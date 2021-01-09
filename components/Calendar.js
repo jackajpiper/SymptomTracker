@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useEffect } from 'react';
 import { View, Button } from 'react-native';
 import moment from "moment";
 // https://github.com/wix/react-native-calendars
@@ -8,12 +8,66 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 export default class CalendarComponent extends React.Component {
     constructor(props) {
         super(props);
+        console.log(moment());
+        var today = moment().format("YYYY-MM-DD");
         this.state = { 
-            markedDates: {
-                '2021-01-21': {marked: true},
-                '2021-01-22': {marked: true, dotColor: 'red', activeOpacity: 0}
-            } 
+            markedDates: { [today]: { selected: true }} 
         };
+    }
+
+    // as soon as the component loads, get the marked dates from local storage
+    componentDidMount = () => {
+        AsyncStorage.getItem('markedDates').then(
+            (value) => {
+                var dates = JSON.parse(value);
+                var today = moment().format("YYYY-MM-DD");
+                if(dates) {
+                    dates[today] = { selected: true };
+                } else {
+                    dates = { [today]: { selected: true } };
+                }
+                this.setState({ 'markedDates': dates })
+            }
+        )
+    }
+
+    // returns a promise
+    getMarkedDates = async () => {
+        try {
+            var value = await AsyncStorage.getItem('markedDates');
+            if(value !== null) {
+                return JSON.parse(value);
+            }
+        } catch(err) {
+            alert(err);
+        }
+    }
+
+    setMarkedDates = async (value) => {
+        var storageValue = JSON.stringify(value);
+        try {
+            await AsyncStorage.setItem('markedDates', storageValue);
+        } catch(err) {
+            alert(err);
+        }
+    }
+
+    onLongPress = date => {
+        let markedDates = this.state.markedDates;
+        // sets the selected date
+        if (markedDates && markedDates[date]) {
+            delete markedDates[date];
+        } else {
+            if(!markedDates) {
+                markedDates = { [date]: {marked: true, dotColor: 'red', activeOpacity: 0} };
+            } else {
+                markedDates[date] = {marked: true, dotColor: 'red', activeOpacity: 0};
+            }
+        }
+        // pushes the new selected/marked dates
+        var dates = JSON.parse(JSON.stringify(markedDates));
+        this.setState({ 'markedDates': dates });
+        this.setMarkedDates(dates);
     }
 
     setSelectedDay = date => {
@@ -74,6 +128,9 @@ export default class CalendarComponent extends React.Component {
                     markedDates={this.state.markedDates}
                     onDayPress={day => {
                         this.setSelectedDay(day.dateString);
+                    }}
+                    onDayLongPress={day => {
+                        this.onLongPress(day.dateString);
                     }}
                 />
                 <Button
