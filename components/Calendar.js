@@ -2,7 +2,7 @@ import React, { useEffect } from 'react';
 import { View, Button } from 'react-native';
 import moment from "moment";
 // https://github.com/wix/react-native-calendars
-import { Calendar } from 'react-native-calendars';
+import { Calendar, CalendarList } from 'react-native-calendars';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
 export default class CalendarComponent extends React.Component {
@@ -11,7 +11,9 @@ export default class CalendarComponent extends React.Component {
         console.log(moment());
         var today = moment().format("YYYY-MM-DD");
         this.state = { 
-            markedDates: { [today]: { selected: true }} 
+            markedDates: { [today]: { selected: true }},
+            Symptoms: null,
+            SymptomInstances: null
         };
     }
 
@@ -27,6 +29,60 @@ export default class CalendarComponent extends React.Component {
                     dates = { [today]: { selected: true } };
                 }
                 this.setState({ 'markedDates': dates })
+            }
+        )
+        this.buildStartUpData();
+    }
+
+    buildStartUpData = async () => {
+        var Symptoms = [
+            { id: 1, name: 'Headache', colour: '#ff00ff' },
+            { id: 2, name: 'Nosebleed', colour: '#0000ff' },
+            { id: 3, name: 'Lethargy', colour: '#ffaabb' }
+        ];
+        var SymptomInstances = [
+            { id: 1, typeId: 1, date: { type: 'day', date: '2021-01-06' }, startTime: '11:40', endTime: '15:05', severity: '30' },
+            { id: 2, typeId: 2, date: { type: 'day', date: '2021-01-11' }, startTime: '19:00', endTime: '19:25', severity: '69' },
+            { id: 3, typeId: 3, date: { type: 'day', date: '2021-01-18' }, startTime: '01:30', endTime: '07:00', severity: '45' },
+            { id: 4, typeId: 1, date: { type: 'day', date: '2021-01-29' }, startTime: '12:40', endTime: '12:55', severity: '78' },
+            { id: 5, typeId: 2, date: { type: 'day', date: '2021-01-04' }, startTime: '21:00', endTime: '22:25', severity: '12' },
+            { id: 6, typeId: 2, date: { type: 'day', date: '2021-01-12' }, startTime: '14:30', endTime: '27:00', severity: '28' }
+        ]
+
+        var storageSymptoms = JSON.stringify(Symptoms);
+        var storageSymptomInstances = JSON.stringify(SymptomInstances);
+        try {
+            await AsyncStorage.setItem('Symptoms', storageSymptoms);
+            await AsyncStorage.setItem('SymptomInstances', storageSymptomInstances);
+            console.log("Symptom data saved - hopefully!");
+        } catch(err) {
+            alert(err);
+        }
+    }
+
+    populateSymptoms = () => {
+        AsyncStorage.getItem('Symptoms').then(
+            (value) => {
+                var Symptoms = JSON.parse(value);
+                AsyncStorage.getItem('SymptomInstances').then(
+                    (value2) => {
+                        var SymptomInstances = JSON.parse(value2);
+                        var today = moment().format("YYYY-MM-DD");
+                        var markedDates = { [today]: { selected: true } };
+                        SymptomInstances.forEach(function (instance, index) {
+                            var symptom = Symptoms.find(symptom => symptom.id === instance.typeId);
+                            var mark = { marked: true, dotColor: symptom.colour };
+
+                            if(instance.date.type === 'day') {
+                                markedDates[instance.date.date] = mark;
+                            } else {
+                                // handle date spans
+                            }
+                        });
+                        var dates = JSON.parse(JSON.stringify(markedDates));
+                        this.setState({ 'markedDates': dates });
+                    }
+                )
             }
         )
     }
@@ -101,12 +157,12 @@ export default class CalendarComponent extends React.Component {
     };
 
     addDate = context => {
-        var markedDates = JSON.parse(JSON.stringify(this.state.markedDates));
-        var num = Math.floor(Math.random() * 31) + 1;
-        var newDate = "2021-01-"+ (num<10 ? "0"+num : num);
-        var newMarkedDates = JSON.parse(JSON.stringify(this.state.markedDates));
-        newMarkedDates[newDate] = {marked: true};
-        this.setState({ markedDates: newMarkedDates });
+        // var markedDates = JSON.parse(JSON.stringify(this.state.markedDates));
+        // var num = Math.floor(Math.random() * 31) + 1;
+        // var newDate = "2021-01-"+ (num<10 ? "0"+num : num);
+        // var newMarkedDates = JSON.parse(JSON.stringify(this.state.markedDates));
+        // newMarkedDates[newDate] = {marked: true};
+        // this.setState({ markedDates: newMarkedDates });
     }
 
     render() {
@@ -134,7 +190,7 @@ export default class CalendarComponent extends React.Component {
                     }}
                 />
                 <Button
-                    onPress={this.addDate}
+                    onPress={this.populateSymptoms}
                     title="Add"
                     color="#841584"
                     accessibilityLabel="Add a random date"

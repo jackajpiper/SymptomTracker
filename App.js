@@ -7,15 +7,15 @@ import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { NavigationContainer } from '@react-navigation/native';
 import moment from "moment";
 import CalendarComponent from './components/Calendar.js';
+import CalendarAgenda from './components/CalendarAgenda.js';
+import AgendaScreen from './components/AgendaExample.js';
+import ExpandableCalendar from './components/ExpandableCalendars.js';
 
 console.log("Reloaded.", moment());
 
 function CalendarScreen() {
   return (
-    <View style={ styles.tab }>
-      <CalendarComponent />
-      <Text style={{flex: 1, borderWidth: 1}}>Home!</Text>
-    </View>
+    <ExpandableCalendar />
   );
 }
 
