@@ -58,7 +58,7 @@ export default function App() {
           },
         })}
         tabBarOptions={{
-          activeTintColor: 'cornflowerblue',
+          activeTintColor: '#00BAFF',
           inactiveTintColor: 'gray',
         }}>
         <Tab.Screen name="Calendar" component={CalendarScreen} />

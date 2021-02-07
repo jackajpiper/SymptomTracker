@@ -98,6 +98,15 @@ function shadeColor(color, percent) {
   return "#"+RR+GG+BB;
 }
 
+function getContrastYIQ(hexcolor){
+  hexcolor = hexcolor.replace("#", "");
+  var r = parseInt(hexcolor.substr(0,2),16);
+  var g = parseInt(hexcolor.substr(2,2),16);
+  var b = parseInt(hexcolor.substr(4,2),16);
+  var yiq = ((r*299)+(g*587)+(b*114))/1000;
+  return (yiq >= 128) ? 'black' : 'white';
+}
+
 
 var ITEMS = [];
 
@@ -163,7 +172,8 @@ export default class ExpandableCalendarScreen extends Component {
 
     let colour = item.colour;
     let lighterColour = shadeColor(colour, 60);
-    let darkerColour = shadeColor(colour,-60);
+    let textColour = getContrastYIQ(lighterColour);
+    let lighterTextColour = textColour === 'black' ? 'grey' : 'silver';
 
     return (
       <LinearGradient 
@@ -173,13 +183,14 @@ export default class ExpandableCalendarScreen extends Component {
         end={{ x: 1, y: 0.5 }}>
 
         <TouchableOpacity onPress={() => this.itemPressed(item.symptom)} style={styles.item} testID={testIDs.agenda.ITEM}>
-          <View>
-            <Text style={styles.itemTimeText}>{item.startTime + ' - ' + item.endTime}</Text>
-            <Text style={styles.itemSeverityText}>{item.severity + '%'}</Text>
-          </View>
-          <Text style={styles.itemTitleText}>{item.symptom}</Text>
+          <Text style={[styles.itemTitleText, {marginTop: 8}]}>{item.symptom}</Text>
           <View style={styles.itemButtonContainer}>
-            <Button color={'grey'} title={'Info'} onPress={this.buttonPressed} />
+            <Text style={[styles.itemTimeText, {color: textColour}]}>
+              {item.startTime + ' - ' + item.endTime}
+            </Text>
+            <Text style={[styles.itemSeverityText, {color: lighterTextColour}]}>
+              {item.severity + '%'}
+            </Text>
           </View>
         </TouchableOpacity>
       </LinearGradient>
@@ -248,7 +259,8 @@ const styles = StyleSheet.create({
     color: 'grey',
     fontSize: 12,
     marginTop: 4,
-    marginLeft: 4
+    marginLeft: 4,
+    textAlign: 'right'
   },
   itemTitleText: {
     color: 'black',
