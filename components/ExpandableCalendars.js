@@ -6,8 +6,6 @@ import moment from "moment";
 import {LinearGradient} from 'expo-linear-gradient';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
-const testIDs = require('../testIDs');
-
 const today = moment().format("YYYY-MM-DD");
 
 // takes the symptoms and symptom instances straight from the datastore and converts them for use
@@ -182,7 +180,7 @@ export default class ExpandableCalendarScreen extends Component {
         start={{ x: 0.5, y: 0.5 }}
         end={{ x: 1, y: 0.5 }}>
 
-        <TouchableOpacity onPress={() => this.itemPressed(item.symptom)} style={styles.item} testID={testIDs.agenda.ITEM}>
+        <TouchableOpacity onPress={() => this.itemPressed(item.symptom)} style={styles.item}>
           <Text style={[styles.itemTitleText, {marginTop: 8}]}>{item.symptom}</Text>
           <View style={styles.itemButtonContainer}>
             <Text style={[styles.itemTimeText, {color: textColour}]}>
@@ -224,13 +222,13 @@ export default class ExpandableCalendarScreen extends Component {
           disabledOpacity={0.6}
         >
           {this.props.weekView ? (
-            <WeekCalendar testID={testIDs.weekCalendar.CONTAINER} firstDay={1} markedDates={this.getMarkedDates()} />
+            <WeekCalendar firstDay={1} markedDates={this.getMarkedDates()} />
           ) : (
             <ExpandableCalendar
-              testID={testIDs.expandableCalendar.CONTAINER}
               disableAllTouchEventsForDisabledDays
               firstDay={1}
               markedDates={this.getMarkedDates()}
+              style = {styles.expandableCalendar}
             />
           )}
           <AgendaList
@@ -246,6 +244,9 @@ export default class ExpandableCalendarScreen extends Component {
 }
 
 const styles = StyleSheet.create({
+  expandableCalendar: {
+    paddingTop: 15
+  },
   item: {
     padding: 20,
     borderBottomWidth: 1,

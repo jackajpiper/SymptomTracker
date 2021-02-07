@@ -60,6 +60,10 @@ export default function App() {
         tabBarOptions={{
           activeTintColor: '#00BAFF',
           inactiveTintColor: 'gray',
+          style: {
+            paddingBottom: 3,
+            paddingTop: 3
+          }
         }}>
         <Tab.Screen name="Calendar" component={CalendarScreen} />
         <Tab.Screen name="Home" component={HomeScreen} />
