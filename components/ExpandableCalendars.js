@@ -105,14 +105,12 @@ function getContrastYIQ(hexcolor){
   return (yiq >= 128) ? 'black' : 'white';
 }
 
-
 var ITEMS = [];
 
 export default class ExpandableCalendarScreen extends Component {
 
   constructor(props) {
     super(props);
-    this.agendaList = React.createRef();
 
     this.state = {
       Symptoms: [],
@@ -181,7 +179,7 @@ export default class ExpandableCalendarScreen extends Component {
         end={{ x: 1, y: 0.5 }}>
 
         <TouchableOpacity onPress={() => this.itemPressed(item.symptom)} style={styles.item}>
-          <Text style={[styles.itemTitleText, {marginTop: 8}]}>{item.symptom}</Text>
+          <Text style={styles.itemTitleText}>{item.symptom}</Text>
           <View style={styles.itemButtonContainer}>
             <Text style={[styles.itemTimeText, {color: textColour}]}>
               {item.startTime + ' - ' + item.endTime}
@@ -267,7 +265,8 @@ const styles = StyleSheet.create({
     color: 'black',
     marginLeft: 16,
     fontWeight: 'bold',
-    fontSize: 16
+    fontSize: 16,
+    marginTop: 8
   },
   itemButtonContainer: {
     flex: 1,

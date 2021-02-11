@@ -6,25 +6,24 @@ import { Ionicons } from '@expo/vector-icons';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { NavigationContainer } from '@react-navigation/native';
 import moment from "moment";
+import HomeScreen from './components/HomeScreen.js';
 import ExpandableCalendar from './components/ExpandableCalendars.js';
 
 console.log("Reloaded.", moment());
 
-function CalendarScreen() {
+function CalendarTab() {
   return (
     <ExpandableCalendar />
   );
 }
 
-function HomeScreen() {
+function HomeTab() {
   return (
-    <View style={ styles.tab }>
-      <Text>Home!</Text>
-    </View>
+    <HomeScreen />
   );
 }
 
-function AnalyseScreen() {
+function AnalyseTab() {
   return (
     <View style={ styles.tab }>
       <Text>Analyse!</Text>
@@ -62,9 +61,9 @@ export default function App() {
             paddingTop: 3
           }
         }}>
-        <Tab.Screen name="Calendar" component={CalendarScreen} />
-        <Tab.Screen name="Home" component={HomeScreen} />
-        <Tab.Screen name="Analyse" component={AnalyseScreen} />
+        <Tab.Screen name="Calendar" component={CalendarTab} />
+        <Tab.Screen name="Home" component={HomeTab} />
+        <Tab.Screen name="Analyse" component={AnalyseTab} />
       </Tab.Navigator>
     </NavigationContainer>
   );
