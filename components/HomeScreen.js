@@ -1,46 +1,43 @@
 import _ from 'lodash';
 import React, {Component} from 'react';
-import {Alert, StyleSheet, View, Text, TouchableOpacity, Button} from 'react-native';
+import {StyleSheet, View, Text, TouchableOpacity} from 'react-native';
 import moment from "moment";
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { NavigationContainer } from '@react-navigation/native';
 import { createStackNavigator } from '@react-navigation/stack';
 import SymptomsListScreen from './SymptomsListScreen.js';
 import EditSymptomScreen from './EditSymptomScreen.js';
+import {LinearGradient} from 'expo-linear-gradient';
 
 const today = moment().format("YYYY-MM-DD");
 const Stack = createStackNavigator();
 
 class MainScreen extends React.Component {
+
+  renderMenuButton = (title, target, colour) => {
+    return (
+      <LinearGradient 
+        colors={['white', colour]}
+        style = { styles.mainButton }
+        start={{ x: 0.25, y: 0.5 }}
+        end={{ x: 1, y: 0.5 }}>
+
+        <TouchableOpacity onPress={() => this.props.navigation.navigate(target)}>
+          <Text style={[styles.mainButtonText]}>{title}</Text>
+        </TouchableOpacity>
+      </LinearGradient>
+    )
+  }
+
   render() {
     return (
         <View style={ styles.main }>
           <Text style={ styles.titleText }>Amy's Symptom Tracker</Text>
           <View style={ styles.buttonList }>
-            {/* the background of these buttons could be a gradient, or a bunch of rainbow colours, or both */}
-            <TouchableOpacity style={ styles.mainButton }
-            onPress={() => this.props.navigation.navigate('Symptoms')}>
-              <View>
-                <Text style={ styles.mainButtonText }>Manage Symptoms</Text>
-              </View>
-            </TouchableOpacity>
-            <TouchableOpacity style={ styles.mainButton }
-            onPress={() => this.props.navigation.navigate('Ingestants')}>
-              <View>
-                <Text style={ styles.mainButtonText }>Manage Ingestants</Text>
-              </View>
-            </TouchableOpacity>
-            <TouchableOpacity style={ styles.mainButton }
-            onPress={() => this.props.navigation.navigate('Diary')}>
-              <View>
-                <Text style={ styles.mainButtonText }>Diary</Text>
-              </View>
-            </TouchableOpacity>
-            <TouchableOpacity style={ styles.mainButton }>
-              <View>
-                <Text style={ styles.mainButtonText }>Settings</Text>
-              </View>
-            </TouchableOpacity>
+            {this.renderMenuButton("Manage Symptoms", "Symptoms", "#E7D5E1")}
+            {this.renderMenuButton("Manage Ingestants", "Ingestants", "#FAEEC4")}
+            {this.renderMenuButton("Diary", "Diary", "#C3D8D1")}
+            {this.renderMenuButton("Settings", "Settings", "#F9E2E8")}
           </View>
         </View>
       );
@@ -68,10 +65,8 @@ class DiaryScreen extends React.Component {
 }
 
 export default class HomeScreen extends Component {
-
   constructor(props) {
     super(props);
-
     this.state = {
       isLoading: true
     };
@@ -97,30 +92,36 @@ export default class HomeScreen extends Component {
 }
 
 const styles = StyleSheet.create({
-  titleText: {
-    marginTop: 60,
-    marginBottom: 10,
-    fontSize: 18
-  },
   main: {
     flex: 1,
     width: '100%',
     alignItems: 'center',
     backgroundColor: 'white',
-    padding: 10
+    padding: 10,
+    paddingTop: 70,
+    paddingBottom: 30
+  },
+  titleText: {
+    fontSize: 24,
+    fontWeight: 'bold'
   },
   buttonList: {
+    flex: 1,
     width: '100%',
-    alignItems: 'center'
+    alignItems: 'center',
+    justifyContent: 'space-evenly'
   },
   mainButton: {
     width: '90%',
-    height: 50,
+    height: 60,
     backgroundColor: 'cornflowerblue',
     justifyContent: 'center',
-    margin: 30
+    margin: 20
   },
   mainButtonText: {
-    textAlign: 'center'
+    color: 'black',
+    marginLeft: 16,
+    fontSize: 16,
+    textAlign: 'left'
   }
 });
