@@ -84,7 +84,7 @@ export default class HomeScreen extends Component {
         <Stack.Screen name="Symptoms" component={SymptomsListScreen} />
         <Stack.Screen name="Ingestants" component={IngestantsScreen} />
         <Stack.Screen name="Diary" component={DiaryScreen} />
-        <Stack.Screen name="EditSymptom" component={EditSymptomScreen} />
+        <Stack.Screen name="EditSymptom" component={EditSymptomScreen} options={({ route }) => ({ title: route.params.symptom.name })} />
       </Stack.Navigator>
     </NavigationContainer>
     )

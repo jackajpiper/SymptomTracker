@@ -110,6 +110,10 @@ export default class SymptomsListScreen extends Component {
     )
   }
 
+  onSymptomPress = (symptom) => {
+    this.props.navigation.navigate('EditSymptom', { symptom: symptom });
+  }
+
   renderItem = ({item}) => {
     let colour = item.colour;
     let lighterColour = shadeColor(colour, 60);
@@ -121,7 +125,7 @@ export default class SymptomsListScreen extends Component {
         start={{ x: 0.5, y: 0.5 }}
         end={{ x: 1, y: 0.5 }}>
 
-        <TouchableOpacity onPress={() => console.log(item.name)} style={styles.item}>
+        <TouchableOpacity onPress={() => this.onSymptomPress(item)} style={styles.item}>
           <Text style={[styles.itemText]}>{item.name}</Text>
         </TouchableOpacity>
       </LinearGradient>
@@ -145,20 +149,6 @@ export default class SymptomsListScreen extends Component {
       )
     }
   }
-
-  // render() {
-  //   return (
-  //     <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center' }}>
-  //       <Text style={{fontSize: 24}}>Symptoms Screen</Text>
-  //       <TouchableOpacity style={ styles.mainButton }
-  //         onPress={() => this.props.navigation.navigate('EditSymptom')}>
-  //         <View>
-  //           <Text style={ styles.mainButtonText }>Edit a symptom</Text>
-  //         </View>
-  //       </TouchableOpacity>
-  //     </View>
-  //   )
-  // }
 }
 
 const styles = StyleSheet.create({
