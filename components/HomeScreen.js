@@ -103,7 +103,8 @@ const styles = StyleSheet.create({
   },
   titleText: {
     fontSize: 24,
-    fontWeight: 'bold'
+    fontWeight: 'bold',
+    marginBottom: 10
   },
   buttonList: {
     flex: 1,
@@ -113,10 +114,11 @@ const styles = StyleSheet.create({
   },
   mainButton: {
     width: '90%',
-    height: 60,
+    height: 65,
     backgroundColor: 'cornflowerblue',
     justifyContent: 'center',
-    margin: 20
+    margin: 20,
+    borderRadius:10
   },
   mainButtonText: {
     color: 'black',
