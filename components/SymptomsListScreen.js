@@ -2,8 +2,8 @@ import _ from 'lodash';
 import React, {Component} from 'react';
 import {ActivityIndicator, StyleSheet, View, Text, TouchableOpacity, FlatList} from 'react-native';
 import moment from "moment";
-import AsyncStorage from '@react-native-async-storage/async-storage';
 import {LinearGradient} from 'expo-linear-gradient';
+import AsyncManager from './AsyncManager';
 
 const today = moment().format("YYYY-MM-DD");
 
@@ -93,21 +93,24 @@ export default class SymptomsListScreen extends Component {
   }
 
   async componentDidMount() {
-    await this.loadItems();
+    let symptoms = await AsyncManager.getSymptoms();
     this.setState({ 
-      isLoading: false
+      isLoading: false,
+      'Symptoms': symptoms
+    });
+
+    this.willFocusListener = this.props.navigation.addListener('focus', async () => {
+      var pollResult = await AsyncManager.pollUpdates("SymptomsList");
+      if(pollResult.Symptoms.length !== 0) {
+        this.setState({Symptoms: pollResult.Symptoms});
+      }
     });
   }
 
-  async loadItems() {
-    return AsyncStorage.getItem('Symptoms').then(
-      (value) => {
-        var Symptoms = JSON.parse(value);
-        this.setState({
-          'Symptoms': Symptoms
-        });
-      }
-    )
+  componentWillUnmount = () => {
+    if(this.willFocusListener && typeof this.willFocusListener.remove === "function") {
+      this.willFocusListener.remove();
+    };
   }
 
   onSymptomPress = (symptom) => {

@@ -4,7 +4,7 @@ import {ActivityIndicator, Alert, StyleSheet, View, Text, TouchableOpacity, Butt
 import {ExpandableCalendar, AgendaList, CalendarProvider, WeekCalendar} from 'react-native-calendars';
 import moment from "moment";
 import {LinearGradient} from 'expo-linear-gradient';
-import AsyncStorage from '@react-native-async-storage/async-storage';
+import AsyncManager from './AsyncManager';
 
 const today = moment().format("YYYY-MM-DD");
 
@@ -120,30 +120,48 @@ export default class ExpandableCalendarScreen extends Component {
   }
 
   async componentDidMount() {
-    await this.loadItems();
+    let symptoms = await AsyncManager.getSymptoms()
+    let instances = await AsyncManager.getInstances()
+    ITEMS = processInstances(instances, symptoms);
     this.setState({ 
-      isLoading: false
+      isLoading: false,
+      Symptoms: symptoms,
+      SymptomInstances: instances
+    });
+
+    this.willFocusListener = this.props.navigation.addListener('focus', async () => {
+      var pollResult = await AsyncManager.pollUpdates("Calendar");
+
+      if(pollResult.Symptoms.length || pollResult.Instances.length) {
+        if(pollResult.Symptoms.length !== 0) {
+          this.setState({Symptoms: pollResult.Symptoms});
+        }
+        if(pollResult.Instances.length !== 0) {
+          this.setState({SymptomInstances: pollResult.Instances});
+        }
+        if(pollResult.Symptoms.length && pollResult.Instances.length) {
+          ITEMS = processInstances(pollResult.Instances, pollResult.Symptoms);
+        } else if(pollResult.Symptoms.length) {
+          ITEMS = processInstances(this.state.SymptomInstances, pollResult.Symptoms);
+        } else if(pollResult.Symptoms.length) {
+          ITEMS = processInstances(pollResult.Instances, this.state.Symptoms);
+        }
+        
+        setInterval(() => {
+          this.setState({
+            isLoading: false
+          });
+        }, 1000);
+        this.forceUpdate();
+      }
     });
   }
 
-  async loadItems() {
-    return AsyncStorage.getItem('Symptoms').then(
-        (value) => {
-            var Symptoms = JSON.parse(value);
-            return AsyncStorage.getItem('SymptomInstances').then(
-                (value2) => {
-                    var SymptomInstances = JSON.parse(value2);
-                    
-                    this.setState({
-                        'Symptoms': Symptoms,
-                        'SymptomInstances': SymptomInstances
-                    });
-                    ITEMS = processInstances(SymptomInstances, Symptoms);
-                }
-            )
-        }
-    )
-}
+  componentWillUnmount = () => {
+    if(this.willFocusListener && typeof this.willFocusListener.remove === "function") {
+      this.willFocusListener.remove();
+    };
+  }
 
   buttonPressed() {
     Alert.alert('show more');

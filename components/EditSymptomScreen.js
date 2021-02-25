@@ -4,8 +4,8 @@ import {Alert, StyleSheet, View, Text, TextInput, Button, TouchableOpacity} from
 import moment from "moment";
 import {SliderHuePicker} from 'react-native-slider-color-picker';
 import {LinearGradient} from 'expo-linear-gradient';
-import AsyncStorage from '@react-native-async-storage/async-storage';
 import Toast from 'react-native-simple-toast';
+import AsyncManager from './AsyncManager';
 
 const today = moment().format("YYYY-MM-DD");
 
@@ -90,37 +90,9 @@ export default class SymptomsListScreen extends Component {
   }
 
   updateSymptomStorage = async (symptom) => {
-    let symptoms = [];
-    try {
-      let storedSymptoms = await AsyncStorage.getItem('Symptoms');
-      if (storedSymptoms !== null) {
-        symptoms = JSON.parse(storedSymptoms);
-      }
-
-      let symptomExists = false;
-      for(let i=0; i<symptoms.length; i++) {
-        if(symptoms[i].id === symptom.id) {
-          symptomExists = true;
-          symptoms[i] = symptom;
-        }
-      }
-      if(!symptomExists) {
-        symptoms.push(symptom);
-      }
-
-      function compareSymptoms(s1, s2) {
-        if(s1.name > s2.name) return 1;
-        else if(s1.name < s2.name) return -1;
-        else return 0;
-      }
-      symptoms.sort(compareSymptoms);
-
-      await AsyncStorage.setItem('Symptoms', JSON.stringify(symptoms));
-      this.setState({dirty: false});
-      Toast.show('Saved!');
-    } catch (error) {
-      console.log(error);
-    }
+    await AsyncManager.setSymptom(symptom);
+    this.setState({dirty: false});
+    Toast.show('Saved!');
   };
 
   updateField = (field, value) => {

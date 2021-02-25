@@ -11,18 +11,6 @@ import ExpandableCalendar from './components/ExpandableCalendars.js';
 
 console.log("Reloaded.", moment());
 
-function CalendarTab() {
-  return (
-    <ExpandableCalendar />
-  );
-}
-
-function HomeTab() {
-  return (
-    <HomeScreen />
-  );
-}
-
 function AnalyseTab() {
   return (
     <View style={ styles.tab }>
@@ -61,8 +49,8 @@ export default function App() {
             paddingTop: 3
           }
         }}>
-        <Tab.Screen name="Calendar" component={CalendarTab} />
-        <Tab.Screen name="Home" component={HomeTab} />
+        <Tab.Screen name="Calendar" component={ExpandableCalendar}/>
+        <Tab.Screen name="Home" component={HomeScreen} />
         <Tab.Screen name="Analyse" component={AnalyseTab} />
       </Tab.Navigator>
     </NavigationContainer>
