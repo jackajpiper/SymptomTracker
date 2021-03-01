@@ -5,8 +5,25 @@ import {ExpandableCalendar, AgendaList, CalendarProvider, WeekCalendar} from 're
 import moment from "moment";
 import {LinearGradient} from 'expo-linear-gradient';
 import AsyncManager from './AsyncManager';
+import { FloatingAction } from "react-native-floating-action";
 
 const today = moment().format("YYYY-MM-DD");
+
+const actionColour = "#00a0db";
+const actions = [
+  {
+    text: "New Symptom",
+    name: "bt_add_symptom",
+    color: actionColour,
+    position: 1
+  },
+  {
+    text: "New Ingestant",
+    name: "bt_add_ingestant",
+    color: actionColour,
+    position: 2
+  }
+];
 
 // takes the symptoms and symptom instances straight from the datastore and converts them for use
 function processInstances(instances, symptoms) {
@@ -120,8 +137,8 @@ export default class ExpandableCalendarScreen extends Component {
   }
 
   async componentDidMount() {
-    let symptoms = await AsyncManager.getSymptoms()
-    let instances = await AsyncManager.getInstances()
+    let symptoms = await AsyncManager.getSymptoms();
+    let instances = await AsyncManager.getInstances();
     ITEMS = processInstances(instances, symptoms);
     this.setState({ 
       isLoading: false,
@@ -253,6 +270,13 @@ export default class ExpandableCalendarScreen extends Component {
             renderItem={this.renderItem}
             ref={this.agendaList}
           />
+          <FloatingAction
+            actions={actions}
+            color={"#00ABEB"}
+            onPressItem={name => {
+              console.log(`selected button: ${name}`);
+            }}
+          />
         </CalendarProvider>
       );
     }
@@ -291,8 +315,8 @@ const styles = StyleSheet.create({
     alignItems: 'flex-end'
   },
   emptyItem: {
-    paddingLeft: 20,
-    height: 60,
+    paddingLeft: 36,
+    height: 85,
     justifyContent: 'center',
     borderBottomWidth: 1,
     borderBottomColor: 'lightgrey',
@@ -300,7 +324,7 @@ const styles = StyleSheet.create({
   },
   emptyItemText: {
     color: 'darkgrey',
-    fontSize: 14
+    fontSize: 16
   },
   container: {
     flex: 1,
