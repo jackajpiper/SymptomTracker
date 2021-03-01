@@ -71,6 +71,14 @@ export default class HomeScreen extends Component {
     };
   }
 
+  editSymptomTitle = (route) => {
+    if (route.params.symptom.name) {
+      return "Edit " + route.params.symptom.name;
+    } else {
+      return "Create New Symptom";
+    }
+  }
+
   render() {
     return (
     <NavigationContainer independent={true}>
@@ -83,7 +91,7 @@ export default class HomeScreen extends Component {
         <Stack.Screen name="Symptoms" component={SymptomsListScreen} />
         <Stack.Screen name="Ingestants" component={IngestantsScreen} />
         <Stack.Screen name="Diary" component={DiaryScreen} />
-        <Stack.Screen name="EditSymptom" component={EditSymptomScreen} options={({ route }) => ({ title: 'Edit ' + route.params.symptom.name })} />
+        <Stack.Screen name="EditSymptom" component={EditSymptomScreen} options={({ route }) => ({ title: this.editSymptomTitle(route) })} />
       </Stack.Navigator>
     </NavigationContainer>
     )

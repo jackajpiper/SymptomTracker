@@ -2,6 +2,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const AsyncManager = {
   symptomsStash: [],
+  symptomsLength: 0,
   instancesStash: [],
   symptomCounts: {
     updateNum: 0
@@ -16,11 +17,12 @@ const AsyncManager = {
         (value) => {
           let parsedValue = JSON.parse(value);
           AsyncManager.symptomsStash = parsedValue;
+          AsyncManager.symptomsLength = parsedValue.length;
           return parsedValue;
         }
       );
     } else {
-      return AsyncManager.symptomsStash;
+      return JSON.parse(JSON.stringify(AsyncManager.symptomsStash));
     }
   },
   
@@ -38,7 +40,24 @@ const AsyncManager = {
     }
   },
 
+  setSymptoms: async function(symptoms) {
+    AsyncManager.symptomsStash = symptoms;
+    AsyncManager.symptomsLength = symptoms.length;
+    AsyncManager.symptomCounts.updateNum++;
+    return AsyncStorage.setItem('Symptoms', JSON.stringify(symptoms));
+  },
+
   setSymptom: async function(symptom) {
+    // leaving this code in, as it is a historic moment.
+    // if (symptom.name === "Pissing and shitting") {
+    //   let wasteid = _.uniqueId();
+    //   symptom.id = 5;
+    // }
+    if (!symptom.id) {
+      symptom.id = AsyncManager.symptomsLength + 1;
+    }
+
+
     let symptoms = AsyncManager.symptomsStash;
     let symptomExists = false;
     for(let i=0; i<symptoms.length; i++) {
@@ -61,9 +80,19 @@ const AsyncManager = {
     return AsyncManager.setSymptoms(symptoms);
   },
 
-  setSymptoms: async function(symptoms) {
-    AsyncManager.symptomCounts.updateNum++;
-    return AsyncStorage.setItem('Symptoms', JSON.stringify(symptoms));
+  deleteSymptom: async function(symptom) {
+    let id = symptom.id;
+    let symptoms = AsyncManager.getSymptoms();
+    for (var i = 0; i < symptoms.length; i++) {
+      var obj = symptoms[i];
+  
+      if (obj.id === symptom.id) {
+        symptoms.splice(i, 1);
+      }
+    }
+    
+    // TODO: also remove all symptom instances
+    AsyncManager.setSymptoms(symptoms);
   },
 
   pollUpdates: async function(screenName) {

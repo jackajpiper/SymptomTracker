@@ -1,9 +1,10 @@
 import _ from 'lodash';
 import React, {Component} from 'react';
-import {ActivityIndicator, StyleSheet, View, Text, TouchableOpacity, FlatList} from 'react-native';
+import {Alert, ActivityIndicator, StyleSheet, View, Text, TouchableOpacity, FlatList} from 'react-native';
 import moment from "moment";
 import {LinearGradient} from 'expo-linear-gradient';
 import AsyncManager from './AsyncManager';
+import { FloatingAction } from "react-native-floating-action";
 
 const today = moment().format("YYYY-MM-DD");
 
@@ -82,6 +83,16 @@ const testSymptoms = [
   { id: 19, name: 'Lethargy', colour: '#ffaabb' },
 ];
 
+const actionColour = "#00a0db";
+const actions = [
+  {
+    text: "New Symptom",
+    name: "bt_add_symptom",
+    color: actionColour,
+    position: 1
+  }
+];
+
 export default class SymptomsListScreen extends Component {
   constructor(props) {
     super(props);
@@ -96,7 +107,7 @@ export default class SymptomsListScreen extends Component {
     let symptoms = await AsyncManager.getSymptoms();
     this.setState({ 
       isLoading: false,
-      'Symptoms': symptoms
+      Symptoms: symptoms
     });
 
     this.willFocusListener = this.props.navigation.addListener('focus', async () => {
@@ -113,8 +124,38 @@ export default class SymptomsListScreen extends Component {
     };
   }
 
+  onAddPress = (btn) => {
+    if (btn === "bt_add_symptom") {
+      let symptom = {
+        id: 0,
+        name: "",
+        colour: ""
+      }
+      this.props.navigation.navigate('EditSymptom', { symptom: symptom });
+    }
+  }
+
   onSymptomPress = (symptom) => {
     this.props.navigation.navigate('EditSymptom', { symptom: symptom });
+  }
+
+  onSymptomLongPress = async (symptom) => {
+    Alert.alert(
+      'Delete symptom?',
+      'This will also delete ALL instances of the symptom!! Are you sure?',
+      [
+        { text: "Cancel", style: 'cancel', onPress: () => {} },
+        {
+          text: 'Delete',
+          style: 'destructive',
+          onPress: async () => {
+            await AsyncManager.deleteSymptom(symptom);
+            let symptoms = await AsyncManager.getSymptoms();
+            this.setState({ Symptoms: symptoms });
+          },
+        },
+      ]
+    );
   }
 
   renderItem = ({item}) => {
@@ -128,7 +169,7 @@ export default class SymptomsListScreen extends Component {
         start={{ x: 0.5, y: 0.5 }}
         end={{ x: 1, y: 0.5 }}>
 
-        <TouchableOpacity onPress={() => this.onSymptomPress(item)} style={styles.item}>
+        <TouchableOpacity onPress={() => this.onSymptomPress(item)} onLongPress={() => this.onSymptomLongPress(item)} style={styles.item}>
           <Text style={[styles.itemText]}>{item.name}</Text>
         </TouchableOpacity>
       </LinearGradient>
@@ -144,17 +185,27 @@ export default class SymptomsListScreen extends Component {
       )
     } else {
       return (
-        <FlatList
-          data={this.state.Symptoms}
-          renderItem={this.renderItem}
-          keyExtractor={item => item.id.toString()}
-        />
+        <View style={styles.container}>
+          <FlatList
+            data={this.state.Symptoms}
+            renderItem={this.renderItem}
+            keyExtractor={item => item.id.toString()}
+          />
+          <FloatingAction
+            actions={actions}
+            color={"#00ABEB"}
+            onPressItem={(btn) => this.onAddPress(btn)}
+          />
+        </View>
       )
     }
   }
 }
 
 const styles = StyleSheet.create({
+  container: {
+    height: "100%"
+  },
   item: {
     height: 70,
     flex: 1,
