@@ -46,7 +46,12 @@ function processInstances(instances, symptoms) {
     dateDict[today].push({});
   }
 
+  function compareOnDay(a, b) {
+    return a.startTime.localeCompare(b.startTime);
+  }
+
   Object.keys(dateDict).forEach(function(date) {
+    dateDict[date] = dateDict[date].sort(compareOnDay);
     dateArr.push({ title: date, data: dateDict[date] });
   });
 
