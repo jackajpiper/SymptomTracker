@@ -1,24 +1,26 @@
 import _ from 'lodash';
 import React, {Component} from 'react';
-import {ActivityIndicator, Alert, StyleSheet, View, Text, TouchableOpacity, Button} from 'react-native';
+import {Modal, ActivityIndicator, Alert, StyleSheet, View, Text, TouchableOpacity, Button} from 'react-native';
 import {ExpandableCalendar, AgendaList, CalendarProvider, WeekCalendar} from 'react-native-calendars';
 import moment from "moment";
 import {LinearGradient} from 'expo-linear-gradient';
 import AsyncManager from './AsyncManager';
 import { FloatingAction } from "react-native-floating-action";
+import SymptomModal from './SymptomModal';
+
 
 const today = moment().format("YYYY-MM-DD");
 
 const actionColour = "#00a0db";
 const actions = [
   {
-    text: "New Symptom",
+    text: "Add Symptom",
     name: "bt_add_symptom",
     color: actionColour,
     position: 1
   },
   {
-    text: "New Ingestant",
+    text: "Add Ingestant",
     name: "bt_add_ingestant",
     color: actionColour,
     position: 2
@@ -40,12 +42,6 @@ function processInstances(instances, symptoms) {
     dateDict[day].push(instance);
   });
 
-  if (!dateDict[today]) {
-    dateDict[today] = [{}];
-  } else {
-    dateDict[today].push({});
-  }
-
   function compareOnDay(a, b) {
     return a.startTime.localeCompare(b.startTime);
   }
@@ -54,6 +50,12 @@ function processInstances(instances, symptoms) {
     dateDict[date] = dateDict[date].sort(compareOnDay);
     dateArr.push({ title: date, data: dateDict[date] });
   });
+  
+  if (!dateDict[today]) {
+    dateDict[today] = [{}];
+  } else {
+    dateDict[today].push({});
+  }
 
   function compareInstances(inst1, inst2) {
     if(inst1.title > inst2.title) return 1;
@@ -137,8 +139,37 @@ export default class ExpandableCalendarScreen extends Component {
     this.state = {
       Symptoms: [],
       SymptomInstances: [],
-      isLoading: true
+      isLoading: true,
+      showSyptomModal: false
     };
+  }
+
+  pollUpdates = async () => {
+    var pollResult = await AsyncManager.pollUpdates("Calendar");
+    console.log(pollResult);
+
+    if(pollResult.Symptoms.length || pollResult.Instances.length) {
+      if(pollResult.Symptoms.length !== 0) {
+        this.setState({Symptoms: pollResult.Symptoms});
+      }
+      if(pollResult.Instances.length !== 0) {
+        this.setState({SymptomInstances: pollResult.Instances});
+      }
+      if(pollResult.Symptoms.length && pollResult.Instances.length) {
+        ITEMS = processInstances(pollResult.Instances, pollResult.Symptoms);
+      } else if(pollResult.Symptoms.length) {
+        ITEMS = processInstances(this.state.SymptomInstances, pollResult.Symptoms);
+      } else if(pollResult.Instances.length) {
+        ITEMS = processInstances(pollResult.Instances, this.state.Symptoms);
+      }
+      
+      setInterval(() => {
+        this.setState({
+          isLoading: false
+        });
+      }, 1000);
+      this.forceUpdate();
+    }
   }
 
   async componentDidMount() {
@@ -152,30 +183,7 @@ export default class ExpandableCalendarScreen extends Component {
     });
 
     this.willFocusListener = this.props.navigation.addListener('focus', async () => {
-      var pollResult = await AsyncManager.pollUpdates("Calendar");
-
-      if(pollResult.Symptoms.length || pollResult.Instances.length) {
-        if(pollResult.Symptoms.length !== 0) {
-          this.setState({Symptoms: pollResult.Symptoms});
-        }
-        if(pollResult.Instances.length !== 0) {
-          this.setState({SymptomInstances: pollResult.Instances});
-        }
-        if(pollResult.Symptoms.length && pollResult.Instances.length) {
-          ITEMS = processInstances(pollResult.Instances, pollResult.Symptoms);
-        } else if(pollResult.Symptoms.length) {
-          ITEMS = processInstances(this.state.SymptomInstances, pollResult.Symptoms);
-        } else if(pollResult.Symptoms.length) {
-          ITEMS = processInstances(pollResult.Instances, this.state.Symptoms);
-        }
-        
-        setInterval(() => {
-          this.setState({
-            isLoading: false
-          });
-        }, 1000);
-        this.forceUpdate();
-      }
+      await this.pollUpdates();
     });
   }
 
@@ -245,6 +253,25 @@ export default class ExpandableCalendarScreen extends Component {
     return marked;
   };
 
+  floatingActions = (btn) => {
+    if (btn === "bt_add_symptom") {
+      let symptom = {
+        id: 0,
+        name: "",
+        colour: ""
+      }
+      this.loadModal();
+    }
+  }
+
+  loadModal = (data) => {
+    this.setState({ showSyptomModal: true });
+  }
+  
+  toggleSymptomModal = (visible) => {
+    this.setState({ showSyptomModal: visible });
+  }
+
   render() {
     if(this.state.isLoading) {
       return (
@@ -278,10 +305,14 @@ export default class ExpandableCalendarScreen extends Component {
           <FloatingAction
             actions={actions}
             color={"#00ABEB"}
-            onPressItem={name => {
-              console.log(`selected button: ${name}`);
-            }}
+            onPressItem={name => { this.floatingActions(name)}}
           />
+          <Modal animationType = {"slide"}
+              visible = {this.state.showSyptomModal}
+              onRequestClose = {() => { this.toggleSymptomModal(false) }}
+              transparent={true} >
+              <SymptomModal toggleModal={this.toggleSymptomModal} triggerPoll={this.pollUpdates} symptoms={this.state.Symptoms} />
+          </Modal>
         </CalendarProvider>
       );
     }
@@ -333,6 +364,8 @@ const styles = StyleSheet.create({
   },
   container: {
     flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center'
   },
   spinner: {
     flex: 1,

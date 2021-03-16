@@ -113,6 +113,7 @@ export default class SymptomsListScreen extends Component {
               style={styles.nameInput}
               onChangeText={text => this.updateField('name', text)}
               placeholder="Symptom name"
+              placeholderTextColor="#B4B4B9"
               underlineColorAndroid='cornflowerblue'
               value={this.state.name}
             />

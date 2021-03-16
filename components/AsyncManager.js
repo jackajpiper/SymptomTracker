@@ -4,6 +4,7 @@ const AsyncManager = {
   symptomsStash: [],
   symptomsLength: 0,
   instancesStash: [],
+  instancesLength: 0,
   symptomCounts: {
     updateNum: 0
   },
@@ -18,7 +19,7 @@ const AsyncManager = {
           let parsedValue = JSON.parse(value);
           AsyncManager.symptomsStash = parsedValue;
           AsyncManager.symptomsLength = parsedValue.length;
-          return parsedValue;
+          return JSON.parse(JSON.stringify(parsedValue));
         }
       );
     } else {
@@ -32,11 +33,12 @@ const AsyncManager = {
         (value) => {
           let parsedValue = JSON.parse(value);
           AsyncManager.instancesStash = parsedValue;
-          return parsedValue;
+          AsyncManager.instancesLength = parsedValue.length;
+          return JSON.parse(JSON.stringify(parsedValue));
         }
       );
     } else {
-      return AsyncManager.instancesStash;
+      return JSON.parse(JSON.stringify(AsyncManager.instancesStash));
     }
   },
 
@@ -56,7 +58,6 @@ const AsyncManager = {
     if (!symptom.id) {
       symptom.id = AsyncManager.symptomsLength + 1;
     }
-
 
     let symptoms = AsyncManager.symptomsStash;
     let symptomExists = false;
@@ -93,6 +94,33 @@ const AsyncManager = {
     
     // TODO: also remove all symptom instances
     AsyncManager.setSymptoms(symptoms);
+  },
+
+  setInstances: async function(instances) {
+    AsyncManager.instancesStash = instances;
+    AsyncManager.instancesLength = instances.length;
+    AsyncManager.instanceCounts.updateNum++;
+    return AsyncStorage.setItem('SymptomInstances', JSON.stringify(instances));
+  },
+
+  setInstance: async function(instance) {
+    if (!instance.id) {
+      instance.id = AsyncManager.instancesLength + 1;
+    }
+
+    let instances = AsyncManager.instancesStash;
+    let instanceExists = false;
+    for(let i=0; i<instances.length; i++) {
+      if(instances[i].id === instance.id) {
+        instanceExists = true;
+        instances[i] = instance;
+      }
+    }
+    if(!instanceExists) {
+      instances.push(instance);
+    }
+    
+    return AsyncManager.setInstances(instances);
   },
 
   pollUpdates: async function(screenName) {

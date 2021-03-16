@@ -6,24 +6,24 @@ const Symptoms = [
   ];
   
   const SymptomInstances = [
-    { id: 1, typeId: 1, date: '2021-01-06', startTime: '11:40', endTime: '15:05', severity: '30' },
-    { id: 2, typeId: 2, date: '2021-01-11', startTime: '19:00', endTime: '19:25', severity: '69' },
-    { id: 3, typeId: 3, date: '2021-01-18', startTime: '01:30', endTime: '07:00', severity: '45' },
-    { id: 4, typeId: 4, date: '2021-01-29', startTime: '12:40', endTime: '12:55', severity: '78' },
-    { id: 5, typeId: 2, date: '2021-01-04', startTime: '21:00', endTime: '22:25', severity: '12' },
-    { id: 6, typeId: 2, date: '2021-01-12', startTime: '14:30', endTime: '21:00', severity: '28' },
-    { id: 7, typeId: 4, date: '2021-01-02', startTime: '11:40', endTime: '15:05', severity: '30' },
-    { id: 8, typeId: 3, date: '2021-01-21', startTime: '19:00', endTime: '19:25', severity: '69' },
-    { id: 9, typeId: 3, date: '2021-01-26', startTime: '01:30', endTime: '07:00', severity: '45' },
-    { id: 10, typeId: 1, date: '2021-01-09', startTime: '12:40', endTime: '12:55', severity: '78' },
-    { id: 11, typeId: 1, date: '2021-01-19', startTime: '21:00', endTime: '22:25', severity: '12' },
-    { id: 12, typeId: 3, date: '2021-01-01', startTime: '14:30', endTime: '23:00', severity: '28' },
-    { id: 13, typeId: 1, date: '2021-02-06', startTime: '11:40', endTime: '15:05', severity: '30' },
-    { id: 14, typeId: 2, date: '2021-02-11', startTime: '19:00', endTime: '19:25', severity: '69' },
-    { id: 15, typeId: 4, date: '2021-02-18', startTime: '01:30', endTime: '07:00', severity: '45' },
-    { id: 17, typeId: 2, date: '2021-02-04', startTime: '21:00', endTime: '22:25', severity: '12' },
-    { id: 18, typeId: 4, date: '2021-02-12', startTime: '14:30', endTime: '22:00', severity: '28' },
-    { id: 16, typeId: 1, date: '2021-03-01', startTime: '12:40', endTime: '12:55', severity: '78' }
+    { id: 1, typeId: 1, date: '2021-01-06', startTime: '11:40', endTime: '15:05', severity: '30', notes: 'note1' },
+    { id: 2, typeId: 2, date: '2021-01-11', startTime: '19:00', endTime: '19:25', severity: '69', notes: 'note2' },
+    { id: 3, typeId: 3, date: '2021-01-18', startTime: '01:30', endTime: '07:00', severity: '45', notes: 'note3' },
+    { id: 4, typeId: 4, date: '2021-01-29', startTime: '12:40', endTime: '12:55', severity: '78', notes: 'note4' },
+    { id: 5, typeId: 2, date: '2021-01-04', startTime: '21:00', endTime: '22:25', severity: '12', notes: 'note5' },
+    { id: 6, typeId: 2, date: '2021-01-12', startTime: '14:30', endTime: '21:00', severity: '28', notes: 'note6' },
+    { id: 7, typeId: 4, date: '2021-01-02', startTime: '11:40', endTime: '15:05', severity: '30', notes: 'note7' },
+    { id: 8, typeId: 3, date: '2021-01-21', startTime: '19:00', endTime: '19:25', severity: '69', notes: 'note8' },
+    { id: 9, typeId: 3, date: '2021-01-26', startTime: '01:30', endTime: '07:00', severity: '45', notes: 'note9' },
+    { id: 10, typeId: 1, date: '2021-01-09', startTime: '12:40', endTime: '12:55', severity: '78', notes: 'note10' },
+    { id: 11, typeId: 1, date: '2021-01-19', startTime: '21:00', endTime: '22:25', severity: '12', notes: 'note11' },
+    { id: 12, typeId: 3, date: '2021-01-01', startTime: '14:30', endTime: '23:00', severity: '28', notes: 'note12' },
+    { id: 13, typeId: 1, date: '2021-02-06', startTime: '11:40', endTime: '15:05', severity: '30', notes: 'note13' },
+    { id: 14, typeId: 2, date: '2021-02-11', startTime: '19:00', endTime: '19:25', severity: '69', notes: 'note14' },
+    { id: 15, typeId: 4, date: '2021-02-18', startTime: '01:30', endTime: '07:00', severity: '45', notes: 'note15' },
+    { id: 17, typeId: 2, date: '2021-02-04', startTime: '21:00', endTime: '22:25', severity: '12', notes: 'note16' },
+    { id: 18, typeId: 4, date: '2021-02-12', startTime: '14:30', endTime: '22:00', severity: '28', notes: 'note17' },
+    { id: 16, typeId: 1, date: '2021-03-01', startTime: '12:40', endTime: '12:55', severity: '78', notes: 'note18' }
   ]
 
 
