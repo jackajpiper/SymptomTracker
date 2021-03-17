@@ -45,17 +45,18 @@ function processInstances(instances, symptoms) {
   function compareOnDay(a, b) {
     return a.startTime.localeCompare(b.startTime);
   }
+  
+  var todayObj = {startTime: "23:59"};
+  if (!dateDict[today]) {
+    dateDict[today] = [todayObj];
+  } else {
+    dateDict[today].push(todayObj);
+  }
 
   Object.keys(dateDict).forEach(function(date) {
     dateDict[date] = dateDict[date].sort(compareOnDay);
     dateArr.push({ title: date, data: dateDict[date] });
   });
-  
-  if (!dateDict[today]) {
-    dateDict[today] = [{}];
-  } else {
-    dateDict[today].push({});
-  }
 
   function compareInstances(inst1, inst2) {
     if(inst1.title > inst2.title) return 1;
