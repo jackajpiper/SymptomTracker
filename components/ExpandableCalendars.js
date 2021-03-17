@@ -141,13 +141,13 @@ export default class ExpandableCalendarScreen extends Component {
       Symptoms: [],
       SymptomInstances: [],
       isLoading: true,
-      showSyptomModal: false
+      showSyptomModal: false,
+      symptomModalData: null
     };
   }
 
   pollUpdates = async () => {
     var pollResult = await AsyncManager.pollUpdates("Calendar");
-    console.log(pollResult);
 
     if(pollResult.Symptoms.length || pollResult.Instances.length) {
       if(pollResult.Symptoms.length !== 0) {
@@ -198,8 +198,8 @@ export default class ExpandableCalendarScreen extends Component {
     Alert.alert('show more');
   }
 
-  itemPressed(id) {
-    Alert.alert(id);
+  itemPressed(instance) {
+    this.loadModal(instance);
   }
 
   renderToday() {
@@ -227,7 +227,7 @@ export default class ExpandableCalendarScreen extends Component {
         start={{ x: 0.5, y: 0.5 }}
         end={{ x: 1, y: 0.5 }}>
 
-        <TouchableOpacity onPress={() => this.itemPressed(item.symptom)} style={styles.item}>
+        <TouchableOpacity onPress={() => this.itemPressed(item)} style={styles.item}>
           <Text style={styles.itemTitleText}>{item.symptom}</Text>
           <View style={styles.itemButtonContainer}>
             <Text style={[styles.itemTimeText, {color: textColour}]}>
@@ -266,7 +266,7 @@ export default class ExpandableCalendarScreen extends Component {
   }
 
   loadModal = (data) => {
-    this.setState({ showSyptomModal: true });
+    this.setState({symptomModalData: data ? data : {}, showSyptomModal: true });
   }
   
   toggleSymptomModal = (visible) => {
@@ -312,7 +312,7 @@ export default class ExpandableCalendarScreen extends Component {
               visible = {this.state.showSyptomModal}
               onRequestClose = {() => { this.toggleSymptomModal(false) }}
               transparent={true} >
-              <SymptomModal toggleModal={this.toggleSymptomModal} triggerPoll={this.pollUpdates} symptoms={this.state.Symptoms} />
+              <SymptomModal toggleModal={this.toggleSymptomModal} triggerPoll={this.pollUpdates} symptoms={this.state.Symptoms} data={this.state.symptomModalData} />
           </Modal>
         </CalendarProvider>
       );

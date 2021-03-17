@@ -18,14 +18,17 @@ export default class SymptomModal extends React.Component {
   constructor(props) {
     super(props);
 
+    let data = this.props.data;
     let origin = {
-      symptomId: undefined,
-      date: new Date(),
-      startTime: new Date(),
-      endTime: new Date(),
-      severity: 50,
-      notes: ""
+      symptomId: data.typeId || undefined,
+      date: data.date ? new Date(data.date) : new Date(),
+      startTime: data.startTime ? moment(data.startTime, "HH:mm").toDate() : new Date(),
+      endTime: data.endTime ? moment(data.endTime, "HH:mm").toDate() : new Date(),
+      severity: data.severity || 50,
+      notes: data.notes || ""
     };
+
+    this.id = data.id;
     this.symptoms = this.props.symptoms;
     this.items = this.symptoms.map(function(x) {
       return {
@@ -85,6 +88,7 @@ export default class SymptomModal extends React.Component {
 
   getData = () => {
     return {
+      id: this.id,
       typeId: this.state.symptomId,
       date: moment(this.state.date).format("YYYY-MM-DD"),
       startTime: moment(this.state.startTime).format("HH:mm"),
@@ -99,7 +103,6 @@ export default class SymptomModal extends React.Component {
     if (errors) {
       Toast.show(errors);
     } else {
-      console.log("will submit now");
       let data = this.getData();
       
       await AsyncManager.setInstance(data);
@@ -132,7 +135,7 @@ export default class SymptomModal extends React.Component {
               <Text style={formStyles.fieldLabel}>Symptom:</Text>
               <RNPickerSelect
                 onValueChange={value => {this.updateField("symptomId", value)}}
-                value={this.state.type}
+                value={this.state.symptomId}
                 style={pickerSelectStyles}
                 useNativeAndroidPickerStyle={false}
                 placeholder={{ label: "Select a symptom..." }}
@@ -199,7 +202,7 @@ export default class SymptomModal extends React.Component {
               <Text style={formStyles.fieldLabel}>{"Severity  ("+this.state.severity+")"}</Text>
               <View style={{ marginLeft: -20, marginRight: -20, paddingTop: 10 }}>
                 <Slider
-                  value={50}
+                  value={this.state.severity}
                   step={1}
                   minimumValue={1}
                   maximumValue={100}
