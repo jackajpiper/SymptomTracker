@@ -1,6 +1,6 @@
 import _ from 'lodash';
 import React from 'react';
-import {TextInput, ScrollView, StyleSheet, View, Text, TouchableOpacity} from 'react-native';
+import {Alert, TextInput, ScrollView, StyleSheet, View, Text, TouchableOpacity} from 'react-native';
 import moment from "moment";
 import {LinearGradient} from 'expo-linear-gradient';
 import AsyncManager from './AsyncManager';
@@ -29,6 +29,7 @@ export default class SymptomModal extends React.Component {
     };
 
     this.id = data.id;
+    this.isNew = !data.id;
     this.symptoms = this.props.symptoms;
     this.items = this.symptoms.map(function(x) {
       return {
@@ -113,6 +114,26 @@ export default class SymptomModal extends React.Component {
     }
   }
 
+  onDelete = () => {
+    Alert.alert(
+      'Delete?',
+      'This will delete this symptom record.',
+      [
+        { text: "Cancel", style: 'cancel', onPress: () => {} },
+        {
+          text: 'Delete',
+          style: 'destructive',
+          onPress: () => {
+            AsyncManager.deleteInstance(this.id);
+            this.props.triggerPoll();
+            this.props.toggleModal(false);
+            Toast.show("Deleted");
+          },
+        },
+      ]
+    );
+  }
+
   formatDateTime = (date, type) => {
     let momentDate = moment(date);
     if (type === "date") {
@@ -124,6 +145,39 @@ export default class SymptomModal extends React.Component {
   }
 
   render() {
+    let buttons;
+    if (this.isNew) {
+      buttons = 
+      <LinearGradient 
+        colors={['white', this.state.dirty ? this.state.colour : 'grey']}
+        style={formStyles.buttonContainer}
+        start={{ x: 0.4, y: 0.5 }}
+        end={{ x: 1, y: 0.5 }}>
+
+        <TouchableOpacity style={formStyles.mainButton} onPress={this.onSubmit} disabled={!this.state.dirty}>
+          <Text style={[formStyles.mainButtonText, {color: this.state.dirty ? 'black' : 'grey'}]}>Add Symptom</Text>
+        </TouchableOpacity>
+      </LinearGradient>
+    } else {
+      buttons =
+      <View style={{display: "flex", flexDirection: "row", justifyContent: "space-between"}}>
+        <LinearGradient 
+          colors={['white', this.state.dirty ? this.state.colour : 'grey']}
+          style={[formStyles.buttonContainer, {width: "80%"}]}
+          start={{ x: 0.4, y: 0.5 }}
+          end={{ x: 1, y: 0.5 }}>
+          <TouchableOpacity style={formStyles.mainButton} onPress={this.onSubmit} disabled={!this.state.dirty}>
+            <Text style={[formStyles.mainButtonText, {color: this.state.dirty ? 'black' : 'grey'}]}>Add Symptom</Text>
+          </TouchableOpacity>
+        </LinearGradient>
+          
+        <TouchableOpacity style={[formStyles.buttonContainer, {width: "18%", backgroundColor: "#e62200", display: "flex", justifyContent: "center"}]} onPress={this.onDelete}>
+          <Ionicons style={{textAlign: "center"}} name="trash-outline" size={32} color="black" />
+        </TouchableOpacity>
+      </View>
+    }
+    console.log(this.isNew);
+
     return (
       <View style={formStyles.container}>
         <View style={formStyles.form}>
@@ -224,17 +278,7 @@ export default class SymptomModal extends React.Component {
               />
             </View>
           </ScrollView>
-
-          <LinearGradient 
-            colors={['white', this.state.dirty ? this.state.colour : 'grey']}
-            style={formStyles.buttonContainer}
-            start={{ x: 0.4, y: 0.5 }}
-            end={{ x: 1, y: 0.5 }}>
-
-            <TouchableOpacity style={formStyles.mainButton} onPress={this.onSubmit} disabled={!this.state.dirty}>
-              <Text style={[formStyles.mainButtonText, {color: this.state.dirty ? 'black' : 'grey'}]}>Add Symptom</Text>
-            </TouchableOpacity>
-          </LinearGradient>
+          {buttons}
         </View>
       </View>
       );

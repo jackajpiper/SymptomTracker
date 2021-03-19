@@ -123,6 +123,19 @@ const AsyncManager = {
     return AsyncManager.setInstances(instances);
   },
 
+  deleteInstance: async function(id) {
+    let instances = AsyncManager.getInstances();
+    for (var i = 0; i < instances.length; i++) {
+      var obj = instances[i];
+  
+      if (obj.id === id) {
+        instances.splice(i, 1);
+      }
+    }
+    
+    AsyncManager.setInstances(instances);
+  },
+
   pollUpdates: async function(screenName) {
     let symptoms = [];
     let instances = [];
