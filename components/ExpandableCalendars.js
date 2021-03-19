@@ -130,8 +130,6 @@ function getContrastYIQ(hexcolor){
   return (yiq >= 128) ? 'black' : 'white';
 }
 
-var ITEMS = [];
-
 export default class ExpandableCalendarScreen extends Component {
 
   constructor(props) {
@@ -140,6 +138,7 @@ export default class ExpandableCalendarScreen extends Component {
     this.state = {
       Symptoms: [],
       SymptomInstances: [],
+      ITEMS: [],
       isLoading: true,
       showSyptomModal: false,
       symptomModalData: null
@@ -157,11 +156,11 @@ export default class ExpandableCalendarScreen extends Component {
         this.setState({SymptomInstances: pollResult.Instances});
       }
       if(pollResult.Symptoms.length && pollResult.Instances.length) {
-        ITEMS = processInstances(pollResult.Instances, pollResult.Symptoms);
+        this.setState({ITEMS: processInstances(pollResult.Instances, pollResult.Symptoms)});
       } else if(pollResult.Symptoms.length) {
-        ITEMS = processInstances(this.state.SymptomInstances, pollResult.Symptoms);
+        this.setState({ITEMS: processInstances(this.state.SymptomInstances, pollResult.Symptoms)});
       } else if(pollResult.Instances.length) {
-        ITEMS = processInstances(pollResult.Instances, this.state.Symptoms);
+        this.setState({ITEMS: processInstances(pollResult.Instances, this.state.Symptoms)});
       }
       
       setInterval(() => {
@@ -176,7 +175,7 @@ export default class ExpandableCalendarScreen extends Component {
   async componentDidMount() {
     let symptoms = await AsyncManager.getSymptoms();
     let instances = await AsyncManager.getInstances();
-    ITEMS = processInstances(instances, symptoms);
+    this.setState({ITEMS: processInstances(instances, symptoms)});
     this.setState({ 
       isLoading: false,
       Symptoms: symptoms,
@@ -245,7 +244,7 @@ export default class ExpandableCalendarScreen extends Component {
 
   getMarkedDates = () => {
     const marked = {};
-    ITEMS.forEach(item => {
+    this.state.ITEMS.forEach(item => {
       // NOTE: only mark dates with data
       if (item.data && item.data.length > 0 && !_.isEmpty(item.data[0])) {
         marked[item.title] = {marked: true};
@@ -256,11 +255,6 @@ export default class ExpandableCalendarScreen extends Component {
 
   floatingActions = (btn) => {
     if (btn === "bt_add_symptom") {
-      let symptom = {
-        id: 0,
-        name: "",
-        colour: ""
-      }
       this.loadModal();
     }
   }
@@ -298,7 +292,7 @@ export default class ExpandableCalendarScreen extends Component {
             />
           )}
           <AgendaList
-            sections={ITEMS}
+            sections={this.state.ITEMS}
             extraData={this.state}
             renderItem={this.renderItem}
             ref={this.agendaList}
