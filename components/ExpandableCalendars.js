@@ -162,13 +162,6 @@ export default class ExpandableCalendarScreen extends Component {
       } else if(pollResult.Instances.length) {
         this.setState({ITEMS: processInstances(pollResult.Instances, this.state.Symptoms)});
       }
-      
-      setInterval(() => {
-        this.setState({
-          isLoading: false
-        });
-      }, 1000);
-      this.forceUpdate();
     }
   }
 
