@@ -142,7 +142,7 @@ export default class SymptomsListScreen extends Component {
   onSymptomLongPress = async (symptom) => {
     Alert.alert(
       'Delete symptom?',
-      'This will also delete ALL instances of the symptom!! Are you sure?',
+      'This will also delete ALL records of the symptom! Are you sure?',
       [
         { text: "Cancel", style: 'cancel', onPress: () => {} },
         {
