@@ -167,7 +167,7 @@ export default class SymptomModal extends React.Component {
           start={{ x: 0.4, y: 0.5 }}
           end={{ x: 1, y: 0.5 }}>
           <TouchableOpacity style={formStyles.mainButton} onPress={this.onSubmit} disabled={!this.state.dirty}>
-            <Text style={[formStyles.mainButtonText, {color: this.state.dirty ? 'black' : 'grey'}]}>Add Symptom</Text>
+            <Text style={[formStyles.mainButtonText, {color: this.state.dirty ? 'black' : 'grey'}]}>Save Symptom</Text>
           </TouchableOpacity>
         </LinearGradient>
           

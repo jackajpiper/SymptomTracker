@@ -2,9 +2,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const AsyncManager = {
   symptomsStash: [],
-  symptomsLength: 0,
   instancesStash: [],
-  instancesLength: 0,
   symptomCounts: {
     updateNum: 0
   },
@@ -18,7 +16,6 @@ const AsyncManager = {
         (value) => {
           let parsedValue = JSON.parse(value);
           AsyncManager.symptomsStash = parsedValue;
-          AsyncManager.symptomsLength = parsedValue.length;
           return JSON.parse(JSON.stringify(parsedValue));
         }
       );
@@ -33,7 +30,6 @@ const AsyncManager = {
         (value) => {
           let parsedValue = JSON.parse(value);
           AsyncManager.instancesStash = parsedValue;
-          AsyncManager.instancesLength = parsedValue.length;
           return JSON.parse(JSON.stringify(parsedValue));
         }
       );
@@ -44,7 +40,6 @@ const AsyncManager = {
 
   setSymptoms: async function(symptoms) {
     AsyncManager.symptomsStash = symptoms;
-    AsyncManager.symptomsLength = symptoms.length;
     AsyncManager.symptomCounts.updateNum++;
     return AsyncStorage.setItem('Symptoms', JSON.stringify(symptoms));
   },
@@ -55,11 +50,12 @@ const AsyncManager = {
     //   let wasteid = _.uniqueId();
     //   symptom.id = 5;
     // }
+    let symptoms = AsyncManager.getSymptoms();
+
     if (!symptom.id) {
-      symptom.id = AsyncManager.symptomsLength + 1;
+      symptom.id = this.getNextId(symptoms);
     }
 
-    let symptoms = AsyncManager.symptomsStash;
     let symptomExists = false;
     for(let i=0; i<symptoms.length; i++) {
       if(symptoms[i].id === symptom.id) {
@@ -84,31 +80,40 @@ const AsyncManager = {
   deleteSymptom: async function(symptom) {
     let id = symptom.id;
     let symptoms = AsyncManager.getSymptoms();
-    for (var i = 0; i < symptoms.length; i++) {
-      var obj = symptoms[i];
+    for (let i = 0; i < symptoms.length; i++) {
+      let obj = symptoms[i];
   
-      if (obj.id === symptom.id) {
+      if (obj.id === id) {
         symptoms.splice(i, 1);
       }
     }
-    
-    // TODO: also remove all symptom instances
-    AsyncManager.setSymptoms(symptoms);
+
+    let instances = AsyncManager.getInstances();
+    for (let i = 0; i < instances.length; i++) {
+      let instance = instances[i];
+        if (instance.typeId === id) {
+          instances.splice(i, 1);
+          i--;
+        }
+    }
+    await AsyncManager.setInstances(instances);
+
+    return AsyncManager.setSymptoms(symptoms);
   },
 
   setInstances: async function(instances) {
     AsyncManager.instancesStash = instances;
-    AsyncManager.instancesLength = instances.length;
     AsyncManager.instanceCounts.updateNum++;
     return AsyncStorage.setItem('SymptomInstances', JSON.stringify(instances));
   },
 
   setInstance: async function(instance) {
+    let instances = AsyncManager.getInstances();
+
     if (!instance.id) {
-      instance.id = AsyncManager.instancesLength + 1;
+      instance.id = AsyncManager.getNextId(instances);
     }
 
-    let instances = AsyncManager.instancesStash;
     let instanceExists = false;
     for(let i=0; i<instances.length; i++) {
       if(instances[i].id === instance.id) {
@@ -119,7 +124,6 @@ const AsyncManager = {
     if(!instanceExists) {
       instances.push(instance);
     }
-    
     return AsyncManager.setInstances(instances);
   },
 
@@ -151,6 +155,16 @@ const AsyncManager = {
     AsyncManager.symptomCounts[screenName] = AsyncManager.symptomCounts.updateNum;
     AsyncManager.instanceCounts[screenName] = AsyncManager.instanceCounts.updateNum;
     return { Symptoms: symptoms, Instances: instances };
+  },
+
+  getNextId: function (arr) {
+    let id = 0;
+    for (let i = 0; i < arr.length; i++) {
+      if (arr[i].id > id) {
+        id = arr[i].id;
+      }
+    }
+    return id+1;
   }
 }
 
