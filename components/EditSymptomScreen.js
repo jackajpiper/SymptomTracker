@@ -92,7 +92,7 @@ export default class SymptomsListScreen extends Component {
     return "";
   }
 
-  onSubmit = () => {
+  onSubmit = async () => {
     var errors = this.validate();
     if (errors) {
       Toast.show(errors);
@@ -100,14 +100,19 @@ export default class SymptomsListScreen extends Component {
       var symptom = this.state.origin;
       symptom.name = this.state.name;
       symptom.colour = this.state.colour;
-      this.updateSymptomStorage(symptom);
+      await this.updateSymptomStorage(symptom);
+      if (this.isNew) {
+        this.props.navigation.goBack();
+        Toast.show('Created');
+      } else {
+        Toast.show('Saved');
+      }
     }
   }
 
   updateSymptomStorage = async (symptom) => {
     await AsyncManager.setSymptom(symptom);
     this.setState({dirty: false});
-    Toast.show('Saved!');
   };
 
   onDelete = () => {
