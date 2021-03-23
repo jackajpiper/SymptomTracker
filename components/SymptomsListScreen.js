@@ -139,25 +139,6 @@ export default class SymptomsListScreen extends Component {
     this.props.navigation.navigate('EditSymptom', { symptom: symptom });
   }
 
-  onSymptomLongPress = async (symptom) => {
-    Alert.alert(
-      'Delete symptom?',
-      'This will also delete ALL records of the symptom! Are you sure?',
-      [
-        { text: "Cancel", style: 'cancel', onPress: () => {} },
-        {
-          text: 'Delete',
-          style: 'destructive',
-          onPress: async () => {
-            await AsyncManager.deleteSymptom(symptom);
-            let symptoms = await AsyncManager.getSymptoms();
-            this.setState({ Symptoms: symptoms });
-          },
-        },
-      ]
-    );
-  }
-
   renderItem = ({item}) => {
     let colour = item.colour;
     let lighterColour = shadeColor(colour, 60);
@@ -169,7 +150,7 @@ export default class SymptomsListScreen extends Component {
         start={{ x: 0.5, y: 0.5 }}
         end={{ x: 1, y: 0.5 }}>
 
-        <TouchableOpacity onPress={() => this.onSymptomPress(item)} onLongPress={() => this.onSymptomLongPress(item)} style={styles.item}>
+        <TouchableOpacity onPress={() => this.onSymptomPress(item)} style={styles.item}>
           <Text style={[styles.itemText]}>{item.name}</Text>
         </TouchableOpacity>
       </LinearGradient>

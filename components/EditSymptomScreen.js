@@ -1,11 +1,12 @@
 import _ from 'lodash';
 import React, {Component} from 'react';
-import {Alert, StyleSheet, View, Text, TextInput, Button, TouchableOpacity} from 'react-native';
+import {Alert, StyleSheet, View, Text, TextInput, TouchableOpacity} from 'react-native';
 import moment from "moment";
 import {SliderHuePicker} from 'react-native-slider-color-picker';
 import {LinearGradient} from 'expo-linear-gradient';
 import Toast from 'react-native-simple-toast';
 import AsyncManager from './AsyncManager';
+import { Ionicons } from '@expo/vector-icons';
 
 const today = moment().format("YYYY-MM-DD");
 
@@ -52,6 +53,8 @@ function HSLToHex(h,s,l) {
 export default class SymptomsListScreen extends Component {
   constructor(props) {
     super(props);
+
+    this.isNew = !props.route.params.symptom.id;
     this.state = {
       isLoading: true,
       name: props.route.params.symptom.name,
@@ -82,11 +85,23 @@ export default class SymptomsListScreen extends Component {
     });
   }
 
+  validate = () => {
+    if (!this.state.name) {
+      return "Please select a name";
+    }
+    return "";
+  }
+
   onSubmit = () => {
-    var symptom = this.state.origin;
-    symptom.name = this.state.name;
-    symptom.colour = this.state.colour;
-    this.updateSymptomStorage(symptom);
+    var errors = this.validate();
+    if (errors) {
+      Toast.show(errors);
+    } else {
+      var symptom = this.state.origin;
+      symptom.name = this.state.name;
+      symptom.colour = this.state.colour;
+      this.updateSymptomStorage(symptom);
+    }
   }
 
   updateSymptomStorage = async (symptom) => {
@@ -94,6 +109,25 @@ export default class SymptomsListScreen extends Component {
     this.setState({dirty: false});
     Toast.show('Saved!');
   };
+
+  onDelete = () => {
+    Alert.alert(
+      'Delete symptom?',
+      'This will also delete ALL records of the symptom! Are you sure?',
+      [
+        { text: "Cancel", style: 'cancel', onPress: () => {} },
+        {
+          text: 'Delete',
+          style: 'destructive',
+          onPress: async () => {
+            await AsyncManager.deleteSymptom(this.state.origin);
+            this.props.navigation.goBack();
+            Toast.show("Deleted");
+          },
+        },
+      ]
+    );
+  }
 
   updateField = (field, value) => {
     let state = this.state;
@@ -104,6 +138,38 @@ export default class SymptomsListScreen extends Component {
   }
 
   render() {
+    let saveBtn;
+    let deleteBtn;
+    if (this.isNew) {
+      saveBtn = 
+      <LinearGradient 
+        colors={['white', this.state.dirty ? this.state.colour : 'grey']}
+        style={styles.buttonContainer}
+        start={{ x: 0.4, y: 0.5 }}
+        end={{ x: 1, y: 0.5 }}>
+
+        <TouchableOpacity style={styles.mainButton} onPress={this.onSubmit} disabled={!this.state.dirty}>
+          <Text style={[styles.mainButtonText, {color: this.state.dirty ? 'black' : 'grey'}]}>Create Symptom</Text>
+        </TouchableOpacity>
+      </LinearGradient>
+    } else {
+      saveBtn =
+      (<LinearGradient 
+        colors={['white', this.state.dirty ? this.state.colour : 'grey']}
+        style={[styles.buttonContainer, {right: 85}]}
+        start={{ x: 0.4, y: 0.5 }}
+        end={{ x: 1, y: 0.5 }}>
+
+        <TouchableOpacity style={styles.mainButton} onPress={this.onSubmit} disabled={!this.state.dirty}>
+          <Text style={[styles.mainButtonText, {color: this.state.dirty ? 'black' : 'grey'}]}>Save Symptom</Text>
+        </TouchableOpacity>
+      </LinearGradient>);
+      deleteBtn = 
+      (<TouchableOpacity style={[styles.buttonContainer, {width: "18%", backgroundColor: "#e62200", display: "flex", justifyContent: "center"}]} onPress={this.onDelete}>
+        <Ionicons style={{textAlign: "center"}} name="trash-outline" size={32} color="black" />
+      </TouchableOpacity>);
+    }
+
     return (
       <View style={styles.container}>
         <View style={styles.form}>
@@ -131,16 +197,8 @@ export default class SymptomsListScreen extends Component {
             />
           </View>
 
-          <LinearGradient 
-            colors={['white', this.state.dirty ? this.state.colour : 'grey']}
-            style={styles.buttonContainer}
-            start={{ x: 0.4, y: 0.5 }}
-            end={{ x: 1, y: 0.5 }}>
-
-            <TouchableOpacity style={styles.mainButton} onPress={this.onSubmit} disabled={!this.state.dirty}>
-              <Text style={[styles.mainButtonText, {color: this.state.dirty ? 'black' : 'grey'}]}>Save</Text>
-            </TouchableOpacity>
-          </LinearGradient>
+          {saveBtn}
+          {deleteBtn}
         </View>
       </View>
     )

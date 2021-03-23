@@ -176,7 +176,6 @@ export default class SymptomModal extends React.Component {
         </TouchableOpacity>
       </View>
     }
-    console.log(this.isNew);
 
     return (
       <View style={formStyles.container}>
