@@ -2,11 +2,11 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const AsyncManager = {
   symptomsStash: [],
-  instancesStash: [],
+  symptomInstancesStash: [],
   symptomCounts: {
     updateNum: 0
   },
-  instanceCounts: {
+  symptomInstanceCounts: {
     updateNum: 0
   },
   
@@ -21,20 +21,6 @@ const AsyncManager = {
       );
     } else {
       return JSON.parse(JSON.stringify(AsyncManager.symptomsStash));
-    }
-  },
-  
-  getInstances: function() {
-    if(AsyncManager.instancesStash.length === 0) {
-      return AsyncStorage.getItem('SymptomInstances').then(
-        (value) => {
-          let parsedValue = JSON.parse(value);
-          AsyncManager.instancesStash = parsedValue;
-          return JSON.parse(JSON.stringify(parsedValue));
-        }
-      );
-    } else {
-      return JSON.parse(JSON.stringify(AsyncManager.instancesStash));
     }
   },
 
@@ -88,7 +74,7 @@ const AsyncManager = {
       }
     }
 
-    let instances = AsyncManager.getInstances();
+    let instances = AsyncManager.getSymptomInstances();
     for (let i = 0; i < instances.length; i++) {
       let instance = instances[i];
         if (instance.typeId === id) {
@@ -96,19 +82,33 @@ const AsyncManager = {
           i--;
         }
     }
-    await AsyncManager.setInstances(instances);
+    await AsyncManager.setSymptomInstances(instances);
 
     return AsyncManager.setSymptoms(symptoms);
   },
+  
+  getSymptomInstances: function() {
+    if(AsyncManager.symptomInstancesStash.length === 0) {
+      return AsyncStorage.getItem('SymptomInstances').then(
+        (value) => {
+          let parsedValue = JSON.parse(value);
+          AsyncManager.symptomInstancesStash = parsedValue;
+          return JSON.parse(JSON.stringify(parsedValue));
+        }
+      );
+    } else {
+      return JSON.parse(JSON.stringify(AsyncManager.symptomInstancesStash));
+    }
+  },
 
-  setInstances: async function(instances) {
-    AsyncManager.instancesStash = instances;
-    AsyncManager.instanceCounts.updateNum++;
+  setSymptomInstances: async function(instances) {
+    AsyncManager.symptomInstancesStash = instances;
+    AsyncManager.symptomInstanceCounts.updateNum++;
     return AsyncStorage.setItem('SymptomInstances', JSON.stringify(instances));
   },
 
-  setInstance: async function(instance) {
-    let instances = AsyncManager.getInstances();
+  setSymptomInstance: async function(instance) {
+    let instances = AsyncManager.getSymptomInstances();
 
     if (!instance.id) {
       instance.id = AsyncManager.getNextId(instances);
@@ -124,11 +124,11 @@ const AsyncManager = {
     if(!instanceExists) {
       instances.push(instance);
     }
-    return AsyncManager.setInstances(instances);
+    return AsyncManager.setSymptomInstances(instances);
   },
 
-  deleteInstance: async function(id) {
-    let instances = AsyncManager.getInstances();
+  deleteSymptomInstance: async function(id) {
+    let instances = AsyncManager.getSymptomInstances();
     for (var i = 0; i < instances.length; i++) {
       var obj = instances[i];
   
@@ -137,7 +137,7 @@ const AsyncManager = {
       }
     }
     
-    AsyncManager.setInstances(instances);
+    AsyncManager.setSymptomInstances(instances);
   },
 
   pollUpdates: async function(screenName) {
@@ -147,13 +147,13 @@ const AsyncManager = {
       symptoms = await AsyncManager.getSymptoms();
       AsyncManager.symptomCounts[screenName] = AsyncManager.symptomCounts.updateNum;
     }
-    if (AsyncManager.instanceCounts.updateNum !== 0 && AsyncManager.instanceCounts.updateNum !== AsyncManager.instanceCounts[screenName]) {
-      instances = await AsyncManager.getInstances();
-      AsyncManager.instanceCounts[screenName] = AsyncManager.instanceCounts.updateNum;
+    if (AsyncManager.symptomInstanceCounts.updateNum !== 0 && AsyncManager.symptomInstanceCounts.updateNum !== AsyncManager.symptomInstanceCounts[screenName]) {
+      instances = await AsyncManager.getSymptomInstances();
+      AsyncManager.symptomInstanceCounts[screenName] = AsyncManager.symptomInstanceCounts.updateNum;
     }
 
     AsyncManager.symptomCounts[screenName] = AsyncManager.symptomCounts.updateNum;
-    AsyncManager.instanceCounts[screenName] = AsyncManager.instanceCounts.updateNum;
+    AsyncManager.symptomInstanceCounts[screenName] = AsyncManager.symptomInstanceCounts.updateNum;
     return { Symptoms: symptoms, Instances: instances };
   },
 

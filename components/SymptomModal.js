@@ -106,7 +106,7 @@ export default class SymptomModal extends React.Component {
     } else {
       let data = this.getData();
       
-      await AsyncManager.setInstance(data);
+      await AsyncManager.setSymptomInstance(data);
 
       this.props.triggerPoll();
       this.props.toggleModal(false);
@@ -124,7 +124,7 @@ export default class SymptomModal extends React.Component {
           text: 'Delete',
           style: 'destructive',
           onPress: () => {
-            AsyncManager.deleteInstance(this.id);
+            AsyncManager.deleteSymptomInstance(this.id);
             this.props.triggerPoll();
             this.props.toggleModal(false);
             Toast.show("Deleted");

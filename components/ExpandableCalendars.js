@@ -167,7 +167,7 @@ export default class ExpandableCalendarScreen extends Component {
 
   async componentDidMount() {
     let symptoms = await AsyncManager.getSymptoms();
-    let instances = await AsyncManager.getInstances();
+    let instances = await AsyncManager.getSymptomInstances();
     this.setState({ITEMS: processInstances(instances, symptoms)});
     this.setState({ 
       isLoading: false,
