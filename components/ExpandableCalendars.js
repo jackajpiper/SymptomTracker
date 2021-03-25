@@ -28,10 +28,10 @@ const actions = [
 ];
 
 // takes the symptoms and symptom instances straight from the datastore and converts them for use
-function processInstances(instances, symptoms) {
+function processInstances(symptomInstances, symptoms, treatmentInstances, treatments) {
   let dateDict = {};
   let dateArr = [];
-  instances.forEach(function (instance, index) {
+  symptomInstances.forEach(function (instance, index) {
     let symptom = symptoms.find(symptom => symptom.id === instance.typeId);
     instance['symptom'] = symptom.name;
     instance['colour'] = symptom.colour;
@@ -146,7 +146,7 @@ export default class ExpandableCalendarScreen extends Component {
   }
 
   pollUpdates = async () => {
-    var pollResult = await AsyncManager.pollUpdates("Calendar");
+    var pollResult = await AsyncManager.pollUpdates("Calendar", "symptoms");
 
     if(pollResult.Symptoms.length || pollResult.Instances.length) {
       if(pollResult.Symptoms.length !== 0) {
