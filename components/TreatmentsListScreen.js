@@ -64,34 +64,42 @@ function shadeColor(color, percent) {
 const actionColour = "#00a0db";
 const actions = [
   {
-    text: "New Symptom",
-    name: "bt_add_symptom",
+    text: "New Treatment",
+    name: "bt_add_treatment",
     color: actionColour,
     position: 1
   }
 ];
 
-export default class SymptomsListScreen extends Component {
+const Treatments = [
+  { id: 1, name: "Ibuprofen", colour: "#6789ab", unitTypeId: 1, unit: "Pills"},
+  { id: 2, name: "Cheese", colour: "#abcdef", unit: "Grams"},
+  { id: 3, name: "Sleep", colour: "#123456", unitTypeId: 2, unit: "Quality"},
+  { id: 4, name: "Hugs", colour: "#456789", unit: "Hugs"}
+]
+
+export default class TreatmentsListScreen extends Component {
   constructor(props) {
     super(props);
 
     this.state = {
       isLoading: true,
-      Symptoms: []
+      Treatments: []
     };
   }
 
   async componentDidMount() {
-    let symptoms = await AsyncManager.getSymptoms();
+    // let treatments = await AsyncManager.getTreatments();
+    let treatments = Treatments;
     this.setState({ 
       isLoading: false,
-      Symptoms: symptoms
+      Treatments: treatments
     });
 
     this.willFocusListener = this.props.navigation.addListener('focus', async () => {
-      var pollResult = await AsyncManager.pollUpdates("SymptomsList", "symptoms");
-      if(pollResult.Symptoms.length !== 0) {
-        this.setState({Symptoms: pollResult.Symptoms});
+      var pollResult = await AsyncManager.pollUpdates("TreatmentsList", "treatments");
+      if(pollResult.Treatments.length !== 0) {
+        this.setState({Treatments: pollResult.Treatments});
       }
     });
   }
@@ -103,18 +111,14 @@ export default class SymptomsListScreen extends Component {
   }
 
   onAddPress = (btn) => {
-    if (btn === "bt_add_symptom") {
-      let symptom = {
+    if (btn === "bt_add_treatment") {
+      let treatment = {
         id: 0,
         name: "",
         colour: ""
       }
-      this.props.navigation.navigate('EditSymptom', { symptom: symptom });
+      this.props.navigation.navigate('EditTreatment', { treatment: treatment });
     }
-  }
-
-  onSymptomPress = (symptom) => {
-    this.props.navigation.navigate('EditSymptom', { symptom: symptom });
   }
 
   renderItem = ({item}) => {
@@ -128,7 +132,7 @@ export default class SymptomsListScreen extends Component {
         start={{ x: 0.5, y: 0.5 }}
         end={{ x: 1, y: 0.5 }}>
 
-        <TouchableOpacity onPress={() => this.onSymptomPress(item)} style={styles.item}>
+        <TouchableOpacity style={styles.item}>
           <Text style={[styles.itemText]}>{item.name}</Text>
         </TouchableOpacity>
       </LinearGradient>
@@ -146,7 +150,7 @@ export default class SymptomsListScreen extends Component {
       return (
         <View style={styles.container}>
           <FlatList
-            data={this.state.Symptoms}
+            data={this.state.Treatments}
             renderItem={this.renderItem}
             keyExtractor={item => item.id.toString()}
           />

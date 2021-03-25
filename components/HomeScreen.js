@@ -5,6 +5,7 @@ import moment from "moment";
 import { NavigationContainer } from '@react-navigation/native';
 import { createStackNavigator } from '@react-navigation/stack';
 import SymptomsListScreen from './SymptomsListScreen.js';
+import TreatmentsListScreen from './TreatmentsListScreen.js';
 import EditSymptomScreen from './EditSymptomScreen.js';
 import {LinearGradient} from 'expo-linear-gradient';
 
@@ -34,22 +35,12 @@ class MainScreen extends React.Component {
           <Text style={ styles.titleText }>Amy's Symptom Tracker</Text>
           <View style={ styles.buttonList }>
             {this.renderMenuButton("Manage Symptoms", "Symptoms", "#E7D5E1")}
-            {this.renderMenuButton("Manage Ingestants", "Ingestants", "#FAEEC4")}
+            {this.renderMenuButton("Manage Treatments", "Treatments", "#FAEEC4")}
             {this.renderMenuButton("Diary", "Diary", "#C3D8D1")}
             {this.renderMenuButton("Settings", "Settings", "#F9E2E8")}
           </View>
         </View>
       );
-  }
-}
-
-class IngestantsScreen extends React.Component {
-  render() {
-    return (
-      <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center' }}>
-        <Text style={{fontSize: 24}}>Ingestants Screen</Text>
-      </View>
-    );
   }
 }
 
@@ -89,7 +80,7 @@ export default class HomeScreen extends Component {
           options={{headerShown: false}}
         />
         <Stack.Screen name="Symptoms" component={SymptomsListScreen} />
-        <Stack.Screen name="Ingestants" component={IngestantsScreen} />
+        <Stack.Screen name="Treatments" component={TreatmentsListScreen} />
         <Stack.Screen name="Diary" component={DiaryScreen} />
         <Stack.Screen name="EditSymptom" component={EditSymptomScreen} options={({ route }) => ({ title: this.editSymptomTitle(route) })} />
       </Stack.Navigator>
