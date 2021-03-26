@@ -71,13 +71,6 @@ const actions = [
   }
 ];
 
-const Treatments = [
-  { id: 1, name: "Ibuprofen", colour: "#6789ab", unitTypeId: 1, unit: "Pills"},
-  { id: 2, name: "Cheese", colour: "#abcdef", unit: "Grams"},
-  { id: 3, name: "Sleep", colour: "#123456", unitTypeId: 2, unit: "Quality"},
-  { id: 4, name: "Hugs", colour: "#456789", unit: "Hugs"}
-]
-
 export default class TreatmentsListScreen extends Component {
   constructor(props) {
     super(props);
@@ -89,8 +82,7 @@ export default class TreatmentsListScreen extends Component {
   }
 
   async componentDidMount() {
-    // let treatments = await AsyncManager.getTreatments();
-    let treatments = Treatments;
+    let treatments = await AsyncManager.getTreatments();
     this.setState({ 
       isLoading: false,
       Treatments: treatments
@@ -121,6 +113,10 @@ export default class TreatmentsListScreen extends Component {
     }
   }
 
+  onSymptomPress = (treatment) => {
+    this.props.navigation.navigate('EditTreatment', { treatment: treatment });
+  }
+
   renderItem = ({item}) => {
     let colour = item.colour;
     let lighterColour = shadeColor(colour, 60);
@@ -132,7 +128,7 @@ export default class TreatmentsListScreen extends Component {
         start={{ x: 0.5, y: 0.5 }}
         end={{ x: 1, y: 0.5 }}>
 
-        <TouchableOpacity style={styles.item}>
+        <TouchableOpacity onPress={() => this.onSymptomPress(item)} style={styles.item}>
           <Text style={[styles.itemText]}>{item.name}</Text>
         </TouchableOpacity>
       </LinearGradient>

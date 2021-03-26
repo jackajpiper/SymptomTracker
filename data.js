@@ -27,10 +27,10 @@ const SymptomInstances = [
 ]
 
 const Treatments = [
-  { id: 1, name: "Ibuprofen", colour: "#6789ab", unitTypeId: 1, unit: "Pills"},
-  { id: 1, name: "Cheese", colour: "#abcdef", unit: "Grams"},
-  { id: 1, name: "Sleep", colour: "#123456", unitTypeId: 2, unit: "Quality"},
-  { id: 1, name: "Hugs", colour: "#456789", unit: "Hugs"}
+  { id: 1, name: "Ibuprofen", colour: "#b87aa8", unitTypeId: 1, unit: "Pills"},
+  { id: 1, name: "Cheese", colour: "#b5b87a", unit: "Grams"},
+  { id: 1, name: "Sleep", colour: "#7a7bb8", unitTypeId: 2, unit: "Quality"},
+  { id: 1, name: "Hugs", colour: "#b88e7a", unit: "Hugs"}
 ]
 
 const TreatmentInstances = [

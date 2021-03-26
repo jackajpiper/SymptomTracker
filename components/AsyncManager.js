@@ -23,6 +23,9 @@ const AsyncManager = {
       return AsyncStorage.getItem('Symptoms').then(
         (value) => {
           let parsedValue = JSON.parse(value);
+          if (!Array.isArray(parsedValue)) {
+            parsedValue = [];
+          }
           AsyncManager.symptomsStash = parsedValue;
           return JSON.parse(JSON.stringify(parsedValue));
         }
@@ -100,6 +103,9 @@ const AsyncManager = {
       return AsyncStorage.getItem('SymptomInstances').then(
         (value) => {
           let parsedValue = JSON.parse(value);
+          if (!Array.isArray(parsedValue)) {
+            parsedValue = [];
+          }
           AsyncManager.symptomInstancesStash = parsedValue;
           return JSON.parse(JSON.stringify(parsedValue));
         }
@@ -153,6 +159,9 @@ const AsyncManager = {
       return AsyncStorage.getItem('Treatments').then(
         (value) => {
           let parsedValue = JSON.parse(value);
+          if (!Array.isArray(parsedValue)) {
+            parsedValue = [];
+          }
           AsyncManager.treatmentsStash = parsedValue;
           return JSON.parse(JSON.stringify(parsedValue));
         }
@@ -225,6 +234,9 @@ const AsyncManager = {
       return AsyncStorage.getItem('TreatmentInstances').then(
         (value) => {
           let parsedValue = JSON.parse(value);
+          if (!Array.isArray(parsedValue)) {
+            parsedValue = [];
+          }
           AsyncManager.treatmentInstancesStash = parsedValue;
           return JSON.parse(JSON.stringify(parsedValue));
         }

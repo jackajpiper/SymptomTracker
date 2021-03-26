@@ -6,6 +6,7 @@ import { NavigationContainer } from '@react-navigation/native';
 import { createStackNavigator } from '@react-navigation/stack';
 import SymptomsListScreen from './SymptomsListScreen.js';
 import TreatmentsListScreen from './TreatmentsListScreen.js';
+import EditTreatmentScreen from './EditTreatmentScreen.js';
 import EditSymptomScreen from './EditSymptomScreen.js';
 import {LinearGradient} from 'expo-linear-gradient';
 
@@ -62,11 +63,11 @@ export default class HomeScreen extends Component {
     };
   }
 
-  editSymptomTitle = (route) => {
-    if (route.params.symptom.name) {
-      return "Edit " + route.params.symptom.name;
+  editTitle = (route, obj) => {
+    if (route.params[obj].name) {
+      return "Edit " + route.params[obj].name;
     } else {
-      return "Create New Symptom";
+      return "Create New " + (obj.charAt(0).toUpperCase() + obj.slice(1));
     }
   }
 
@@ -82,7 +83,8 @@ export default class HomeScreen extends Component {
         <Stack.Screen name="Symptoms" component={SymptomsListScreen} />
         <Stack.Screen name="Treatments" component={TreatmentsListScreen} />
         <Stack.Screen name="Diary" component={DiaryScreen} />
-        <Stack.Screen name="EditSymptom" component={EditSymptomScreen} options={({ route }) => ({ title: this.editSymptomTitle(route) })} />
+        <Stack.Screen name="EditSymptom" component={EditSymptomScreen} options={({ route }) => ({ title: this.editTitle(route, "symptom") })} />
+        <Stack.Screen name="EditTreatment" component={EditTreatmentScreen} options={({ route }) => ({ title: this.editTitle(route, "treatment") })} />
       </Stack.Navigator>
     </NavigationContainer>
     )
