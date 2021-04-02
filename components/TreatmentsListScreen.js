@@ -90,7 +90,7 @@ export default class TreatmentsListScreen extends Component {
 
     this.willFocusListener = this.props.navigation.addListener('focus', async () => {
       var pollResult = await AsyncManager.pollUpdates("TreatmentsList", "treatments");
-      if(pollResult.Treatments.length !== 0) {
+      if(pollResult.Treatments) {
         this.setState({Treatments: pollResult.Treatments});
       }
     });

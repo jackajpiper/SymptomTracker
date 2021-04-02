@@ -47,7 +47,7 @@ const AsyncManager = {
     //   let wasteid = _.uniqueId();
     //   symptom.id = 5;
     // }
-    let symptoms = AsyncManager.getSymptoms();
+    let symptoms = await AsyncManager.getSymptoms();
 
     if (!symptom.id) {
       symptom.id = this.getNextId(symptoms);
@@ -98,7 +98,7 @@ const AsyncManager = {
     return AsyncManager.setSymptoms(symptoms);
   },
   
-  getSymptomInstances: function() {
+  getSymptomInstances: async function() {
     if(AsyncManager.symptomInstancesStash.length === 0) {
       return AsyncStorage.getItem('SymptomInstances').then(
         (value) => {
@@ -122,7 +122,7 @@ const AsyncManager = {
   },
 
   setSymptomInstance: async function(instance) {
-    let instances = AsyncManager.getSymptomInstances();
+    let instances = await AsyncManager.getSymptomInstances();
 
     if (!instance.id) {
       instance.id = AsyncManager.getNextId(instances);
@@ -142,7 +142,7 @@ const AsyncManager = {
   },
 
   deleteSymptomInstance: async function(id) {
-    let instances = AsyncManager.getSymptomInstances();
+    let instances = await AsyncManager.getSymptomInstances();
     for (var i = 0; i < instances.length; i++) {
       var obj = instances[i];
   
@@ -151,7 +151,7 @@ const AsyncManager = {
       }
     }
     
-    AsyncManager.setSymptomInstances(instances);
+    return AsyncManager.setSymptomInstances(instances);
   },
 
   getTreatments: function () {
@@ -178,7 +178,7 @@ const AsyncManager = {
   },
 
   setTreatment: async function(treatment) {
-    let treatments = AsyncManager.getTreatments();
+    let treatments = await AsyncManager.getTreatments();
 
     if (!treatment.id) {
       treatment.id = this.getNextId(treatments);
@@ -229,7 +229,7 @@ const AsyncManager = {
     return AsyncManager.setTreatments(treatments);
   },
   
-  getTreatmentInstances: function() {
+  getTreatmentInstances: async function() {
     if(AsyncManager.treatmentInstancesStash.length === 0) {
       return AsyncStorage.getItem('TreatmentInstances').then(
         (value) => {
@@ -253,7 +253,7 @@ const AsyncManager = {
   },
 
   setTreatmentInstance: async function(instance) {
-    let instances = AsyncManager.getTreatmentInstances();
+    let instances = await AsyncManager.getTreatmentInstances();
 
     if (!instance.id) {
       instance.id = AsyncManager.getNextId(instances);
@@ -273,7 +273,7 @@ const AsyncManager = {
   },
 
   deleteTreatmentInstance: async function(id) {
-    let instances = AsyncManager.getTreatmentInstances();
+    let instances = await AsyncManager.getTreatmentInstances();
     for (var i = 0; i < instances.length; i++) {
       var obj = instances[i];
   
@@ -282,18 +282,18 @@ const AsyncManager = {
       }
     }
     
-    AsyncManager.setTreatmentInstances(instances);
+    return AsyncManager.setTreatmentInstances(instances);
   },
 
   pollUpdates: async function(screenName, objName) {
     if (objName === "symptoms") {
-      let symptoms = [];
-      let instances = [];
-      if (AsyncManager.symptomCounts.updateNum !== 0 && AsyncManager.symptomCounts.updateNum !== AsyncManager.symptomCounts[screenName]) {
+      let symptoms = false;
+      let instances = false;
+      if (AsyncManager.symptomCounts.updateNum !== (AsyncManager.symptomCounts[screenName] || 0)) {
         symptoms = await AsyncManager.getSymptoms();
         AsyncManager.symptomCounts[screenName] = AsyncManager.symptomCounts.updateNum;
       }
-      if (AsyncManager.symptomInstanceCounts.updateNum !== 0 && AsyncManager.symptomInstanceCounts.updateNum !== AsyncManager.symptomInstanceCounts[screenName]) {
+      if (AsyncManager.symptomInstanceCounts.updateNum !== (AsyncManager.symptomInstanceCounts[screenName] || 0)) {
         instances = await AsyncManager.getSymptomInstances();
         AsyncManager.symptomInstanceCounts[screenName] = AsyncManager.symptomInstanceCounts.updateNum;
       }
@@ -302,8 +302,8 @@ const AsyncManager = {
       AsyncManager.symptomInstanceCounts[screenName] = AsyncManager.symptomInstanceCounts.updateNum;
       return { Symptoms: symptoms, Instances: instances };
     } else if (objName === "treatments") {
-      let treatments = [];
-      let instances = [];
+      let treatments = false;
+      let instances = false;
       if (AsyncManager.treatmentCounts.updateNum !== 0 && AsyncManager.treatmentCounts.updateNum !== AsyncManager.treatmentCounts[screenName]) {
         treatments = await AsyncManager.getTreatments();
         AsyncManager.treatmentCounts[screenName] = AsyncManager.treatmentCounts.updateNum;

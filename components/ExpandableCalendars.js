@@ -7,6 +7,8 @@ import {LinearGradient} from 'expo-linear-gradient';
 import AsyncManager from './AsyncManager';
 import { FloatingAction } from "react-native-floating-action";
 import SymptomModal from './SymptomModal';
+import TreatmentModal from './TreatmentModal';
+import { Ionicons } from '@expo/vector-icons';
 
 
 const today = moment().format("YYYY-MM-DD");
@@ -20,21 +22,33 @@ const actions = [
     position: 1
   },
   {
-    text: "Add Ingestant",
-    name: "bt_add_ingestant",
+    text: "Add Treatment",
+    name: "bt_add_treatment",
     color: actionColour,
     position: 2
   }
 ];
 
-// takes the symptoms and symptom instances straight from the datastore and converts them for use
+// takes the symptoms, symptom instances, treatments and treatment instances straight from the datastore and converts them for use
 function processInstances(symptomInstances, symptoms, treatmentInstances, treatments) {
   let dateDict = {};
   let dateArr = [];
   symptomInstances.forEach(function (instance, index) {
     let symptom = symptoms.find(symptom => symptom.id === instance.typeId);
-    instance['symptom'] = symptom.name;
-    instance['colour'] = symptom.colour;
+    instance.name = symptom.name;
+    instance.colour = symptom.colour;
+    instance.type = "symptom";
+    let day = instance.date;
+    if (!dateDict[day]) {
+      dateDict[day] = [];
+    }
+    dateDict[day].push(instance);
+  });
+  treatmentInstances.forEach(function (instance, index) {
+    let treatment = treatments.find(treatment => treatment.id === instance.typeId);
+    instance.name = treatment.name;
+    instance.colour = treatment.colour;
+    instance.type = "treatment";
     let day = instance.date;
     if (!dateDict[day]) {
       dateDict[day] = [];
@@ -138,41 +152,70 @@ export default class ExpandableCalendarScreen extends Component {
     this.state = {
       Symptoms: [],
       SymptomInstances: [],
+      Treatments: [],
+      TreatmentInstances: [],
       ITEMS: [],
       isLoading: true,
       showSyptomModal: false,
+      showTreatmentModal: false,
       symptomModalData: null
     };
   }
 
   pollUpdates = async () => {
-    var pollResult = await AsyncManager.pollUpdates("Calendar", "symptoms");
+    let symptomResult = await AsyncManager.pollUpdates("Calendar", "symptoms");
+    let treatmentResult = await AsyncManager.pollUpdates("Calendar", "treatments");
 
-    if(pollResult.Symptoms.length || pollResult.Instances.length) {
-      if(pollResult.Symptoms.length !== 0) {
-        this.setState({Symptoms: pollResult.Symptoms});
-      }
-      if(pollResult.Instances.length !== 0) {
-        this.setState({SymptomInstances: pollResult.Instances});
-      }
-      if(pollResult.Symptoms.length && pollResult.Instances.length) {
-        this.setState({ITEMS: processInstances(pollResult.Instances, pollResult.Symptoms)});
-      } else if(pollResult.Symptoms.length) {
-        this.setState({ITEMS: processInstances(this.state.SymptomInstances, pollResult.Symptoms)});
-      } else if(pollResult.Instances.length) {
-        this.setState({ITEMS: processInstances(pollResult.Instances, this.state.Symptoms)});
-      }
+    let oneChanged = false;
+    let newSymptoms = symptomResult.Symptoms;
+    let newSymptomInstances = symptomResult.Instances;
+    let newTreatments = treatmentResult.Treatments;
+    let newTreatmentInstances = treatmentResult.Instances;
+
+    if (newSymptoms) {
+      this.setState({Symptoms: newSymptoms});
+      oneChanged = true;
+    } else {
+      newSymptoms = this.state.Symptoms;
+    }
+    if (newSymptomInstances) {
+      this.setState({SymptomInstances: newSymptomInstances});
+      oneChanged = true;
+    } else {
+      newSymptomInstances = this.state.SymptomInstances;
+    }
+    if (newTreatments) {
+      this.setState({Treatments: newTreatments});
+      oneChanged = true;
+    } else {
+      newTreatments = this.state.Treatments;
+    }
+    if (newTreatmentInstances) {
+      this.setState({TreatmentInstances: newTreatmentInstances});
+      oneChanged = true;
+    } else {
+      newTreatmentInstances = this.state.TreatmentInstances;
+    }
+
+    if (oneChanged) {
+      this.setState({ITEMS: processInstances(newSymptomInstances, newSymptoms, newTreatmentInstances, newTreatments)});
     }
   }
 
   async componentDidMount() {
     let symptoms = await AsyncManager.getSymptoms();
-    let instances = await AsyncManager.getSymptomInstances();
-    this.setState({ITEMS: processInstances(instances, symptoms)});
+    let symptomInstances = await AsyncManager.getSymptomInstances();
+    let treatments = await AsyncManager.getTreatments();
+    let treatmentInstances = await AsyncManager.getTreatmentInstances();
+
+    this.setState({ITEMS: processInstances(symptomInstances, symptoms, treatmentInstances, treatments)});
+
     this.setState({ 
       isLoading: false,
       Symptoms: symptoms,
-      SymptomInstances: instances
+      SymptomInstances: symptomInstances,
+      Treatments: treatments,
+      TreatmentInstances: treatmentInstances
     });
 
     this.willFocusListener = this.props.navigation.addListener('focus', async () => {
@@ -186,12 +229,8 @@ export default class ExpandableCalendarScreen extends Component {
     };
   }
 
-  buttonPressed() {
-    Alert.alert('show more');
-  }
-
   itemPressed(instance) {
-    this.loadModal(instance);
+    this.loadModal(instance.type, instance);
   }
 
   renderToday() {
@@ -203,7 +242,7 @@ export default class ExpandableCalendarScreen extends Component {
   }
 
   renderItem = ({item}) => {
-    if (!item.symptom) {
+    if (!item.name) {
       return this.renderToday();
     }
 
@@ -212,27 +251,48 @@ export default class ExpandableCalendarScreen extends Component {
     let textColour = getContrastYIQ(lighterColour);
     let lighterTextColour = textColour === 'black' ? 'grey' : 'silver';
 
-    return (
-      <LinearGradient 
-        colors={['white', lighterColour]}
-        style = { styles.container }
-        start={{ x: 0.5, y: 0.5 }}
-        end={{ x: 1, y: 0.5 }}>
-
-        <TouchableOpacity onPress={() => this.itemPressed(item)} style={styles.item}>
-          <Text style={styles.itemTitleText}>{item.symptom}</Text>
-          <View style={styles.itemButtonContainer}>
-            <Text style={[styles.itemTimeText, {color: textColour}]}>
-              {item.startTime + ' - ' + item.endTime}
-            </Text>
-            <Text style={[styles.itemSeverityText, {color: lighterTextColour}]}>
-              {item.severity + '%'}
-            </Text>
-          </View>
-        </TouchableOpacity>
-      </LinearGradient>
-      
-    );
+    if (item.type === "symptom") {
+      return (
+        <LinearGradient 
+          colors={['white', lighterColour]}
+          style = { styles.container }
+          start={{ x: 0.5, y: 0.5 }}
+          end={{ x: 1, y: 0.5 }}>
+  
+          <TouchableOpacity onPress={() => this.itemPressed(item)} style={styles.item}>
+            <Ionicons style={{textAlign: "center", paddingTop: 4}} name="thermometer-outline" size={28} color="#b6b6b6" />
+            <Text style={styles.itemTitleText}>{item.name}</Text>
+            <View style={styles.itemButtonContainer}>
+              <Text style={[styles.itemTimeText, {color: textColour}]}>
+                {item.startTime + ' - ' + item.endTime}
+              </Text>
+              <Text style={[styles.itemSeverityText, {color: lighterTextColour}]}>
+                {item.severity + '%'}
+              </Text>
+            </View>
+          </TouchableOpacity>
+        </LinearGradient>
+      );
+    } else {
+      return (
+        <LinearGradient 
+          colors={['white', lighterColour]}
+          style = { styles.container }
+          start={{ x: 0.5, y: 0.5 }}
+          end={{ x: 1, y: 0.5 }}>
+  
+          <TouchableOpacity onPress={() => this.itemPressed(item)} style={styles.item}>
+            <Ionicons style={{textAlign: "center", paddingTop: 4}} name="bandage-outline" size={28} color="#b6b6b6" />
+            <Text style={styles.itemTitleText}>{item.name}</Text>
+            <View style={styles.itemButtonContainer}>
+              <Text style={[styles.itemTimeText, {color: textColour, marginTop: 10}]}>
+                {item.startTime + ' - ' + item.endTime}
+              </Text>
+            </View>
+          </TouchableOpacity>
+        </LinearGradient>
+      );
+    }
   };
 
   getMarkedDates = () => {
@@ -248,16 +308,26 @@ export default class ExpandableCalendarScreen extends Component {
 
   floatingActions = (btn) => {
     if (btn === "bt_add_symptom") {
-      this.loadModal();
+      this.loadModal("symptom");
+    } else if (btn === "bt_add_treatment") {
+      this.loadModal("treatment");
     }
   }
 
-  loadModal = (data) => {
-    this.setState({symptomModalData: data ? data : {}, showSyptomModal: true });
+  loadModal = (type, data) => {
+    if (type === "symptom") {
+      this.setState({symptomModalData: data ? data : {}, showSyptomModal: true });
+    } else {
+      this.setState({treatmentModalData: data ? data : {}, showTreatmentModal: true });
+    }
   }
   
-  toggleSymptomModal = (visible) => {
-    this.setState({ showSyptomModal: visible });
+  toggleModal = (type, visible) => {
+    if (type === "symptom") {
+      this.setState({ showSyptomModal: visible });
+    } else {
+      this.setState({ showTreatmentModal: visible });
+    }
   }
 
   render() {
@@ -297,9 +367,15 @@ export default class ExpandableCalendarScreen extends Component {
           />
           <Modal animationType = {"slide"}
               visible = {this.state.showSyptomModal}
-              onRequestClose = {() => { this.toggleSymptomModal(false) }}
+              onRequestClose = {() => { this.toggleModal("symptom", false) }}
               transparent={true} >
-              <SymptomModal toggleModal={this.toggleSymptomModal} triggerPoll={this.pollUpdates} symptoms={this.state.Symptoms} data={this.state.symptomModalData} />
+              <SymptomModal toggleModal={this.toggleModal} triggerPoll={this.pollUpdates} symptoms={this.state.Symptoms} data={this.state.symptomModalData} />
+          </Modal>
+          <Modal animationType = {"slide"}
+              visible = {this.state.showTreatmentModal}
+              onRequestClose = {() => { this.toggleModal("treatment", false) }}
+              transparent={true} >
+              <TreatmentModal toggleModal={this.toggleModal} triggerPoll={this.pollUpdates} treatments={this.state.Treatments} data={this.state.treatmentModalData} />
           </Modal>
         </CalendarProvider>
       );
@@ -313,9 +389,10 @@ const styles = StyleSheet.create({
   },
   item: {
     padding: 20,
-    borderBottomWidth: 1,
+    borderBottomWidth: 0.5,
     borderBottomColor: 'lightgrey',
-    flexDirection: 'row'
+    flexDirection: 'row',
+    height: "100%"
   },
   itemTimeText: {
     color: 'black'
@@ -353,7 +430,8 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     justifyContent: 'center',
-    alignItems: 'center'
+    alignItems: 'center',
+    height: 80
   },
   spinner: {
     flex: 1,

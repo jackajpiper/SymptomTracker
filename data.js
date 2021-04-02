@@ -26,6 +26,13 @@ const SymptomInstances = [
   { id: 16, typeId: 1, date: '2021-03-01', startTime: '12:40', endTime: '12:55', severity: 78, notes: 'note18' }
 ]
 
+const TreatmentInstances = [
+  { id: 1, typeId: 4, date: '2021-02-18', startTime: '02:30', endTime: '07:00', notes: 'note1' },
+  { id: 2, typeId: 2, date: '2021-02-11', startTime: '22:00', endTime: '22:25', notes: 'note2' },
+  { id: 3, typeId: 3, date: '2021-02-12', startTime: '16:30', endTime: '22:00', notes: 'note3' },
+  { id: 4, typeId: 1, date: '2021-03-01', startTime: '10:40', endTime: '12:55', notes: 'note4' }
+]
+
 const Treatments = [
   { id: 1, name: "Ibuprofen", colour: "#b87aa8", unitTypeId: 1, unit: "Pills"},
   { id: 1, name: "Cheese", colour: "#b5b87a", unit: "Grams"},
@@ -54,9 +61,18 @@ const TreatmentInstances = [
   { id: 16, typeId: 1, date: '2021-03-01', startTime: '12:40', endTime: '12:55', severity: 78, notes: 'note18' }
 ]
 
-
-
-
+// TODO
+//  -- make severity an optional attribute for symptoms
+//    -- maybe expand the system to allow custom severity/dose tracking
+//  -- do something with the analyse tab
+//    -- allow the user to chart one symptom/treatment against another in a graph (probably scatter)
+//    -- maybe provide some kind of calculated correlation score
+//  -- make the title on the homepage more stylish
+//  -- implement dark mode
+//    -- follow that up by implementing themes
+//  -- make a onboarding thing for new users
+//  -- implement settings
+//  -- implement the diary?
 
 
 //  -- EXTESION IDEAS

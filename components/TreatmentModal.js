@@ -8,30 +8,28 @@ import { Ionicons } from '@expo/vector-icons';
 import RNPickerSelect from 'react-native-picker-select';
 import DateTimePicker from '@react-native-community/datetimepicker';
 import Toast from 'react-native-simple-toast';
-import Slider from '@react-native-community/slider';
 
 
 const today = moment().format("YYYY-MM-DD");
 
-export default class SymptomModal extends React.Component {
+export default class TreatmentModal extends React.Component {
 
   constructor(props) {
     super(props);
 
     let data = this.props.data;
     let origin = {
-      symptomId: data.typeId || undefined,
+      treatmentId: data.typeId || undefined,
       date: data.date ? new Date(data.date) : new Date(),
       startTime: data.startTime ? moment(data.startTime, "HH:mm").toDate() : new Date(),
       endTime: data.endTime ? moment(data.endTime, "HH:mm").toDate() : new Date(),
-      severity: data.severity || 50,
       notes: data.notes || ""
     };
 
     this.id = data.id;
     this.isNew = !data.id;
-    this.symptoms = this.props.symptoms;
-    this.items = this.symptoms.map(function(x) {
+    this.treatments = this.props.treatments;
+    this.items = this.treatments.map(function(x) {
       return {
         label: x.name,
         value: x.id
@@ -39,11 +37,10 @@ export default class SymptomModal extends React.Component {
     });
 
     this.state = {
-      symptomId: origin.symptomId,
+      treatmentId: origin.treatmentId,
       date: origin.date,
       startTime: origin.startTime,
       endTime: origin.endTime,
-      severity: origin.severity,
       notes: origin.notes,
       origin: JSON.parse(JSON.stringify(origin)),
       showDate: false,
@@ -55,9 +52,9 @@ export default class SymptomModal extends React.Component {
   }
 
   updateField = (field, value) => {
-    if (field === 'symptomId') {
+    if (field === 'treatmentId') {
       let colour = value
-        ? this.symptoms.find(symptom => symptom.id === value).colour
+        ? this.treatments.find(treatment => treatment.id === value).colour
         : "cornflowerblue";
       this.setState({colour: colour});
     }
@@ -71,7 +68,6 @@ export default class SymptomModal extends React.Component {
         this.setState({startTime: value});
       }
     }
-
     this.setState({[field]: value}, () => {
       this.setState({dirty: this.isDirty()});
     });
@@ -80,7 +76,7 @@ export default class SymptomModal extends React.Component {
   isDirty = () => {
     let origin = this.state.origin;
     let state = this.state;
-    if (state.symptomId !== origin.symptomId
+    if (state.treatmentId !== origin.treatmentId
       || !moment(state.date).isSame(moment(origin.date))
       || !moment(state.startTime).isSame(moment(origin.startTime))
       || !moment(state.endTime).isSame(moment(origin.endTime))
@@ -92,8 +88,8 @@ export default class SymptomModal extends React.Component {
   }
 
   validate = () => {
-    if (!this.state.symptomId) {
-      return "Please select a symptom";
+    if (!this.state.treatmentId) {
+      return "Please select a treatment";
     }
     return "";
   }
@@ -101,7 +97,7 @@ export default class SymptomModal extends React.Component {
   getData = () => {
     return {
       id: this.id,
-      typeId: this.state.symptomId,
+      typeId: this.state.treatmentId,
       date: moment(this.state.date).format("YYYY-MM-DD"),
       startTime: moment(this.state.startTime).format("HH:mm"),
       endTime: moment(this.state.endTime).format("HH:mm"),
@@ -117,10 +113,10 @@ export default class SymptomModal extends React.Component {
     } else {
       let data = this.getData();
       
-      await AsyncManager.setSymptomInstance(data);
+      await AsyncManager.setTreatmentInstance(data);
 
-      this.props.triggerPoll("Calendar", "symptom");
-      this.props.toggleModal("symptom", false);
+      this.props.triggerPoll("Calendar", "treatment");
+      this.props.toggleModal("treatment", false);
       Toast.show("Saved!");
     }
   }
@@ -128,16 +124,16 @@ export default class SymptomModal extends React.Component {
   onDelete = () => {
     Alert.alert(
       'Delete?',
-      'This will delete this symptom record.',
+      'This will delete this treatment record.',
       [
         { text: "Cancel", style: 'cancel', onPress: () => {} },
         {
           text: 'Delete',
           style: 'destructive',
           onPress: async () => {
-            await AsyncManager.deleteSymptomInstance(this.id);
+            await AsyncManager.deleteTreatmentInstance(this.id);
             this.props.triggerPoll();
-            this.props.toggleModal("symptom", false);
+            this.props.toggleModal("treatment", false);
             Toast.show("Deleted");
           },
         },
@@ -166,7 +162,7 @@ export default class SymptomModal extends React.Component {
         end={{ x: 1, y: 0.5 }}>
 
         <TouchableOpacity style={formStyles.mainButton} onPress={this.onSubmit} disabled={!this.state.dirty}>
-          <Text style={[formStyles.mainButtonText, {color: this.state.dirty ? 'black' : 'grey'}]}>Add Symptom</Text>
+          <Text style={[formStyles.mainButtonText, {color: this.state.dirty ? 'black' : 'grey'}]}>Add Treatment</Text>
         </TouchableOpacity>
       </LinearGradient>
     } else {
@@ -178,7 +174,7 @@ export default class SymptomModal extends React.Component {
           start={{ x: 0.4, y: 0.5 }}
           end={{ x: 1, y: 0.5 }}>
           <TouchableOpacity style={formStyles.mainButton} onPress={this.onSubmit} disabled={!this.state.dirty}>
-            <Text style={[formStyles.mainButtonText, {color: this.state.dirty ? 'black' : 'grey'}]}>Save Symptom</Text>
+            <Text style={[formStyles.mainButtonText, {color: this.state.dirty ? 'black' : 'grey'}]}>Save Treatment</Text>
           </TouchableOpacity>
         </LinearGradient>
           
@@ -191,18 +187,18 @@ export default class SymptomModal extends React.Component {
     return (
       <View style={formStyles.container}>
         <View style={formStyles.form}>
-          <TouchableOpacity style={formStyles.closeBtn} onPress={() => { this.props.toggleModal("symptom", false) }} >
+          <TouchableOpacity style={formStyles.closeBtn} onPress={() => { this.props.toggleModal("treatment", false) }} >
             <Ionicons name="close" size={24} color="black" />
           </TouchableOpacity>
           <ScrollView style={formStyles.fields}>
             <View style={formStyles.field}>
-              <Text style={formStyles.fieldLabel}>Symptom:</Text>
+              <Text style={formStyles.fieldLabel}>Treatment:</Text>
               <RNPickerSelect
-                onValueChange={value => {this.updateField("symptomId", value)}}
-                value={this.state.symptomId}
+                onValueChange={value => {this.updateField("treatmentId", value)}}
+                value={this.state.treatmentId}
                 style={pickerSelectStyles}
                 useNativeAndroidPickerStyle={false}
-                placeholder={{ label: "Select a symptom..." }}
+                placeholder={{ label: "Select a treatment..." }}
                 Icon={() => {
                   return <Ionicons name="chevron-down" size={24} color="black" style={{paddingTop: 10}}/>;
                 }}
@@ -260,20 +256,6 @@ export default class SymptomModal extends React.Component {
                     onChange={(event, value) => {this.setState({showEndTime: false}); value && this.updateField("endTime", value)}}
                   />
                 )}
-              </View>
-            </View>
-            <View style={[formStyles.field, formStyles.sliderField]}>
-              <Text style={formStyles.fieldLabel}>{"Severity  ("+this.state.severity+")"}</Text>
-              <View style={{ marginLeft: -20, marginRight: -20, paddingTop: 10 }}>
-                <Slider
-                  value={this.state.severity}
-                  step={1}
-                  minimumValue={1}
-                  maximumValue={100}
-                  minimumTrackTintColor={this.state.colour}
-                  maximumTrackTintColor="#000000"
-                  onValueChange={(value) => this.updateField("severity", value)}
-                />
               </View>
             </View>
             <View style={[formStyles.field, {paddingBottom: 10}]}>
