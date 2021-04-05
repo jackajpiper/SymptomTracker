@@ -61,6 +61,17 @@ const TreatmentInstances = [
   { id: 16, typeId: 1, date: '2021-03-01', startTime: '12:40', endTime: '12:55', severity: 78, notes: 'note18' }
 ]
 
+const DiaryData = [
+  { date: "2021-03-12", text: "I had big shit in my trousers" },
+  { date: "2021-03-13", text: "I had big shit in my trousers again" },
+  { date: "2021-03-15", text: "I keep getting these absurdly huge shits inside my trousers" },
+  { date: "2021-03-16", text: "It happened again." },
+  { date: "2021-03-19", text: "I don't understand how it keeps happening.\n\n\n\n\n\n\nIt's like a bomb went off down there." },
+  { date: "2021-03-21", text: "If only I could figure out...\n\n\n\n\n\nWhy I keep finding insane poo volumes in my downstairs clothing" },
+  { date: "2021-03-22", text: "I\ndon't\nwant\nto\nkeep\nshitting\nmyself" },
+  { date: "2021-03-23", text: "It was warm today." }
+]
+
 // TODO
 //  -- make severity an optional attribute for symptoms
 //    -- maybe expand the system to allow custom severity/dose tracking
