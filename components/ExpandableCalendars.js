@@ -187,7 +187,6 @@ export default class ExpandableCalendarScreen extends Component {
     let symptomResult = await AsyncManager.pollUpdates("Calendar", "symptoms");
     let treatmentResult = await AsyncManager.pollUpdates("Calendar", "treatments");
     let triggerResult = await AsyncManager.pollUpdates("Calendar", "triggers");
-    console.log(triggerResult.Triggers);
 
     let oneChanged = false;
     let newSymptoms = symptomResult.Symptoms;
@@ -371,6 +370,8 @@ export default class ExpandableCalendarScreen extends Component {
       this.loadModal("symptom");
     } else if (btn === "bt_add_treatment") {
       this.loadModal("treatment");
+    } else if (btn === "bt_add_trigger") {
+      this.loadModal("trigger");
     }
   }
 

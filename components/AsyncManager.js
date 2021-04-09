@@ -84,7 +84,7 @@ const AsyncManager = {
 
   deleteSymptom: async function(symptom) {
     let id = symptom.id;
-    let symptoms = AsyncManager.getSymptoms();
+    let symptoms = await AsyncManager.getSymptoms();
     for (let i = 0; i < symptoms.length; i++) {
       let obj = symptoms[i];
   
@@ -93,7 +93,7 @@ const AsyncManager = {
       }
     }
 
-    let instances = AsyncManager.getSymptomInstances();
+    let instances = await AsyncManager.getSymptomInstances();
     for (let i = 0; i < instances.length; i++) {
       let instance = instances[i];
         if (instance.typeId === id) {
@@ -215,7 +215,7 @@ const AsyncManager = {
 
   deleteTreatment: async function(treatment) {
     let id = treatment.id;
-    let treatments = AsyncManager.getTreatments();
+    let treatments = await AsyncManager.getTreatments();
     for (let i = 0; i < treatments.length; i++) {
       let obj = treatments[i];
   
@@ -224,7 +224,7 @@ const AsyncManager = {
       }
     }
 
-    let instances = AsyncManager.getTreatmentInstances();
+    let instances = await AsyncManager.getTreatmentInstances();
     for (let i = 0; i < instances.length; i++) {
       let instance = instances[i];
         if (instance.typeId === id) {
@@ -346,7 +346,7 @@ const AsyncManager = {
 
   deleteTrigger: async function(trigger) {
     let id = trigger.id;
-    let triggers = AsyncManager.getTriggers();
+    let triggers = await AsyncManager.getTriggers();
     for (let i = 0; i < triggers.length; i++) {
       let obj = triggers[i];
   
@@ -355,7 +355,7 @@ const AsyncManager = {
       }
     }
 
-    let instances = AsyncManager.getTriggerInstances();
+    let instances = await AsyncManager.getTriggerInstances();
     for (let i = 0; i < instances.length; i++) {
       let instance = instances[i];
         if (instance.typeId === id) {
