@@ -8,6 +8,7 @@ import AsyncManager from './AsyncManager';
 import { FloatingAction } from "react-native-floating-action";
 import SymptomModal from './SymptomModal';
 import TreatmentModal from './TreatmentModal';
+import TriggerModal from './TriggerModal';
 import { Ionicons } from '@expo/vector-icons';
 
 
@@ -26,11 +27,17 @@ const actions = [
     name: "bt_add_treatment",
     color: actionColour,
     position: 2
+  },
+  {
+    text: "Add Trigger",
+    name: "bt_add_trigger",
+    color: actionColour,
+    position: 3
   }
 ];
 
 // takes the symptoms, symptom instances, treatments and treatment instances straight from the datastore and converts them for use
-function processInstances(symptomInstances, symptoms, treatmentInstances, treatments) {
+function processInstances(symptomInstances, symptoms, treatmentInstances, treatments, triggerInstances, triggers) {
   let dateDict = {};
   let dateArr = [];
   symptomInstances.forEach(function (instance, index) {
@@ -49,6 +56,17 @@ function processInstances(symptomInstances, symptoms, treatmentInstances, treatm
     instance.name = treatment.name;
     instance.colour = treatment.colour;
     instance.type = "treatment";
+    let day = instance.date;
+    if (!dateDict[day]) {
+      dateDict[day] = [];
+    }
+    dateDict[day].push(instance);
+  });
+  triggerInstances.forEach(function (instance, index) {
+    let trigger = triggers.find(trigger => trigger.id === instance.typeId);
+    instance.name = trigger.name;
+    instance.colour = trigger.colour;
+    instance.type = "trigger";
     let day = instance.date;
     if (!dateDict[day]) {
       dateDict[day] = [];
@@ -154,10 +172,13 @@ export default class ExpandableCalendarScreen extends Component {
       SymptomInstances: [],
       Treatments: [],
       TreatmentInstances: [],
+      Triggers: [],
+      TriggerInstances: [],
       ITEMS: [],
       isLoading: true,
       showSyptomModal: false,
       showTreatmentModal: false,
+      showTriggerModal: false,
       symptomModalData: null
     };
   }
@@ -165,12 +186,16 @@ export default class ExpandableCalendarScreen extends Component {
   pollUpdates = async () => {
     let symptomResult = await AsyncManager.pollUpdates("Calendar", "symptoms");
     let treatmentResult = await AsyncManager.pollUpdates("Calendar", "treatments");
+    let triggerResult = await AsyncManager.pollUpdates("Calendar", "triggers");
+    console.log(triggerResult.Triggers);
 
     let oneChanged = false;
     let newSymptoms = symptomResult.Symptoms;
     let newSymptomInstances = symptomResult.Instances;
     let newTreatments = treatmentResult.Treatments;
     let newTreatmentInstances = treatmentResult.Instances;
+    let newTriggers = triggerResult.Triggers;
+    let newTriggerInstances = triggerResult.Instances;
 
     if (newSymptoms) {
       this.setState({Symptoms: newSymptoms});
@@ -196,9 +221,21 @@ export default class ExpandableCalendarScreen extends Component {
     } else {
       newTreatmentInstances = this.state.TreatmentInstances;
     }
+    if (newTriggers) {
+      this.setState({Triggers: newTriggers});
+      oneChanged = true;
+    } else {
+      newTriggers = this.state.Triggers;
+    }
+    if(newTriggerInstances) {
+      this.setState({TriggerInstances: newTriggerInstances});
+      oneChanged = true;
+    } else {
+      newTriggerInstances = this.state.TriggerInstances;
+    }
 
     if (oneChanged) {
-      this.setState({ITEMS: processInstances(newSymptomInstances, newSymptoms, newTreatmentInstances, newTreatments)});
+      this.setState({ITEMS: processInstances(newSymptomInstances, newSymptoms, newTreatmentInstances, newTreatments, newTriggerInstances, newTriggers)});
     }
   }
 
@@ -207,15 +244,19 @@ export default class ExpandableCalendarScreen extends Component {
     let symptomInstances = await AsyncManager.getSymptomInstances();
     let treatments = await AsyncManager.getTreatments();
     let treatmentInstances = await AsyncManager.getTreatmentInstances();
+    let triggers = await AsyncManager.getTriggers();
+    let triggerInstances = await AsyncManager.getTriggerInstances();
 
-    this.setState({ITEMS: processInstances(symptomInstances, symptoms, treatmentInstances, treatments)});
+    this.setState({ITEMS: processInstances(symptomInstances, symptoms, treatmentInstances, treatments, triggerInstances, triggers)});
 
     this.setState({ 
       isLoading: false,
       Symptoms: symptoms,
       SymptomInstances: symptomInstances,
       Treatments: treatments,
-      TreatmentInstances: treatmentInstances
+      TreatmentInstances: treatmentInstances,
+      Triggers: triggers,
+      TriggerInstances: triggerInstances
     });
 
     this.willFocusListener = this.props.navigation.addListener('focus', async () => {
@@ -273,7 +314,7 @@ export default class ExpandableCalendarScreen extends Component {
           </TouchableOpacity>
         </LinearGradient>
       );
-    } else {
+    } else if (item.type === "treatment") {
       return (
         <LinearGradient 
           colors={['white', lighterColour]}
@@ -283,6 +324,25 @@ export default class ExpandableCalendarScreen extends Component {
   
           <TouchableOpacity onPress={() => this.itemPressed(item)} style={styles.item}>
             <Ionicons style={{textAlign: "center", paddingTop: 4}} name="bandage-outline" size={28} color="#b6b6b6" />
+            <Text style={styles.itemTitleText}>{item.name}</Text>
+            <View style={styles.itemButtonContainer}>
+              <Text style={[styles.itemTimeText, {color: textColour, marginTop: 10}]}>
+                {item.startTime + ' - ' + item.endTime}
+              </Text>
+            </View>
+          </TouchableOpacity>
+        </LinearGradient>
+      );
+    } else if (item.type === "trigger") {
+      return (
+        <LinearGradient 
+          colors={['white', lighterColour]}
+          style = { styles.container }
+          start={{ x: 0.5, y: 0.5 }}
+          end={{ x: 1, y: 0.5 }}>
+
+          <TouchableOpacity onPress={() => this.itemPressed(item)} style={styles.item}>
+            <Ionicons style={{textAlign: "center", paddingTop: 4}} name="alert" size={28} color="#b6b6b6" />
             <Text style={styles.itemTitleText}>{item.name}</Text>
             <View style={styles.itemButtonContainer}>
               <Text style={[styles.itemTimeText, {color: textColour, marginTop: 10}]}>
@@ -317,16 +377,20 @@ export default class ExpandableCalendarScreen extends Component {
   loadModal = (type, data) => {
     if (type === "symptom") {
       this.setState({symptomModalData: data ? data : {}, showSyptomModal: true });
-    } else {
+    } else if (type === "treatment") {
       this.setState({treatmentModalData: data ? data : {}, showTreatmentModal: true });
+    } else if (type === "trigger") {
+      this.setState({triggerModalData: data ? data : {}, showTriggerModal: true });
     }
   }
   
   toggleModal = (type, visible) => {
     if (type === "symptom") {
       this.setState({ showSyptomModal: visible });
-    } else {
+    } else if (type === "treatment") {
       this.setState({ showTreatmentModal: visible });
+    } else if (type === "trigger") {
+      this.setState({ showTriggerModal: visible });
     }
   }
 
@@ -376,6 +440,12 @@ export default class ExpandableCalendarScreen extends Component {
               onRequestClose = {() => { this.toggleModal("treatment", false) }}
               transparent={true} >
               <TreatmentModal toggleModal={this.toggleModal} triggerPoll={this.pollUpdates} treatments={this.state.Treatments} data={this.state.treatmentModalData} />
+          </Modal>
+          <Modal animationType = {"slide"}
+              visible = {this.state.showTriggerModal}
+              onRequestClose = {() => { this.toggleModal("trigger", false) }}
+              transparent={true} >
+              <TriggerModal toggleModal={this.toggleModal} triggerPoll={this.pollUpdates} triggers={this.state.Triggers} data={this.state.triggerModalData} />
           </Modal>
         </CalendarProvider>
       );

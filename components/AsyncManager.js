@@ -17,6 +17,14 @@ const AsyncManager = {
   treatmentInstanceCounts: {
     updateNum: 0
   },
+  triggersStash: [],
+  triggerInstancesStash: [],
+  triggerCounts: {
+    updateNum: 0
+  },
+  triggerInstanceCounts: {
+    updateNum: 0
+  },
   
   getSymptoms: function() {
     if(AsyncManager.symptomsStash.length === 0) {
@@ -284,6 +292,137 @@ const AsyncManager = {
     
     return AsyncManager.setTreatmentInstances(instances);
   },
+  
+  getTriggers: function() {
+    if(AsyncManager.triggersStash.length === 0) {
+      return AsyncStorage.getItem('Triggers').then(
+        (value) => {
+          let parsedValue = JSON.parse(value);
+          if (!Array.isArray(parsedValue)) {
+            parsedValue = [];
+          }
+          AsyncManager.triggersStash = parsedValue;
+          return JSON.parse(JSON.stringify(parsedValue));
+        }
+      );
+    } else {
+      return JSON.parse(JSON.stringify(AsyncManager.triggersStash));
+    }
+  },
+
+  setTriggers: function(triggers) {
+    AsyncManager.triggersStash = triggers;
+    AsyncManager.triggerCounts.updateNum++;
+    return AsyncStorage.setItem('Triggers', JSON.stringify(triggers));
+  },
+
+  setTrigger: async function(trigger) {
+    let triggers = await AsyncManager.getTriggers();
+
+    if (!trigger.id) {
+      trigger.id = this.getNextId(triggers);
+    }
+
+    let triggerExists = false;
+    for(let i=0; i<triggers.length; i++) {
+      if(triggers[i].id === trigger.id) {
+        triggerExists = true;
+        triggers[i] = trigger;
+      }
+    }
+    if(!triggerExists) {
+      triggers.push(trigger);
+    }
+
+    function compareTriggers(s1, s2) {
+      if(s1.name > s2.name) return 1;
+      else if(s1.name < s2.name) return -1;
+      else return 0;
+    }
+    triggers.sort(compareTriggers);
+
+    return AsyncManager.setTriggers(triggers);
+  },
+
+  deleteTrigger: async function(trigger) {
+    let id = trigger.id;
+    let triggers = AsyncManager.getTriggers();
+    for (let i = 0; i < triggers.length; i++) {
+      let obj = triggers[i];
+  
+      if (obj.id === id) {
+        triggers.splice(i, 1);
+      }
+    }
+
+    let instances = AsyncManager.getTriggerInstances();
+    for (let i = 0; i < instances.length; i++) {
+      let instance = instances[i];
+        if (instance.typeId === id) {
+          instances.splice(i, 1);
+          i--;
+        }
+    }
+    await AsyncManager.setTriggerInstances(instances);
+
+    return AsyncManager.setTriggers(triggers);
+  },
+  
+  getTriggerInstances: async function() {
+    if(AsyncManager.triggerInstancesStash.length === 0) {
+      return AsyncStorage.getItem('TriggerInstances').then(
+        (value) => {
+          let parsedValue = JSON.parse(value);
+          if (!Array.isArray(parsedValue)) {
+            parsedValue = [];
+          }
+          AsyncManager.triggerInstancesStash = parsedValue;
+          return JSON.parse(JSON.stringify(parsedValue));
+        }
+      );
+    } else {
+      return JSON.parse(JSON.stringify(AsyncManager.triggerInstancesStash));
+    }
+  },
+
+  setTriggerInstances: async function(instances) {
+    AsyncManager.triggerInstancesStash = instances;
+    AsyncManager.triggerInstanceCounts.updateNum++;
+    return AsyncStorage.setItem('TriggerInstances', JSON.stringify(instances));
+  },
+
+  setTriggerInstance: async function(instance) {
+    let instances = await AsyncManager.getTriggerInstances();
+
+    if (!instance.id) {
+      instance.id = AsyncManager.getNextId(instances);
+    }
+
+    let instanceExists = false;
+    for(let i=0; i<instances.length; i++) {
+      if(instances[i].id === instance.id) {
+        instanceExists = true;
+        instances[i] = instance;
+      }
+    }
+    if(!instanceExists) {
+      instances.push(instance);
+    }
+    return AsyncManager.setTriggerInstances(instances);
+  },
+
+  deleteTriggerInstance: async function(id) {
+    let instances = await AsyncManager.getTriggerInstances();
+    for (var i = 0; i < instances.length; i++) {
+      var obj = instances[i];
+  
+      if (obj.id === id) {
+        instances.splice(i, 1);
+      }
+    }
+    
+    return AsyncManager.setTriggerInstances(instances);
+  },
 
   pollUpdates: async function(screenName, objName) {
     if (objName === "symptoms") {
@@ -316,6 +455,21 @@ const AsyncManager = {
       AsyncManager.treatmentCounts[screenName] = AsyncManager.treatmentCounts.updateNum;
       AsyncManager.treatmentInstanceCounts[screenName] = AsyncManager.treatmentInstanceCounts.updateNum;
       return { Treatments: treatments, Instances: instances };
+    } else if (objName === "triggers") {
+      let triggers = false;
+      let instances = false;
+      if (AsyncManager.triggerCounts.updateNum !== 0 && AsyncManager.triggerCounts.updateNum !== AsyncManager.triggerCounts[screenName]) {
+        triggers = await AsyncManager.getTriggers();
+        AsyncManager.triggerCounts[screenName] = AsyncManager.triggerCounts.updateNum;
+      }
+      if (AsyncManager.triggerInstanceCounts.updateNum !== 0 && AsyncManager.triggerInstanceCounts.updateNum !== AsyncManager.triggerInstanceCounts[screenName]) {
+        instances = await AsyncManager.getTriggerInstances();
+        AsyncManager.triggerInstanceCounts[screenName] = AsyncManager.triggerInstanceCounts.updateNum;
+      }
+
+      AsyncManager.triggerCounts[screenName] = AsyncManager.triggerCounts.updateNum;
+      AsyncManager.triggerInstanceCounts[screenName] = AsyncManager.triggerInstanceCounts.updateNum;
+      return { Triggers: triggers, Instances: instances };
     }
   },
 

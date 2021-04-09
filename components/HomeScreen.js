@@ -6,6 +6,8 @@ import { NavigationContainer } from '@react-navigation/native';
 import { createStackNavigator } from '@react-navigation/stack';
 import SymptomsListScreen from './SymptomsListScreen.js';
 import TreatmentsListScreen from './TreatmentsListScreen.js';
+import TriggersListScreen from './TriggersListScreen.js';
+import EditTriggerScreen from './EditTriggerScreen.js';
 import EditTreatmentScreen from './EditTreatmentScreen.js';
 import EditSymptomScreen from './EditSymptomScreen.js';
 import {LinearGradient} from 'expo-linear-gradient';
@@ -37,7 +39,8 @@ class MainScreen extends React.Component {
           <View style={ styles.buttonList }>
             {this.renderMenuButton("Manage Symptoms", "Symptoms", "#E7D5E1")}
             {this.renderMenuButton("Manage Treatments", "Treatments", "#FAEEC4")}
-            {this.renderMenuButton("Diary", "Diary", "#C3D8D1")}
+            {this.renderMenuButton("Manage Triggers", "Triggers", "#C3D8D1")}
+            {this.renderMenuButton("Diary", "Diary", "#F9D5C7")}
             {this.renderMenuButton("Settings", "Settings", "#F9E2E8")}
           </View>
         </View>
@@ -82,9 +85,11 @@ export default class HomeScreen extends Component {
         />
         <Stack.Screen name="Symptoms" component={SymptomsListScreen} />
         <Stack.Screen name="Treatments" component={TreatmentsListScreen} />
+        <Stack.Screen name="Triggers" component={TriggersListScreen} />
         <Stack.Screen name="Diary" component={DiaryScreen} />
         <Stack.Screen name="EditSymptom" component={EditSymptomScreen} options={({ route }) => ({ title: this.editTitle(route, "symptom") })} />
         <Stack.Screen name="EditTreatment" component={EditTreatmentScreen} options={({ route }) => ({ title: this.editTitle(route, "treatment") })} />
+        <Stack.Screen name="EditTrigger" component={EditTriggerScreen} options={({ route }) => ({ title: this.editTitle(route, "trigger") })} />
       </Stack.Navigator>
     </NavigationContainer>
     )
@@ -96,21 +101,20 @@ const styles = StyleSheet.create({
     flex: 1,
     width: '100%',
     alignItems: 'center',
-    backgroundColor: 'white',
-    padding: 10,
-    paddingTop: 70,
-    paddingBottom: 30
+    backgroundColor: 'white'
   },
   titleText: {
     fontSize: 24,
     fontWeight: 'bold',
-    marginBottom: 10
+    marginTop: 60,
+    marginBottom: 20
   },
   buttonList: {
     flex: 1,
     width: '100%',
     alignItems: 'center',
-    justifyContent: 'space-evenly'
+    justifyContent: 'space-evenly',
+    paddingBottom: 20
   },
   buttonContainer: {
     width: '90%',
