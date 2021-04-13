@@ -10,6 +10,7 @@ import TriggersListScreen from './TriggersListScreen.js';
 import EditTriggerScreen from './EditTriggerScreen.js';
 import EditTreatmentScreen from './EditTreatmentScreen.js';
 import EditSymptomScreen from './EditSymptomScreen.js';
+import DiaryScreen from './DiaryScreen.js';
 import {LinearGradient} from 'expo-linear-gradient';
 
 const today = moment().format("YYYY-MM-DD");
@@ -48,11 +49,11 @@ class MainScreen extends React.Component {
   }
 }
 
-class DiaryScreen extends React.Component {
+class SettingsScreen extends React.Component {
   render() {
     return (
       <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center' }}>
-        <Text style={{fontSize: 24}}>Diary Screen</Text>
+        <Text style={{fontSize: 24}}>Settings Screen</Text>
       </View>
     );
   }
@@ -87,6 +88,7 @@ export default class HomeScreen extends Component {
         <Stack.Screen name="Treatments" component={TreatmentsListScreen} />
         <Stack.Screen name="Triggers" component={TriggersListScreen} />
         <Stack.Screen name="Diary" component={DiaryScreen} />
+        <Stack.Screen name="Settings" component={SettingsScreen} />
         <Stack.Screen name="EditSymptom" component={EditSymptomScreen} options={({ route }) => ({ title: this.editTitle(route, "symptom") })} />
         <Stack.Screen name="EditTreatment" component={EditTreatmentScreen} options={({ route }) => ({ title: this.editTitle(route, "treatment") })} />
         <Stack.Screen name="EditTrigger" component={EditTriggerScreen} options={({ route }) => ({ title: this.editTitle(route, "trigger") })} />
