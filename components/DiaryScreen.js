@@ -57,7 +57,7 @@ export default class DiaryScreen extends Component {
 
   pollUpdates = async () => {
     let result = await AsyncManager.pollUpdates("diary", "diaries");
-
+    
     if (result.Diaries) {
       this.setState({Diaries: processDiaries(result.Diaries)});
     }
@@ -75,12 +75,8 @@ export default class DiaryScreen extends Component {
 
 
     if (this.props.navigation.dangerouslyGetParent()) {
-      this.willFocusListener = this.props.navigation
-        .dangerouslyGetParent()
-        .addListener('focus', (e) => {
-          if (this.props.navigation.isFocused()) {
-            this.pollUpdates();
-          }
+      this.willFocusListener = this.props.navigation.addListener('focus', (e) => {
+          this.pollUpdates();
         });
     }
   }

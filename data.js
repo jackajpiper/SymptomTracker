@@ -77,6 +77,9 @@ const DiaryData = [
 //  -- implement settings
 //  -- implement the diary?
 
+// EDGE CASES
+//  -- symptom/trigger/treatment name being super long
+
 // Settings
 //  -- themes
 //    -- light mode/dark mode

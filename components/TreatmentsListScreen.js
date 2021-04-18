@@ -82,11 +82,13 @@ export default class TreatmentsListScreen extends Component {
   }
 
   async componentDidMount() {
-    let treatments = await AsyncManager.getTreatments();
-    this.setState({ 
-      isLoading: false,
-      Treatments: treatments
-    });
+    setTimeout(async () => {
+      let treatments = await AsyncManager.getTreatments();
+      this.setState({ 
+        isLoading: false,
+        Treatments: treatments
+      });
+    }, 0);
 
     this.willFocusListener = this.props.navigation.addListener('focus', async () => {
       var pollResult = await AsyncManager.pollUpdates("TreatmentsList", "treatments");

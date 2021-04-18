@@ -39,8 +39,8 @@ class MainScreen extends React.Component {
           <Text style={ styles.titleText }>Amy's Symptom Tracker</Text>
           <View style={ styles.buttonList }>
             {this.renderMenuButton("Manage Symptoms", "Symptoms", "#E7D5E1")}
-            {this.renderMenuButton("Manage Treatments", "Treatments", "#FAEEC4")}
-            {this.renderMenuButton("Manage Triggers", "Triggers", "#C3D8D1")}
+            {this.renderMenuButton("Manage Triggers", "Triggers", "#FAEEC4")}
+            {this.renderMenuButton("Manage Treatments", "Treatments", "#C3D8D1")}
             {this.renderMenuButton("Diary", "Diary", "#F9D5C7")}
             {this.renderMenuButton("Settings", "Settings", "#F9E2E8")}
           </View>

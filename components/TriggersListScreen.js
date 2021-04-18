@@ -82,11 +82,13 @@ export default class TriggersListScreen extends Component {
   }
 
   async componentDidMount() {
-    let triggers = await AsyncManager.getTriggers();
-    this.setState({ 
-      isLoading: false,
-      Triggers: triggers
-    });
+    setTimeout(async () => {
+      let triggers = await AsyncManager.getTriggers();
+      this.setState({ 
+        isLoading: false,
+        Triggers: triggers
+      });
+    }, 0);
 
     this.willFocusListener = this.props.navigation.addListener('focus', async () => {
       var pollResult = await AsyncManager.pollUpdates("TriggersList", "triggers");

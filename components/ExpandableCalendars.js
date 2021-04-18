@@ -409,16 +409,12 @@ export default class ExpandableCalendarScreen extends Component {
           showTodayButton
           disabledOpacity={0.6}
         >
-          {this.props.weekView ? (
-            <WeekCalendar firstDay={1} markedDates={this.getMarkedDates()} />
-          ) : (
-            <ExpandableCalendar
-              disableAllTouchEventsForDisabledDays
-              firstDay={1}
-              markedDates={this.getMarkedDates()}
-              style = {styles.expandableCalendar}
-            />
-          )}
+          <ExpandableCalendar
+            disableAllTouchEventsForDisabledDays
+            firstDay={1}
+            markedDates={this.getMarkedDates()}
+            style = {styles.expandableCalendar}
+          />
           <AgendaList
             sections={this.state.ITEMS}
             extraData={this.state}
