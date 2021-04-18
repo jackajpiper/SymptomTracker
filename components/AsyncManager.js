@@ -25,6 +25,10 @@ const AsyncManager = {
   triggerInstanceCounts: {
     updateNum: 0
   },
+  diaryStash: [],
+  diaryCounts: {
+    updateNum: 0
+  },
   
   getSymptoms: function() {
     if(AsyncManager.symptomsStash.length === 0) {
@@ -424,6 +428,67 @@ const AsyncManager = {
     return AsyncManager.setTriggerInstances(instances);
   },
 
+  getDiaries: async function() {
+    if(AsyncManager.diaryStash.length === 0) {
+      return AsyncStorage.getItem('Diaries').then(
+        (value) => {
+          let parsedValue = JSON.parse(value);
+          if (!Array.isArray(parsedValue)) {
+            parsedValue = [];
+          }
+          AsyncManager.diaryStash = parsedValue;
+          return JSON.parse(JSON.stringify(parsedValue));
+        }
+      );
+    } else {
+      return JSON.parse(JSON.stringify(AsyncManager.diaryStash));
+    }
+  },
+
+  getDiaryForDate: async function(date) {
+    let diaries = AsyncManager.getDiaries();
+    return diary = diaries.find(x => x.date === date);
+  },
+
+  setDiaries: async function(diaries) {
+    AsyncManager.diaryStash = diaries;
+    AsyncManager.diaryCounts.updateNum++;
+    return AsyncStorage.setItem('Diaries', JSON.stringify(diaries));
+  },
+
+  setDiary: async function(diary) {
+    let diaries = await AsyncManager.getDiaries();
+
+    if (!diary.id) {
+      diary.id = AsyncManager.getNextId(diaries);
+    }
+
+    let diaryExists = false;
+    for(let i=0; i<diaries.length; i++) {
+      if(diaries[i].id === diary.id) {
+        diaryExists = true;
+        diaries[i] = diary;
+      }
+    }
+    if(!diaryExists) {
+      diaries.push(diary);
+    }
+    return AsyncManager.setDiaries(diaries);
+  },
+
+  deleteDiary: async function(id) {
+    let diaries = await AsyncManager.getDiaries();
+    for (var i = 0; i < diaries.length; i++) {
+      var obj = diaries[i];
+  
+      if (obj.id === id) {
+        diaries.splice(i, 1);
+      }
+    }
+    
+    return AsyncManager.setTriggerInstances(instances);
+  },
+
   pollUpdates: async function(screenName, objName) {
     if (objName === "symptoms") {
       let symptoms = false;
@@ -470,6 +535,15 @@ const AsyncManager = {
       AsyncManager.triggerCounts[screenName] = AsyncManager.triggerCounts.updateNum;
       AsyncManager.triggerInstanceCounts[screenName] = AsyncManager.triggerInstanceCounts.updateNum;
       return { Triggers: triggers, Instances: instances };
+    } else if (objName === "diaries") {
+      let diaries = false;
+      if (AsyncManager.diaryCounts.updateNum !== 0 && AsyncManager.diaryCounts.updateNum !== AsyncManager.diaryCounts[screenName]) {
+        diaries = await AsyncManager.getDiaries();
+        AsyncManager.diaryCounts[screenName] = AsyncManager.diaryCounts.updateNum;
+      }
+
+      AsyncManager.diaryCounts[screenName] = AsyncManager.diaryCounts.updateNum;
+      return { Diaries: diaries };
     }
   },
 

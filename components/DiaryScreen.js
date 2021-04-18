@@ -1,58 +1,88 @@
 import _ from 'lodash';
 import React, {Component} from 'react';
-import {StyleSheet, ActivityIndicator, View, Text, SectionList} from 'react-native';
-import { TextInput } from 'react-native-gesture-handler';
+import {Modal, ActivityIndicator, Alert, StyleSheet, View, Text, TouchableOpacity, Button} from 'react-native';
+import {ExpandableCalendar, AgendaList, CalendarProvider, WeekCalendar} from 'react-native-calendars';
 import moment from "moment";
 import {LinearGradient} from 'expo-linear-gradient';
 import AsyncManager from './AsyncManager';
 import { FloatingAction } from "react-native-floating-action";
-import SymptomModal from './SymptomModal';
-import TreatmentModal from './TreatmentModal';
-import { Ionicons } from '@expo/vector-icons';
+import { Ionicons, AntDesign } from '@expo/vector-icons';
 
-export default class DiaryScreen extends React.Component {
 
+const today = moment().format("YYYY-MM-DD");
+
+const actionColour = "#00a0db";
+const actions = [
+  {
+    text: "Add Entry",
+    name: "bt_add_entry",
+    color: actionColour,
+    position: 1
+  }
+];
+
+function processDiaries(diaries) {
+  let dateDict = {};
+  let dateArr = [];
+  diaries.forEach(function (diary, index) {
+    !(diary.title && diary.title.length) && (diary.title = diary.text);
+    dateDict[diary.date] = [diary];
+    dateArr.push({ title: diary.date, data: [diary] });
+  });
+  
+  var todayObj = {text: ""};
+  if (!dateDict[today]) {
+    dateArr.push({ title: today, data: [todayObj] });
+  }
+
+  function compareInstances(diary1, diary2) {
+    if(diary1.title > diary2.title) return 1;
+    else if(diary1.title < diary2.title) return -1;
+    else return 0;
+  }
+
+  dateArr.sort(compareInstances);
+  return dateArr;
+}
+
+export default class DiaryScreen extends Component {
   constructor(props) {
     super(props);
 
     this.state = {
-      ITEMS: [],
-      isLoading: true
+      isLoading: true,
+      Diaries: {}
     };
   }
 
   pollUpdates = async () => {
-    let diaries = await AsyncManager.pollUpdates("Diary", "diaries");
+    let result = await AsyncManager.pollUpdates("diary", "diaries");
 
-    console.log("polling updates for diaries: "+(diaries && diaries.length));
-    if (diaries) {
-      this.setState({ITEMS: diaries});
+    if (result.Diaries) {
+      this.setState({Diaries: processDiaries(result.Diaries)});
     }
   }
 
   async componentDidMount() {
-    let items = [
-      { title: "2021-03-12", data: ["I had big shit in my trousers"] },
-      { title: "2021-03-13", data: ["I had big shit in my trousers again"] },
-      { title: "2021-03-15", data: ["I keep getting these absurdly huge shits inside my trousers"] },
-      { title: "2021-03-16", data: ["It happened again."] },
-      { title: "2021-03-19", data: ["I don't understand how it keeps happening. It's like a bomb went off down there."] },
-      { title: "2021-03-21", data: ["If only I could figure out... Why I keep finding insane poo volumes in my downstairs clothing"] },
-      { title: "2021-03-22", data: ["Idon'twanttokeepshittingmyself"] },
-      { title: "2021-03-23", data: ["It was warm today."] }
-    ];
+    setTimeout(async () => {
+      let diaries = await AsyncManager.getDiaries();
+
+      this.setState({ 
+        isLoading: false,
+        Diaries: processDiaries(diaries)
+      });
+    }, 0);
 
 
-    console.log("setting initial item state: "+items.length);
-    this.setState({ITEMS: items});
-
-    this.setState({ 
-      isLoading: false
-    });
-
-    this.willFocusListener = this.props.navigation.addListener('focus', async () => {
-      await this.pollUpdates();
-    });
+    if (this.props.navigation.dangerouslyGetParent()) {
+      this.willFocusListener = this.props.navigation
+        .dangerouslyGetParent()
+        .addListener('focus', (e) => {
+          if (this.props.navigation.isFocused()) {
+            this.pollUpdates();
+          }
+        });
+    }
   }
 
   componentWillUnmount = () => {
@@ -61,74 +91,147 @@ export default class DiaryScreen extends React.Component {
     };
   }
 
-  renderItem = ({item}) => {
+  itemPressed(diary) {
+    console.log("item pressed");
+  }
+
+  renderToday() {
     return (
-      <View style = { styles.container }>
-        <TextInput multiline style={[styles.textInput, {color: 'red'}]}>
-          {item}
-        </TextInput>
+      <View style = { [{backgroundColor: '#f5f5f5'}, styles.container] }>
+        <TouchableOpacity style={styles.item}>
+          <Ionicons style={{textAlign: "center", paddingTop: 4}} name="reader-outline" size={28} color="darkgrey" />
+          <Text style={styles.emptyItemText}>How are you feeling today?</Text>
+        </TouchableOpacity>
       </View>
-    );
-  };
-
-  renderSectionHeader = ({section: {title}}) => {
-    let sectionTitle = moment(title).format('dddd, MMM d');
-
-    return (
-      <Text 
-        // allowFontScaling={false} 
-        // style={[this.style.sectionText, sectionStyle]} 
-        // onLayout={this.onHeaderLayout}
-      >
-        {sectionTitle}
-      </Text>
     );
   }
 
-  keyExtractor = (item, index) => {
-    const {keyExtractor} = this.props;
-    return _.isFunction(keyExtractor) ? keyExtractor(item, index) : String(index);
+  renderItem = ({item}) => {
+    if (!item.text.length) {
+      return this.renderToday();
+    }
+
+    return (
+      <LinearGradient 
+        colors={['white', 'white']}
+        style = { styles.container }
+        start={{ x: 0.7, y: 0.5 }}
+        end={{ x: 1, y: 0.5 }}>
+
+        <TouchableOpacity onPress={() => this.itemPressed(item)} style={styles.item}>
+          <Ionicons style={{textAlign: "center", paddingTop: 4}} name="reader-outline" size={28} color="#009ad4" />
+          <Text numberOfLines={1} style={styles.itemTitleText}>{item.text}</Text>
+          <View style={styles.itemButtonContainer}>
+          </View>
+        </TouchableOpacity>
+      </LinearGradient>
+    );
+  };
+
+  getMarkedDates = () => {
+    const marked = {};
+    this.state.Diaries.forEach(item => {
+      // NOTE: only mark dates with data
+      if (item.data && item.data.length > 0 && !_.isEmpty(item.data[0])) {
+        marked[item.title] = {marked: true};
+      }
+    });
+    return marked;
+  };
+
+  floatingActions = (btn) => {
+    console.log(btn);
   }
 
   render() {
     if(this.state.isLoading) {
       return (
         <View style={[styles.spinner]}>
-          <ActivityIndicator size="large" color="cornflowerblue" />
+        <ActivityIndicator size="large" color="cornflowerblue" />
         </View>
       )
     } else {
       return (
-        <View style={styles.container}>
-          <SectionList
-            sections={this.state.ITEMS}
+        <CalendarProvider
+          date={today}
+          showTodayButton
+          disabledOpacity={0.6}
+        >
+          <ExpandableCalendar
+            disableAllTouchEventsForDisabledDays
+            firstDay={1}
+            markedDates={this.getMarkedDates()}
+            style = {styles.expandableCalendar}
+          />
+          <AgendaList
+            sections={this.state.Diaries}
             extraData={this.state}
             renderItem={this.renderItem}
-            renderSectionHeader={this.renderSectionHeader}
-            keyExtractor={this.keyExtractor}
-            onScrollToIndexFailed={(info) => { console.warn('onScrollToIndexFailed info: ', info); }}
-            // getItemLayout={this.getItemLayout} // onViewableItemsChanged is not updated when list scrolls!!!
+            ref={this.agendaList}
           />
-        </View>
-      )
+          <FloatingAction
+            actions={actions}
+            color={"#00ABEB"}
+            onPressItem={name => { this.floatingActions(name)}}
+          />
+        </CalendarProvider>
+      );
     }
   }
 }
 
 const styles = StyleSheet.create({
-  page: {
-    height: "100%",
-    width: "100%"
+  expandableCalendar: {
+    paddingTop: 0
   },
-  textInput: {
+  item: {
+    padding: 20,
+    borderBottomWidth: 1,
+    borderBottomColor: 'lightgrey',
+    flexDirection: 'row',
+    height: "100%"
+  },
+  itemTimeText: {
+    color: 'black'
+  },
+  itemSeverityText: {
+    color: 'grey',
     fontSize: 12,
-    padding: 10,
+    marginTop: 4,
+    marginLeft: 4,
     textAlign: 'right'
+  },
+  itemTitleText: {
+    color: 'black',
+    marginLeft: 16,
+    fontSize: 16,
+    marginTop: 8,
+    width: "70%"
+  },
+  itemButtonContainer: {
+    flex: 1,
+    alignItems: 'flex-end'
+  },
+  emptyItemText: {
+    color: 'darkgrey',
+    fontSize: 16,
+    alignSelf: "flex-start",
+    flex: 1,
+    alignSelf: "flex-start",
+    marginLeft: 16,
+    marginTop: 8,
   },
   container: {
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
     height: 80
+  },
+  spinner: {
+    flex: 1,
+    justifyContent: "center",
+    flexDirection: "row",
+    justifyContent: "space-around",
+    padding: 10
   }
 });

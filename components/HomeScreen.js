@@ -77,7 +77,6 @@ export default class HomeScreen extends Component {
 
   render() {
     return (
-    <NavigationContainer independent={true}>
       <Stack.Navigator>
         <Stack.Screen
           name="Home"
@@ -93,7 +92,6 @@ export default class HomeScreen extends Component {
         <Stack.Screen name="EditTreatment" component={EditTreatmentScreen} options={({ route }) => ({ title: this.editTitle(route, "treatment") })} />
         <Stack.Screen name="EditTrigger" component={EditTriggerScreen} options={({ route }) => ({ title: this.editTitle(route, "trigger") })} />
       </Stack.Navigator>
-    </NavigationContainer>
     )
   }
 }

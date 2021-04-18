@@ -492,7 +492,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     borderBottomWidth: 1,
     borderBottomColor: 'lightgrey',
-    backgroundColor: '#eeeeee'
+    backgroundColor: '#f5f5f5'
   },
   emptyItemText: {
     color: 'darkgrey',
