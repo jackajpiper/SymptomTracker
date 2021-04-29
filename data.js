@@ -54,14 +54,14 @@ const TriggerInstances = [
 ]
 
 const DiaryData = [
-  { date: "2021-03-12", text: "I had big shit in my trousers" },
-  { date: "2021-03-13", text: "I had big shit in my trousers again" },
-  { date: "2021-03-15", text: "I keep getting these absurdly huge shits inside my trousers" },
-  { date: "2021-03-16", text: "It happened again." },
-  { date: "2021-03-19", text: "I don't understand how it keeps happening.\n\n\n\n\n\n\nIt's like a bomb went off down there." },
-  { date: "2021-03-21", text: "If only I could figure out...\n\n\n\n\n\nWhy I keep finding insane poo volumes in my downstairs clothing" },
-  { date: "2021-03-22", text: "I\ndon't\nwant\nto\nkeep\nshitting\nmyself" },
-  { date: "2021-03-23", text: "It was warm today." }
+  { id: 1, date: "2021-03-12", text: "I had big shit in my trousers" },
+  { id: 2, date: "2021-03-13", text: "I had big shit in my trousers again" },
+  { id: 3, date: "2021-03-15", text: "I keep getting these absurdly huge shits inside my trousers" },
+  { id: 4, date: "2021-03-16", text: "It happened again." },
+  { id: 5, date: "2021-03-19", text: "I don't understand how it keeps happening.\n\n\n\n\n\n\nIt's like a bomb went off down there." },
+  { id: 6, date: "2021-03-21", text: "If only I could figure out...\n\n\n\n\n\nWhy I keep finding insane poo volumes in my downstairs clothing" },
+  { id: 7, date: "2021-03-22", text: "I\ndon't\nwant\nto\nkeep\nshitting\nmyself" },
+  { id: 8, date: "2021-03-23", text: "It was warm today." }
 ]
 
 // TODO

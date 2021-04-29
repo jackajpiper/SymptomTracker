@@ -25,7 +25,9 @@ function processDiaries(diaries) {
   let dateDict = {};
   let dateArr = [];
   diaries.forEach(function (diary, index) {
-    !(diary.title && diary.title.length) && (diary.title = diary.text);
+    if (!(diary.title && diary.title.length)) {
+      diary.alternateTitle = diary.text;
+    };
     dateDict[diary.date] = [diary];
     dateArr.push({ title: diary.date, data: [diary] });
   });
@@ -87,14 +89,14 @@ export default class DiaryScreen extends Component {
     };
   }
 
-  itemPressed(diary) {
-    console.log("item pressed");
+  itemPressed = (diary) => {
+    this.props.navigation.navigate('EditDiary', { diary: diary });
   }
 
   renderToday() {
     return (
       <View style = { [{backgroundColor: '#f5f5f5'}, styles.container] }>
-        <TouchableOpacity style={styles.item}>
+        <TouchableOpacity onPress={() => this.clickedNew()} style={styles.item}>
           <Ionicons style={{textAlign: "center", paddingTop: 4}} name="reader-outline" size={28} color="darkgrey" />
           <Text style={styles.emptyItemText}>How are you feeling today?</Text>
         </TouchableOpacity>
@@ -116,7 +118,7 @@ export default class DiaryScreen extends Component {
 
         <TouchableOpacity onPress={() => this.itemPressed(item)} style={styles.item}>
           <Ionicons style={{textAlign: "center", paddingTop: 4}} name="reader-outline" size={28} color="#009ad4" />
-          <Text numberOfLines={1} style={styles.itemTitleText}>{item.text}</Text>
+          <Text numberOfLines={1} style={styles.itemTitleText}>{item.title || item.alternateTitle}</Text>
           <View style={styles.itemButtonContainer}>
           </View>
         </TouchableOpacity>
@@ -135,8 +137,9 @@ export default class DiaryScreen extends Component {
     return marked;
   };
 
-  floatingActions = (btn) => {
-    console.log(btn);
+  clickedNew = () => {
+    let diary = this.state.Diaries.find((diary) => {return diary.title === today}) || {data: [{date: today}]};
+    this.itemPressed(diary.data[0]);
   }
 
   render() {
@@ -168,7 +171,7 @@ export default class DiaryScreen extends Component {
           <FloatingAction
             actions={actions}
             color={"#00ABEB"}
-            onPressItem={name => { this.floatingActions(name)}}
+            onPressItem={name => { this.clickedNew(name)}}
           />
         </CalendarProvider>
       );

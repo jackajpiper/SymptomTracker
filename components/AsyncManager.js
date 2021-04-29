@@ -446,7 +446,7 @@ const AsyncManager = {
   },
 
   getDiaryForDate: async function(date) {
-    let diaries = AsyncManager.getDiaries();
+    let diaries = await AsyncManager.getDiaries();
     return diary = diaries.find(x => x.date === date);
   },
 
@@ -476,7 +476,8 @@ const AsyncManager = {
     return AsyncManager.setDiaries(diaries);
   },
 
-  deleteDiary: async function(id) {
+  deleteDiary: async function(diary) {
+    let id = diary.id;
     let diaries = await AsyncManager.getDiaries();
     for (var i = 0; i < diaries.length; i++) {
       var obj = diaries[i];
@@ -486,7 +487,7 @@ const AsyncManager = {
       }
     }
     
-    return AsyncManager.setTriggerInstances(instances);
+    return AsyncManager.setDiaries(diaries);
   },
 
   pollUpdates: async function(screenName, objName) {

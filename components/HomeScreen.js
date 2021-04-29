@@ -11,6 +11,7 @@ import EditTriggerScreen from './EditTriggerScreen.js';
 import EditTreatmentScreen from './EditTreatmentScreen.js';
 import EditSymptomScreen from './EditSymptomScreen.js';
 import DiaryScreen from './DiaryScreen.js';
+import EditDiaryScreen from './EditDiaryScreen.js';
 import {LinearGradient} from 'expo-linear-gradient';
 
 const today = moment().format("YYYY-MM-DD");
@@ -68,10 +69,10 @@ export default class HomeScreen extends Component {
   }
 
   editTitle = (route, obj) => {
-    if (route.params[obj].name) {
-      return "Edit " + route.params[obj].name;
+    if (route.params[obj].id) {
+      return "Edit " + (route.params[obj].name || "Diary");
     } else {
-      return "Create New " + (obj.charAt(0).toUpperCase() + obj.slice(1));
+      return "Add New " + (obj.charAt(0).toUpperCase() + obj.slice(1));
     }
   }
 
@@ -87,6 +88,7 @@ export default class HomeScreen extends Component {
         <Stack.Screen name="Treatments" component={TreatmentsListScreen} />
         <Stack.Screen name="Triggers" component={TriggersListScreen} />
         <Stack.Screen name="Diary" component={DiaryScreen} />
+        <Stack.Screen name="EditDiary" component={EditDiaryScreen} options={({ route }) => ({ title: this.editTitle(route, "diary") })} />
         <Stack.Screen name="Settings" component={SettingsScreen} />
         <Stack.Screen name="EditSymptom" component={EditSymptomScreen} options={({ route }) => ({ title: this.editTitle(route, "symptom") })} />
         <Stack.Screen name="EditTreatment" component={EditTreatmentScreen} options={({ route }) => ({ title: this.editTitle(route, "treatment") })} />
