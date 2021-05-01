@@ -8,6 +8,7 @@ import { NavigationContainer } from '@react-navigation/native';
 import moment from "moment";
 import HomeScreen from './components/HomeScreen.js';
 import ExpandableCalendar from './components/ExpandableCalendars.js';
+import AnalysisScreen from './components/AnalysisScreen.js';
 
 console.log("Reloaded.", moment());
 
@@ -50,7 +51,7 @@ export default function App() {
         }}>
         <Tab.Screen name="Calendar" component={ExpandableCalendar}/>
         <Tab.Screen name="Home" component={HomeScreen} />
-        <Tab.Screen name="Analyse" component={AnalyseTab} />
+        <Tab.Screen name="Analyse" component={AnalysisScreen} />
       </Tab.Navigator>
     </NavigationContainer>
   );

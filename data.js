@@ -67,15 +67,17 @@ const DiaryData = [
 // TODO
 //  -- make severity an optional attribute for symptoms
 //    -- maybe expand the system to allow custom severity/dose tracking
-//  -- do something with the analyse tab
-//    -- allow the user to chart one symptom/treatment against another in a graph (probably scatter)
-//    -- maybe provide some kind of calculated correlation score
 //  -- make the title on the homepage more stylish
 //  -- implement dark mode
 //    -- follow that up by implementing themes
 //  -- make a onboarding thing for new users
 //  -- implement settings
 //  -- implement the diary?
+
+// ANALYSIS TAB
+//  -- track one item against another to look for correlation
+//    -- find some kind of calculated correlation score
+//  -- select one symptom and be presented with statistically likely triggers
 
 // EDGE CASES
 //  -- symptom/trigger/treatment name being super long
