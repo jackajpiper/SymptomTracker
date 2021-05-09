@@ -91,8 +91,8 @@ function processInstances(symptomInstances, symptoms, treatmentInstances, treatm
   });
 
   function compareInstances(inst1, inst2) {
-    if(inst1.title > inst2.title) return 1;
-    else if(inst1.title < inst2.title) return -1;
+    if(inst1.title > inst2.title) return -1;
+    else if(inst1.title < inst2.title) return 1;
     else return 0;
   }
 

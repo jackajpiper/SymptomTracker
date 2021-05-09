@@ -38,8 +38,8 @@ function processDiaries(diaries) {
   }
 
   function compareInstances(diary1, diary2) {
-    if(diary1.title > diary2.title) return 1;
-    else if(diary1.title < diary2.title) return -1;
+    if(diary1.title > diary2.title) return -1;
+    else if(diary1.title < diary2.title) return 1;
     else return 0;
   }
 
