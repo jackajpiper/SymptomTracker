@@ -35,6 +35,10 @@ export default class TreatmentModal extends React.Component {
         value: x.id
       };
     });
+    
+    this.colour = this.id
+      ? this.treatments.find(x => x.id === origin.treatmentId).colour
+      : "cornflowerblue";
 
     this.state = {
       treatmentId: origin.treatmentId,
@@ -47,7 +51,7 @@ export default class TreatmentModal extends React.Component {
       showStartTime: false,
       showEndTime: false,
       dirty: false,
-      colour: "cornflowerblue"
+      colour: this.colour
     };
   }
 

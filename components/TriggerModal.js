@@ -36,6 +36,10 @@ export default class TriggerModal extends React.Component {
       };
     });
 
+    this.colour = this.id
+      ? this.triggers.find(x => x.id === origin.triggerId).colour
+      : "cornflowerblue";
+
     this.state = {
       triggerId: origin.triggerId,
       date: origin.date,
@@ -47,7 +51,7 @@ export default class TriggerModal extends React.Component {
       showStartTime: false,
       showEndTime: false,
       dirty: false,
-      colour: "cornflowerblue"
+      colour: this.colour
     };
   }
 

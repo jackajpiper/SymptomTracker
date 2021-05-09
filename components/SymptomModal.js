@@ -37,6 +37,10 @@ export default class SymptomModal extends React.Component {
         value: x.id
       };
     });
+    
+    this.colour = this.id
+      ? this.symptoms.find(x => x.id === origin.symptomId).colour
+      : "cornflowerblue";
 
     this.state = {
       symptomId: origin.symptomId,
@@ -50,7 +54,7 @@ export default class SymptomModal extends React.Component {
       showStartTime: false,
       showEndTime: false,
       dirty: false,
-      colour: "cornflowerblue"
+      colour: this.colour
     };
   }
 

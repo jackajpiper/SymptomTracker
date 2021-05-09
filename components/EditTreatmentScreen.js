@@ -89,6 +89,9 @@ export default class TreatmentsListScreen extends Component {
     if (!this.state.name) {
       return "Please select a name";
     }
+    if (!this.state.colour) {
+      return "Please select a colour";
+    }
     return "";
   }
 
