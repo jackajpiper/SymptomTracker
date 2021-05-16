@@ -65,6 +65,7 @@ const DiaryData = [
 ]
 
 // TODO
+//  -- stop constantly lightening the colours and just save them in the lightened state
 //  -- make severity an optional attribute for symptoms
 //    -- maybe expand the system to allow custom severity/dose tracking
 //  -- make the title on the homepage more stylish
