@@ -4,37 +4,6 @@ import { StackedBarChart, LineChart } from 'react-native-chart-kit'
 import moment from "moment";
 import AsyncManager from './AsyncManager';
 
-const data = [
-[
-  3840,
-  1920,
-  960,
-  400,
-  400,
-],
-[
-  1600,
-  1440,
-  960,
-  400,
-],
-[
-  640,
-  960,
-  3640,
-  400,
-],
-[
-  3320,
-  480,
-  640,
-  400,
-],
-]
-
-const colours = ['#7b4173', '#a55194', '#ce6dbd', '#de9ed6']
-const labels = ['March 2021', 'April 2021', 'May 2021', 'June 2021']
-
 function shadeColour(color, percent) {
 
   var R = parseInt(color.substring(1,3),16);
