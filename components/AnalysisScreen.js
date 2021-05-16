@@ -1,4 +1,3 @@
-import _ from 'lodash';
 import React, {Component} from 'react';
 import { StyleSheet, View, TouchableOpacity, Text, ScrollView, ActivityIndicator } from "react-native";
 import AsyncManager from './AsyncManager';

@@ -1,5 +1,5 @@
 import React from 'react'
-import { View, Text, Dimensions } from "react-native";
+import { View, ScrollView, Dimensions } from "react-native";
 import { StackedBarChart, LineChart } from 'react-native-chart-kit'
 import moment from "moment";
 import AsyncManager from './AsyncManager';
@@ -165,7 +165,7 @@ export default class StackedBarChartExample extends React.PureComponent {
       let type = this.state[typeName+"s"].find((t) => t.id === id);
       typeList.push(type.name);
       colourList.push(shadeColour(type.colour, 40));
-      let instances = this.state[typeName+"Instances"];
+      let instances = this.state[typeName+"Instances"].filter((instance) => {return instance.typeId === id});
       
       instances.map((instance) => {
         instance.type = typeName;
@@ -176,12 +176,22 @@ export default class StackedBarChartExample extends React.PureComponent {
     });
 
     let dateDict = {};
+    let firstDate = moment("9999-12-31");
+    let lastDate = moment("0001-01-01");
     allInstances.forEach((instance) => {
-      let dateString = moment(instance.date).format("MMM YY");
+      let date = moment(instance.date)
+      let dateString = date.format("MMM YY");
+      if (date.isBefore(firstDate)) {
+        firstDate = date;
+      } else if (date.isAfter(lastDate)) {
+        lastDate = date;
+      }
+
       let type = this.state[instance.type+"s"].find((type) => { return type.id === instance.typeId; });
       if (!dateDict[dateString]) {
         dateDict[dateString] = {
           month: new Date(instance.date),
+          monthString: moment(instance.date).format("MMM"),
           [type.name]: 1
         };
       } else {
@@ -192,16 +202,30 @@ export default class StackedBarChartExample extends React.PureComponent {
         }
       }
     });
-  
-    let dates = [];
-    let colours = typeList.map((type) => type.colour);
+
+    // fill out missing months
+    while (lastDate > firstDate || firstDate.format('M') === lastDate.format('M')) {
+      let dateString = firstDate.format("MMM YY");
+      if (!dateDict[dateString]) {
+        dateDict[dateString] = {
+          month: new Date(firstDate.format("YYYY-MM-DD")),
+          monthString: firstDate.format("MMM")
+        }
+      }
+      firstDate.add(1,'month');
+    }
+
+    let dateArr = Object.keys(dateDict).map(function(key) { return [key, dateDict[key]]; });
+    dateArr.sort(function(first, second) { return moment(second[0], "MMM YY").isBefore(moment(first[0], "MMM YY")) });
+
+    let dates = dateArr.map((i)=>{return i[1].monthString});
+    let dataArr = dateArr.map((i)=>{return i[1]});
     let data = [];
-    Object.keys(dateDict).forEach(function(date) {
+    dataArr.forEach(function(dict) {
       let datum = [];
       typeList.forEach((type) => {
-        datum.push(dateDict[date][type] || 0)
+        datum.push(dict[type] || 0)
       });
-      dates.push(date);
       data.push(datum);
     });
 
@@ -210,12 +234,26 @@ export default class StackedBarChartExample extends React.PureComponent {
 
   render() {
     let selectedData = this.selectedInstancesByMonth(this.state.SelectedData);
+    let lengthMultiple = 1;
+    let barPercentage = 1;
+    if (selectedData.data.length > 9) {
+      barPercentage = 0.7;
+      lengthMultiple = 1.2;
+    }
+    if (selectedData.data.length > 27) {
+      barPercentage = 0.4;
+      lengthMultiple = 2;
+    }
+    console.log(selectedData.data.length);
+    console.log("bar percentage is "+barPercentage);
+    console.log("length multiple is "+lengthMultiple);
     
     return (
-      <View style={{width: "100%", borderWidth: 1}} onLayout={(event) => {this.setState({graphWidth: event.nativeEvent.layout.width});}}>
+      <View style={{ width: "100%", borderWidth: 1}} onLayout={(event) => {this.setState({graphWidth: event.nativeEvent.layout.width});}}>
+        <ScrollView horizontal={true} scrollEnabled={lengthMultiple !== 1}>
         <StackedBarChart
           data={selectedData}
-          width={this.state.graphWidth}
+          width={this.state.graphWidth * lengthMultiple}
           height={220}
           decimalPlaces={0}
           hideLegend={true}
@@ -225,6 +263,7 @@ export default class StackedBarChartExample extends React.PureComponent {
             withVerticalLines: true,
             color: (opacity = 1) => `rgba(20, 20, 20, ${opacity})`,
             labelColor: (opacity = 1) => `rgba(20, 20, 20, ${opacity})`,
+            barPercentage: barPercentage,
             style: {
               borderRadius: 16
             },
@@ -235,6 +274,7 @@ export default class StackedBarChartExample extends React.PureComponent {
             }
           }}
         />
+        </ScrollView>
       </View>
     )
   }
