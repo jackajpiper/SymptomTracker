@@ -107,9 +107,7 @@ export default class AnalysisScreen extends React.Component {
       TriggerInstances: [],
       Treatments: [],
       TreatmentInstances: [],
-      GraphData: [],
-      GraphDomainStart: 0,
-      GraphDomainEnd: 1,
+      GraphType: [],
       SelectedData: [],
     };
   }
@@ -221,7 +219,7 @@ export default class AnalysisScreen extends React.Component {
     ));
   }
 
-  renderGraph = () => {
+  renderGraph = (type) => {
     if (!this.state.Symptoms.length) {
       return (
         <View style={styles.spinner}>
@@ -229,8 +227,12 @@ export default class AnalysisScreen extends React.Component {
         </View>
       );
     } else {
-      return <StackedBarChartExample state={{...this.state}} navigation={{...this.props.navigation}}/>
+      return <StackedBarChartExample type={type} state={{...this.state}} navigation={{...this.props.navigation}}/>
     }
+  }
+
+  setGraph = (type) => {
+    this.setState({ GraphType: type });
   }
 
   render() {
@@ -238,13 +240,28 @@ export default class AnalysisScreen extends React.Component {
       <View style={styles.container}>
         <View style={styles.top}>
           <View style={styles.graph}>
-            {this.renderGraph()}
+            {this.renderGraph(this.state.GraphType)}
           </View>
         </View>
         <View style={styles.bottom}>
           <TouchableOpacity style={{height: 50, width: 100, backgroundColor: "cornflowerblue"}}><Text>Toggle</Text></TouchableOpacity>
-          
-          {this.renderSymptomCheckboxes()}
+          <View style={{flex: 1, flexDirection: "row"}}>
+            <View>
+              {this.renderSymptomCheckboxes()}
+            </View>
+            <View style={{marginLeft: 30}}>
+              <RadioButton
+                value="bar"
+                status={ this.state.GraphType === 'bar' ? 'checked' : 'unchecked' }
+                onPress={() => this.setGraph('bar')}
+              />
+              <RadioButton
+                value="line"
+                status={ this.state.GraphType === 'line' ? 'checked' : 'unchecked' }
+                onPress={() => this.setGraph('line')}
+              />
+            </View>
+          </View>
         </View>
       </View>
     );

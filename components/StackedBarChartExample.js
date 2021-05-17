@@ -3,6 +3,7 @@ import { View, ScrollView, Dimensions } from "react-native";
 import { StackedBarChart, LineChart } from 'react-native-chart-kit'
 import moment from "moment";
 import AsyncManager from './AsyncManager';
+import { max } from 'react-native-reanimated';
 
 function shadeColour(color, percent) {
 
@@ -61,8 +62,10 @@ export default class StackedBarChartExample extends React.PureComponent {
   constructor(props) {
     super(props);
 
-    this.state = props.state;
+    this.props = props;
     this.navigation = props.navigation;
+
+    this.state = props.state;
     this.state.graphWidth = 0;
   }
 
@@ -124,7 +127,7 @@ export default class StackedBarChartExample extends React.PureComponent {
     };
   }
 
-  selectedInstancesByMonth = (selectedData) => {
+  selectedBarDataByMonth = (selectedData) => {
     let allInstances = [];
     let typeList = [];
     let colourList = [];
@@ -201,49 +204,166 @@ export default class StackedBarChartExample extends React.PureComponent {
     return {data: data, barColors: colourList, labels: dates};
   }
 
-  render() {
-    let selectedData = this.selectedInstancesByMonth(this.state.SelectedData);
-    let lengthMultiple = 1;
-    let barPercentage = 1;
-    if (selectedData.data.length > 9) {
-      barPercentage = 0.7;
-      lengthMultiple = 1.2;
-    }
-    if (selectedData.data.length > 27) {
-      barPercentage = 0.4;
-      lengthMultiple = 2;
-    }
-    console.log(selectedData.data.length);
-    console.log("bar percentage is "+barPercentage);
-    console.log("length multiple is "+lengthMultiple);
+  selectedLineDataByMonth = (selectedData) => {
+    let typeLines = [];
+    let typeList = [];
+    let firstDate = moment("9999-12-31");
+    let lastDate = moment("0001-01-01");
+    selectedData.forEach((selected) => {
+      let typeName = selected.split(' ')[0];
+      let id = parseInt(selected.split(' ')[1]);
+      let type = this.state[typeName+"s"].find((t) => t.id === id);
+      typeList.push(type.name);
+      let instances = this.state[typeName+"Instances"].filter((instance) => {return instance.typeId === id});
+      
+      instances.map((instance) => {
+        instance.type = typeName;
+        return instance;
+      });
+
+      let typeLine = {
+        data: [],
+        color: (opacity = 1) => shadeColour(type.colour, 40)
+      };
+      let dateDict = {};
+      // constructs the dictionary of dates and respective counts for this type (e.g Headache)
+      instances.forEach((instance) => {
+        let date = moment(instance.date)
+        let dateString = date.format("MMM YY");
+        if (date.isBefore(firstDate)) {
+          firstDate = date;
+        } else if (date.isAfter(lastDate)) {
+          lastDate = date;
+        }
+        
+        !dateDict[dateString] && (dateDict[dateString] = 0);
+        dateDict[dateString]++;
+      });
+
+      typeLine.data = dateDict;
+      typeLines.push(typeLine);
+    });
     
+    let dates = [];
+    let tempFirstDate = moment(firstDate);
+    typeLines.forEach((type) => {
+      // now we go from the first date to the last date, filling in
+      let typeLineData = [];
+      dates = [];
+      while (lastDate > tempFirstDate || tempFirstDate.format('M') === lastDate.format('M')) {
+        let dateString = tempFirstDate.format("MMM YY");
+        dates.push(dateString);
+        if (!type.data[dateString]) {
+          typeLineData.push(0);
+        } else {
+          typeLineData.push(type.data[dateString]);
+        }
+        tempFirstDate.add(1,'month');
+      }
+      type.data = typeLineData;
+      tempFirstDate = moment(firstDate);
+    });
+
+    return { datasets: typeLines, labels: dates };
+
+  }
+
+  renderGraph = (type) => {
+    if (type === "bar") {
+      let selectedData = this.selectedBarDataByMonth(this.state.SelectedData);
+
+
+      let maxVisible = 10
+      let numOfItems = selectedData.datasets && selectedData.datasets[0] && selectedData.datasets[0].data.length;
+      let lengthMultiple = Math.round((numOfItems / maxVisible)*10)/10;
+
+
+      let barPercentage = 1;
+      if (selectedData.data.length > 9) {
+        barPercentage = 0.7;
+        lengthMultiple = 1.2;
+      }
+      if (selectedData.data.length > 27) {
+        barPercentage = 0.4;
+        lengthMultiple = 2;
+      }
+
+      return (
+        <ScrollView horizontal={true} showsHorizontalScrollIndicator={lengthMultiple !== 1} scrollEnabled={lengthMultiple !== 1}>
+          <StackedBarChart
+            data={selectedData}
+            width={this.state.graphWidth * lengthMultiple}
+            height={220}
+            decimalPlaces={0}
+            hideLegend={true}
+            chartConfig={{
+              backgroundGradientFrom: "white",
+              backgroundGradientTo: "white",
+              withVerticalLines: true,
+              color: (opacity = 1) => `rgba(20, 20, 20, ${opacity})`,
+              labelColor: (opacity = 1) => `rgba(20, 20, 20, ${opacity})`,
+              barPercentage: barPercentage,
+              style: {
+                borderRadius: 16
+              },
+              propsForDots: {
+                r: "6",
+                strokeWidth: "2",
+                stroke: "#ffa726"
+              }
+            }}
+          />
+        </ScrollView>
+      )
+    } else if (type === "line") {
+      let selectedData = this.selectedLineDataByMonth(this.state.SelectedData);
+
+      let maxVisible = 10;
+      let numOfItems = selectedData.datasets && selectedData.datasets[0] && selectedData.datasets[0].data.length;
+      let lengthMultiple = numOfItems > maxVisible
+        ? Math.round((numOfItems / maxVisible)*10)/10
+        : 1;
+
+      if (selectedData.datasets.length) {
+        return (
+          <ScrollView horizontal={true} showsHorizontalScrollIndicator={lengthMultiple !== 1} scrollEnabled={lengthMultiple !== 1}>
+            <LineChart
+              data={selectedData}
+              width={(this.state.graphWidth+30) * lengthMultiple}
+              height={220}
+              chartConfig={{
+                backgroundGradientFrom: "white",
+                backgroundGradientTo: "white",
+                decimalPlaces: 0,
+                color: (opacity = 1) => `rgba(20, 20, 20, ${opacity})`,
+                labelColor: (opacity = 1) => `rgba(20, 20, 20, ${opacity})`,
+                propsForDots: {
+                  r: "6",
+                  strokeWidth: "2",
+                  stroke: "#777777"
+                }
+              }}
+              bezier
+              style={{
+                // marginVertical: 8,
+                marginLeft: -30,
+                borderRadius: 16
+              }}
+            />
+          </ScrollView>
+        )
+      } else {
+        return (
+          <View></View>
+        )
+      }
+    }
+  }
+
+  render() {
     return (
       <View style={{ width: "100%", borderWidth: 1}} onLayout={(event) => {this.setState({graphWidth: event.nativeEvent.layout.width});}}>
-        <ScrollView horizontal={true} scrollEnabled={lengthMultiple !== 1}>
-        <StackedBarChart
-          data={selectedData}
-          width={this.state.graphWidth * lengthMultiple}
-          height={220}
-          decimalPlaces={0}
-          hideLegend={true}
-          chartConfig={{
-            backgroundGradientFrom: "white",
-            backgroundGradientTo: "white",
-            withVerticalLines: true,
-            color: (opacity = 1) => `rgba(20, 20, 20, ${opacity})`,
-            labelColor: (opacity = 1) => `rgba(20, 20, 20, ${opacity})`,
-            barPercentage: barPercentage,
-            style: {
-              borderRadius: 16
-            },
-            propsForDots: {
-              r: "6",
-              strokeWidth: "2",
-              stroke: "#ffa726"
-            }
-          }}
-        />
-        </ScrollView>
+        {this.renderGraph(this.props.type)}
       </View>
     )
   }
