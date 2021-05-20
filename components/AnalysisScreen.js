@@ -260,6 +260,11 @@ export default class AnalysisScreen extends React.Component {
                 status={ this.state.GraphType === 'line' ? 'checked' : 'unchecked' }
                 onPress={() => this.setGraph('line')}
               />
+              <RadioButton
+                value="contribution"
+                status={ this.state.GraphType === 'contribution' ? 'checked' : 'unchecked' }
+                onPress={() => this.setGraph('contribution')}
+              />
             </View>
           </View>
         </View>

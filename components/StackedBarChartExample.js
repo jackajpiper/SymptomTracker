@@ -1,6 +1,6 @@
 import React from 'react'
 import { View, ScrollView, Dimensions } from "react-native";
-import { StackedBarChart, LineChart } from 'react-native-chart-kit'
+import { StackedBarChart, LineChart, ContributionGraph } from 'react-native-chart-kit'
 import moment from "moment";
 import AsyncManager from './AsyncManager';
 import { max } from 'react-native-reanimated';
@@ -268,31 +268,84 @@ export default class StackedBarChartExample extends React.PureComponent {
 
   }
 
+  selectedContributionDataByMonth = (selectedData) => {
+
+    let allInstances = [];
+    let datesDict = {};
+    let firstDate = moment("9999-12-31");
+    let lastDate = moment("0001-01-01");
+    selectedData.forEach((selected) => {
+      let typeName = selected.split(' ')[0];
+      let id = parseInt(selected.split(' ')[1]);
+      let instances = this.state[typeName+"Instances"].filter((instance) => {return instance.typeId === id});
+
+      instances.forEach((instance) => {
+        let date = moment(instance.date)
+        let dateString = date.format("YYYY-MM-DD");
+        if (date.isBefore(firstDate)) {
+          firstDate = date;
+        } else if (date.isAfter(lastDate)) {
+          lastDate = date;
+        }
+        
+        !datesDict[dateString] && (datesDict[dateString] = 0);
+        datesDict[dateString]+=5;
+      });
+    });
+
+    let dateArr = Object.keys(datesDict).map(function(key) { return { date: key, count: datesDict[key] }; });
+    console.log(dateArr);
+
+    return dateArr;
+  }
+
+  calculateWidthsOlder = (itemCount, maxVisible, maxScaled, lengthStart, maxBarPercentage, minBarPercentage) => {
+    let dynamicRange = maxScaled-maxVisible;
+    let lengthMultiple;
+    let barPercentage;
+    if (itemCount <= maxVisible) {
+      lengthMultiple = lengthStart;
+      barPercentage = maxBarPercentage;
+    } else if (itemCount >= maxScaled) {
+      let r = Math.round(((itemCount-maxVisible)/dynamicRange)*10)/10;
+      lengthMultiple = lengthStart+r;
+      barPercentage = minBarPercentage;
+    } else {
+      let r = Math.round(((itemCount-maxVisible)/dynamicRange)*10)/10;
+      lengthMultiple = lengthStart+r;
+      barPercentage = maxBarPercentage - (r*minBarPercentage);
+    }
+    return { scaleMultiple: lengthMultiple, itemPercentage: barPercentage };
+  }
+
+  calculateBarWidths = (itemCount, maxVisible, maxScaled, lengthStart, maxBarPercentage, minBarPercentage) => {
+    let lengthMultiple;
+    let barPercentage;
+    let r = itemCount/maxScaled;
+    if (itemCount <= maxVisible) {
+      lengthMultiple = lengthStart;
+      barPercentage = maxBarPercentage - (r*minBarPercentage);
+    } else if (itemCount >= maxScaled) {
+      lengthMultiple = lengthStart+r;
+      barPercentage = minBarPercentage;
+    } else {
+      lengthMultiple = lengthStart+r;
+      barPercentage = maxBarPercentage - (r*minBarPercentage);
+    }
+    return { scaleMultiple: lengthMultiple, itemPercentage: barPercentage };
+  }
+
   renderGraph = (type) => {
     if (type === "bar") {
+      console.log("doing a bar");
       let selectedData = this.selectedBarDataByMonth(this.state.SelectedData);
-
-
-      let maxVisible = 10
-      let numOfItems = selectedData.datasets && selectedData.datasets[0] && selectedData.datasets[0].data.length;
-      let lengthMultiple = Math.round((numOfItems / maxVisible)*10)/10;
-
-
-      let barPercentage = 1;
-      if (selectedData.data.length > 9) {
-        barPercentage = 0.7;
-        lengthMultiple = 1.2;
-      }
-      if (selectedData.data.length > 27) {
-        barPercentage = 0.4;
-        lengthMultiple = 2;
-      }
+      let widths = this.calculateBarWidths(selectedData.data && selectedData.data.length, 12, 31, 1, 0.8, 0.4);
 
       return (
-        <ScrollView horizontal={true} showsHorizontalScrollIndicator={lengthMultiple !== 1} scrollEnabled={lengthMultiple !== 1}>
+        <ScrollView horizontal={true} showsHorizontalScrollIndicator={widths.scaleMultiple !== 1} scrollEnabled={widths.scaleMultiple !== 1}>
           <StackedBarChart
             data={selectedData}
-            width={this.state.graphWidth * lengthMultiple}
+            width={(this.state.graphWidth * widths.scaleMultiple)-10}
             height={220}
             decimalPlaces={0}
             hideLegend={true}
@@ -302,7 +355,7 @@ export default class StackedBarChartExample extends React.PureComponent {
               withVerticalLines: true,
               color: (opacity = 1) => `rgba(20, 20, 20, ${opacity})`,
               labelColor: (opacity = 1) => `rgba(20, 20, 20, ${opacity})`,
-              barPercentage: barPercentage,
+              barPercentage: widths.itemPercentage,
               style: {
                 borderRadius: 16
               },
@@ -351,6 +404,40 @@ export default class StackedBarChartExample extends React.PureComponent {
               }}
             />
           </ScrollView>
+        )
+      } else {
+        return (
+          <View></View>
+        )
+      }
+    } else if (type === "contribution") {
+      
+      console.log("doing a contribution");
+      let selectedData = this.selectedContributionDataByMonth(this.state.SelectedData);
+      if (selectedData.length) {
+        return (
+          <ContributionGraph
+            values={selectedData}
+            endDate={new Date("2021-04-01")}
+            numDays={105}
+            width={this.state.graphWidth}
+            height={220}
+            chartConfig={{
+              backgroundGradientFrom: "white",
+              backgroundGradientTo: "white",
+              decimalPlaces: 0,
+              color: (opacity = 1) => `rgba(20, 20, 20, ${opacity})`,
+              labelColor: (opacity = 1) => `rgba(20, 20, 20, ${opacity})`,
+              propsForDots: {
+                r: "6",
+                strokeWidth: "2",
+                stroke: "#777777"
+              }
+            }}
+            style={{
+              marginLeft: -20
+            }}
+          />
         )
       } else {
         return (
