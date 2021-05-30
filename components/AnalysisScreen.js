@@ -4,6 +4,7 @@ import AsyncManager from './AsyncManager';
 import moment from "moment";
 import BouncyCheckbox from "react-native-bouncy-checkbox";
 import StackedBarChartExample from './StackedBarChartExample';
+import { RadioButton } from 'react-native-paper';
 
 
 function shadeColor(color, percent) {
@@ -219,6 +220,33 @@ export default class AnalysisScreen extends React.Component {
     ));
   }
 
+  renderGraphCheckboxes = () => {
+
+    return (
+      <View style={{marginLeft: 30}}>
+        <RadioButton
+          value="bar"
+          status={ this.state.GraphType === 'bar' ? 'checked' : 'unchecked' }
+          onPress={() => this.setGraph('bar')}
+        />
+        <RadioButton
+          value="line"
+          status={ this.state.GraphType === 'line' ? 'checked' : 'unchecked' }
+          onPress={() => this.setGraph('line')}
+        />
+        <RadioButton
+          value="heat"
+          status={ this.state.GraphType === 'heat' ? 'checked' : 'unchecked' }
+          onPress={() => this.setGraph('heat')}
+        />
+      </View>
+    );
+  }
+
+  setGraph = (type) => {
+    this.setState({ GraphType: type });
+  }
+
   renderGraph = (type) => {
     if (!this.state.Symptoms.length) {
       return (
@@ -229,10 +257,6 @@ export default class AnalysisScreen extends React.Component {
     } else {
       return <StackedBarChartExample type={type} state={{...this.state}} navigation={{...this.props.navigation}}/>
     }
-  }
-
-  setGraph = (type) => {
-    this.setState({ GraphType: type });
   }
 
   render() {
@@ -249,22 +273,8 @@ export default class AnalysisScreen extends React.Component {
             <View>
               {this.renderSymptomCheckboxes()}
             </View>
-            <View style={{marginLeft: 30}}>
-              <RadioButton
-                value="bar"
-                status={ this.state.GraphType === 'bar' ? 'checked' : 'unchecked' }
-                onPress={() => this.setGraph('bar')}
-              />
-              <RadioButton
-                value="line"
-                status={ this.state.GraphType === 'line' ? 'checked' : 'unchecked' }
-                onPress={() => this.setGraph('line')}
-              />
-              <RadioButton
-                value="contribution"
-                status={ this.state.GraphType === 'contribution' ? 'checked' : 'unchecked' }
-                onPress={() => this.setGraph('contribution')}
-              />
+            <View>
+              {this.renderGraphCheckboxes()}
             </View>
           </View>
         </View>
@@ -279,10 +289,9 @@ const styles = StyleSheet.create({
     justifyContent: "flex-start",
     alignItems: "center",
     backgroundColor: "white"
-    // backgroundColor: "#f5fcff"
   },
   top: {
-    flex: 4,
+    flex: 3,
     width: "100%",
     flexDirection: "row",
     marginTop: 25,
@@ -302,7 +311,7 @@ const styles = StyleSheet.create({
     marginTop: 12
   },
   bottom: {
-    flex: 3
+    flex: 4
   },
   spinner: {
     flex: 1,

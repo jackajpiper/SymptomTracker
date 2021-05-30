@@ -65,7 +65,11 @@ const DiaryData = [
 ]
 
 // TODO
+//  -- sort out calendar ordering, render data by month etc
 //  -- stop constantly lightening the colours and just save them in the lightened state
+//    -- currently uses saturation of 30 and lightness of 60
+//    -- used in Edit(Symptom/Trigger/Treatment)Screen
+//    -- also used when calculating average colour for the heat graph
 //  -- make severity an optional attribute for symptoms
 //    -- maybe expand the system to allow custom severity/dose tracking
 //  -- make the title on the homepage more stylish
