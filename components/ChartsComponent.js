@@ -1,5 +1,5 @@
 import React from 'react'
-import { StyleSheet, View, ScrollView, Text } from "react-native";
+import { StyleSheet, View, ScrollView, Text, DrawerLayoutAndroidComponent } from "react-native";
 import { StackedBarChart, LineChart, ContributionGraph } from 'react-native-chart-kit'
 import moment from "moment";
 import AsyncManager from './AsyncManager';
@@ -192,7 +192,7 @@ function getColourIntervals(colour, num) {
   return colours;
 }
 
-export default class StackedBarChartExample extends React.PureComponent {
+export default class ChartsComponent extends React.PureComponent {
   constructor(props) {
     super(props);
 
@@ -338,65 +338,92 @@ export default class StackedBarChartExample extends React.PureComponent {
     return {data: data, barColors: colourList, labels: dates};
   }
 
-  selectedLineDataByMonth = (selectedData) => {
+  selectedLineDataByMonth = (selectedData, rangeType, start, end) => {
     let typeLines = [];
     let typeList = [];
+    let dates = [];
     let firstDate = moment("9999-12-31");
     let lastDate = moment("0001-01-01");
-    selectedData.forEach((selected) => {
-      let typeName = selected.split(' ')[0];
-      let id = parseInt(selected.split(' ')[1]);
-      let type = this.state[typeName+"s"].find((t) => t.id === id);
-      typeList.push(type.name);
-      let instances = this.state[typeName+"Instances"].filter((instance) => {return instance.typeId === id});
+
+    if (rangeType === "year-average") {
+
+      dates = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+
+      selectedData.forEach((selected) => {
+        let typeName = selected.split(' ')[0];
+        let id = parseInt(selected.split(' ')[1]);
+        let type = this.state[typeName+"s"].find((t) => t.id === id);
+        typeList.push(type.name);
+        let instances = this.state[typeName+"Instances"].filter((instance) => {return instance.typeId === id});
+  
+        let typeLine = {
+          data: [],
+          color: (opacity = 1) => shadeColour(type.colour, 40)
+        };
+        let dataArr = [];
+        // constructs the dictionary of dates and respective counts for this type (e.g Headache)
+        for (let i=0; i<12; i++) {
+          let dayInstances = instances.filter(function (instance) { return parseInt(moment(instance.date).month()) === i; });
+          dataArr.push(dayInstances.length);
+        }
+  
+        typeLine.data = dataArr;
+        typeLines.push(typeLine);
+      });
       
-      instances.map((instance) => {
-        instance.type = typeName;
-        return instance;
+    } else if (rangeType === "week-average") {
+
+      dates = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
+
+      selectedData.forEach((selected) => {
+        let typeName = selected.split(' ')[0];
+        let id = parseInt(selected.split(' ')[1]);
+        let type = this.state[typeName+"s"].find((t) => t.id === id);
+        typeList.push(type.name);
+        let instances = this.state[typeName+"Instances"].filter((instance) => {return instance.typeId === id});
+  
+        let typeLine = {
+          data: [],
+          color: (opacity = 1) => shadeColour(type.colour, 40)
+        };
+        let dataArr = [];
+        // constructs the dictionary of dates and respective counts for this type (e.g Headache)
+        for (let i=1; i<=7; i++) {
+          let dayInstances = instances.filter(function (instance) { return parseInt(moment(instance.date).day()) === i; });
+          dataArr.push(dayInstances.length);
+        }
+  
+        typeLine.data = dataArr;
+        typeLines.push(typeLine);
       });
 
-      let typeLine = {
-        data: [],
-        color: (opacity = 1) => shadeColour(type.colour, 40)
-      };
-      let dateDict = {};
-      // constructs the dictionary of dates and respective counts for this type (e.g Headache)
-      instances.forEach((instance) => {
-        let date = moment(instance.date)
-        let dateString = date.format("MMM YY");
-        if (date.isBefore(firstDate)) {
-          firstDate = date;
-        } else if (date.isAfter(lastDate)) {
-          lastDate = date;
-        }
-        
-        !dateDict[dateString] && (dateDict[dateString] = 0);
-        dateDict[dateString]++;
-      });
+    } else if (rangeType === "month-average") {
 
-      typeLine.data = dateDict;
-      typeLines.push(typeLine);
-    });
-    
-    let dates = [];
-    let tempFirstDate = moment(firstDate);
-    typeLines.forEach((type) => {
-      // now we go from the first date to the last date, filling in
-      let typeLineData = [];
-      dates = [];
-      while (lastDate > tempFirstDate || tempFirstDate.format('M') === lastDate.format('M')) {
-        let dateString = tempFirstDate.format("MMM YY");
-        dates.push(tempFirstDate.format("MMM"));
-        if (!type.data[dateString]) {
-          typeLineData.push(0);
-        } else {
-          typeLineData.push(type.data[dateString]);
-        }
-        tempFirstDate.add(1,'month');
-      }
-      type.data = typeLineData;
-      tempFirstDate = moment(firstDate);
-    });
+      dates = ["1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11",
+              "12", "13", "14", "15", "16", "17", "18", "19", "20", "21",
+              "22", "23", "24", "25", "26", "27", "28", "29", "30", "31"];
+
+      selectedData.forEach((selected) => {
+        let typeName = selected.split(' ')[0];
+        let id = parseInt(selected.split(' ')[1]);
+        let type = this.state[typeName+"s"].find((t) => t.id === id);
+        typeList.push(type.name);
+        let instances = this.state[typeName+"Instances"].filter((instance) => {return instance.typeId === id});
+  
+        let typeLine = {
+          data: [],
+          color: (opacity = 1) => shadeColour(type.colour, 40)
+        };
+        let dataArr = [];
+        dates.forEach(function (date) {
+          let dayInstances = instances.filter(function (instance) { return moment(instance.date).date() === parseInt(date); });
+          dataArr.push(dayInstances.length);
+        });
+  
+        typeLine.data = dataArr;
+        typeLines.push(typeLine);
+      });
+    }
 
     return { datasets: typeLines, labels: dates };
 
@@ -592,7 +619,7 @@ export default class StackedBarChartExample extends React.PureComponent {
         </ScrollView>
       )
     } else if (type === "line") {
-      let selectedData = this.selectedLineDataByMonth(this.state.SelectedData);
+      let selectedData = this.selectedLineDataByMonth(this.state.SelectedData, this.props.period);
 
       let maxVisible = 10;
       let numOfItems = selectedData.datasets && selectedData.datasets[0] && selectedData.datasets[0].data.length;
@@ -633,7 +660,7 @@ export default class StackedBarChartExample extends React.PureComponent {
         )
       }
     } else if (type === "heat") {
-      let heatGraph = this.buildHeatChart(this.state.SelectedData, "week-average");
+      let heatGraph = this.buildHeatChart(this.state.SelectedData, this.props.period);
 
       if (this.state.SelectedData.length) {
         return heatGraph;

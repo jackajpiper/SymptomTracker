@@ -3,7 +3,7 @@ import { StyleSheet, View, TouchableOpacity, Text, ScrollView, ActivityIndicator
 import AsyncManager from './AsyncManager';
 import moment from "moment";
 import BouncyCheckbox from "react-native-bouncy-checkbox";
-import StackedBarChartExample from './StackedBarChartExample';
+import ChartsComponent from './ChartsComponent';
 import { RadioButton } from 'react-native-paper';
 import { createMaterialTopTabNavigator } from '@react-navigation/material-top-tabs';
 
@@ -231,7 +231,7 @@ export default class AnalysisScreen extends React.Component {
         </View>
       );
     } else {
-      return <StackedBarChartExample type={type} state={{...this.state}} navigation={{...this.props.navigation}}/>
+      return <ChartsComponent type={type} period={period} state={{...this.state}} navigation={{...this.props.navigation}}/>
     }
   }
 
