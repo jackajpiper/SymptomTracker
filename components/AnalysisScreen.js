@@ -5,7 +5,7 @@ import moment from "moment";
 import BouncyCheckbox from "react-native-bouncy-checkbox";
 import StackedBarChartExample from './StackedBarChartExample';
 import { RadioButton } from 'react-native-paper';
-
+import { createMaterialTopTabNavigator } from '@react-navigation/material-top-tabs';
 
 function shadeColor(color, percent) {
 
@@ -60,40 +60,7 @@ function shadeColor(color, percent) {
   return "#"+RR+GG+BB;
 }
 
-const data = [
-  {
-      month: new Date(2015, 0, 1),
-      apples: 3840,
-      bananas: 1920,
-      cherries: 960,
-      dates: 400,
-      oranges: 400,
-  },
-  {
-      month: new Date(2015, 1, 1),
-      apples: 1600,
-      bananas: 1440,
-      cherries: 960,
-      dates: 400,
-  },
-  {
-      month: new Date(2015, 2, 1),
-      apples: 640,
-      bananas: 960,
-      cherries: 3640,
-      dates: 400,
-  },
-  {
-      month: new Date(2015, 3, 1),
-      apples: 3320,
-      bananas: 480,
-      cherries: 640,
-      dates: 400,
-  },
-]
-
-const colors = ['#7b4173', '#a55194', '#ce6dbd', '#de9ed6']
-const keys = ['apples', 'bananas', 'cherries', 'dates']
+const Tab = createMaterialTopTabNavigator();
 
 export default class AnalysisScreen extends React.Component {
   constructor(props) {
@@ -108,7 +75,8 @@ export default class AnalysisScreen extends React.Component {
       TriggerInstances: [],
       Treatments: [],
       TreatmentInstances: [],
-      GraphType: [],
+      GraphType: "",
+      GraphPeriodType: "",
       SelectedData: [],
     };
   }
@@ -121,7 +89,6 @@ export default class AnalysisScreen extends React.Component {
       let triggerInstances = await AsyncManager.getTriggerInstances();
       let treatments = await AsyncManager.getTreatments();
       let treatmentInstances = await AsyncManager.getTreatmentInstances();
-
 
       this.setState({ 
         isLoading: false,
@@ -204,6 +171,21 @@ export default class AnalysisScreen extends React.Component {
     }
   }
 
+  renderRadioButton = (value, stateName, text) => {
+    return (
+      <View style={{ display: "flex", flexDirection: "row", alignItems: "center" }}>
+        <View style={{  }}>
+          <RadioButton
+            value={value}
+            status={this.state[stateName] === value ? 'checked' : 'unchecked'}
+            onPress={() => {this.setState({ [stateName]: value })}}
+          />
+        </View>
+        <Text style={{}}>{text}</Text>
+      </View>
+    )
+  }
+
   renderSymptomCheckboxes = () => {
     return this.state.Symptoms.map((symptom, index) => (
       <View key={symptom.id} style={styles.checkbox}>
@@ -220,34 +202,28 @@ export default class AnalysisScreen extends React.Component {
     ));
   }
 
-  renderGraphCheckboxes = () => {
-
+  renderGraphCheckboxes = (things, things2) => {
+    console.log(things, things2);
     return (
       <View style={{marginLeft: 30}}>
-        <RadioButton
-          value="bar"
-          status={ this.state.GraphType === 'bar' ? 'checked' : 'unchecked' }
-          onPress={() => this.setGraph('bar')}
-        />
-        <RadioButton
-          value="line"
-          status={ this.state.GraphType === 'line' ? 'checked' : 'unchecked' }
-          onPress={() => this.setGraph('line')}
-        />
-        <RadioButton
-          value="heat"
-          status={ this.state.GraphType === 'heat' ? 'checked' : 'unchecked' }
-          onPress={() => this.setGraph('heat')}
-        />
+        {this.renderRadioButton("bar", "GraphType", "Bar chart")}
+        {this.renderRadioButton("line", "GraphType", "Line chart")}
+        {this.renderRadioButton("heat", "GraphType", "Heat map")}
       </View>
     );
   }
 
-  setGraph = (type) => {
-    this.setState({ GraphType: type });
+  renderPeriodCheckboxes = () => {
+    return (
+      <View style={{marginLeft: 30}}>
+        {this.renderRadioButton("week-average", "GraphPeriodType", "Week")}
+        {this.renderRadioButton("month-average", "GraphPeriodType", "Month")}
+        {this.renderRadioButton("year-average", "GraphPeriodType", "Year")}
+      </View>
+    );
   }
 
-  renderGraph = (type) => {
+  renderGraph = (type, period) => {
     if (!this.state.Symptoms.length) {
       return (
         <View style={styles.spinner}>
@@ -259,24 +235,24 @@ export default class AnalysisScreen extends React.Component {
     }
   }
 
+  renderTabs = () => {
+    return (
+      <Tab.Navigator>
+        <Tab.Screen name="Graph" component={this.renderGraphCheckboxes} />
+        <Tab.Screen name="Period" component={this.renderPeriodCheckboxes} />
+        <Tab.Screen name="Data" component={this.renderSymptomCheckboxes} />
+      </Tab.Navigator>
+    );
+  }
+
   render() {
     return (
       <View style={styles.container}>
         <View style={styles.top}>
-          <View style={styles.graph}>
-            {this.renderGraph(this.state.GraphType)}
-          </View>
+          {this.renderGraph(this.state.GraphType, this.state.GraphPeriodType)}
         </View>
         <View style={styles.bottom}>
-          <TouchableOpacity style={{height: 50, width: 100, backgroundColor: "cornflowerblue"}}><Text>Toggle</Text></TouchableOpacity>
-          <View style={{flex: 1, flexDirection: "row"}}>
-            <View>
-              {this.renderSymptomCheckboxes()}
-            </View>
-            <View>
-              {this.renderGraphCheckboxes()}
-            </View>
-          </View>
+          {this.renderTabs()}
         </View>
       </View>
     );
@@ -311,7 +287,8 @@ const styles = StyleSheet.create({
     marginTop: 12
   },
   bottom: {
-    flex: 4
+    flex: 4,
+    width: "100%"
   },
   spinner: {
     flex: 1,
