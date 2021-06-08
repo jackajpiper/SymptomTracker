@@ -472,7 +472,7 @@ export default class ChartsComponent extends React.PureComponent {
               justifyContent: "space-between",
               flex: 1
             }}>
-              <Text style={[styles.monthDay, {marginTop: -38}]}> 1</Text>
+              <Text style={[styles.monthDay, {marginTop: -32}]}> 1</Text>
               <Text style={styles.monthDay}> 7</Text>
               <Text style={styles.monthDay}>29</Text>
             </View>
