@@ -338,12 +338,67 @@ export default class ChartsComponent extends React.PureComponent {
     return {data: data, barColors: colourList, labels: dates};
   }
 
+  buildSelectedBarData = (selectedData, period, start, end) => {
+    let data = [];
+    let dates = [];
+    let colourList = [];
+    
+    if (period === "week-average") {
+      data = [[], [], [], [], [], [], []];
+      dates = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
+
+      selectedData.forEach((selected) => {
+        let typeName = selected.split(' ')[0];
+        let id = parseInt(selected.split(' ')[1]);
+        let type = this.state[typeName+"s"].find((t) => t.id === id);
+        colourList.push(shadeColour(type.colour, 40));
+        let instances = this.state[typeName+"Instances"].filter((instance) => {return instance.typeId === id});
+        for (let i=0; i<7; i++) {
+          data[i].push(instances.filter((instance) => { return moment(instance.date).day() === (i) }).length);
+        }
+      });
+    } else if (period === "year-average") {
+      data = [[], [], [], [], [], [], [], [], [], [], [], []];
+      dates = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+
+      selectedData.forEach((selected) => {
+        let typeName = selected.split(' ')[0];
+        let id = parseInt(selected.split(' ')[1]);
+        let type = this.state[typeName+"s"].find((t) => t.id === id);
+        colourList.push(shadeColour(type.colour, 40));
+        let instances = this.state[typeName+"Instances"].filter((instance) => {return instance.typeId === id});
+        console.log(moment("2021-01-01").month());
+        for (let i=0; i<12; i++) {
+          data[i].push(instances.filter((instance) => { return moment(instance.date).month() === (i) }).length);
+        }
+      });
+    } else if (period === "month-average") {
+      data = [[], [], [], [], [], [], [], [], [], [],
+              [], [], [], [], [], [], [], [], [], [],
+              [], [], [], [], [], [], [], [], [], [], []];
+      dates = ["1", "2", "3", "4", "5", "6", "7", "8", "9", "10",
+              "11", "12", "13", "14", "15", "16", "17", "18", "19", "20",
+              "21", "22", "23", "24", "25", "26", "27", "28", "29", "30", "31"];
+
+      selectedData.forEach((selected) => {
+        let typeName = selected.split(' ')[0];
+        let id = parseInt(selected.split(' ')[1]);
+        let type = this.state[typeName+"s"].find((t) => t.id === id);
+        colourList.push(shadeColour(type.colour, 40));
+        let instances = this.state[typeName+"Instances"].filter((instance) => {return instance.typeId === id});
+        for (let i=0; i<31; i++) {
+          data[i].push(instances.filter((instance) => { return moment(instance.date).date() === (i+1) }).length);
+        }
+      });
+    }
+
+    return {data: data, barColors: colourList, labels: dates};
+  }
+
   selectedLineDataByMonth = (selectedData, rangeType, start, end) => {
     let typeLines = [];
     let typeList = [];
     let dates = [];
-    let firstDate = moment("9999-12-31");
-    let lastDate = moment("0001-01-01");
 
     if (rangeType === "year-average") {
 
@@ -388,7 +443,7 @@ export default class ChartsComponent extends React.PureComponent {
         };
         let dataArr = [];
         // constructs the dictionary of dates and respective counts for this type (e.g Headache)
-        for (let i=1; i<=7; i++) {
+        for (let i=0; i<7; i++) {
           let dayInstances = instances.filter(function (instance) { return parseInt(moment(instance.date).day()) === i; });
           dataArr.push(dayInstances.length);
         }
@@ -588,7 +643,7 @@ export default class ChartsComponent extends React.PureComponent {
 
   renderGraph = (type) => {
     if (type === "bar") {
-      let selectedData = this.selectedBarDataByMonth(this.state.SelectedData);
+      let selectedData = this.buildSelectedBarData(this.state.SelectedData, this.props.period);
       let widths = this.calculateBarWidths(selectedData.data && selectedData.data.length, 12, 31, 1, 0.8, 0.4);
 
       return (
