@@ -354,7 +354,7 @@ export default class ChartsComponent extends React.PureComponent {
         colourList.push(shadeColour(type.colour, 40));
         let instances = this.state[typeName+"Instances"].filter((instance) => {return instance.typeId === id});
         for (let i=0; i<7; i++) {
-          data[i].push(instances.filter((instance) => { return moment(instance.date).day() === (i) }).length);
+          data[i].push(instances.filter((instance) => { return moment(instance.date).day()-1 === (i) }).length);
         }
       });
     } else if (period === "year-average") {
@@ -444,7 +444,7 @@ export default class ChartsComponent extends React.PureComponent {
         let dataArr = [];
         // constructs the dictionary of dates and respective counts for this type (e.g Headache)
         for (let i=0; i<7; i++) {
-          let dayInstances = instances.filter(function (instance) { return parseInt(moment(instance.date).day()) === i; });
+          let dayInstances = instances.filter(function (instance) { return parseInt(moment(instance.date).day())-1 === i; });
           dataArr.push(dayInstances.length);
         }
   
