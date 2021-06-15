@@ -1,10 +1,8 @@
 import React, {Component} from 'react';
 import { StyleSheet, View, TouchableOpacity, Text, ScrollView, ActivityIndicator } from "react-native";
 import AsyncManager from './AsyncManager';
-import moment from "moment";
 import BouncyCheckbox from "react-native-bouncy-checkbox";
 import ChartsComponent from './ChartsComponent';
-import { RadioButton } from 'react-native-paper';
 import { createMaterialTopTabNavigator } from '@react-navigation/material-top-tabs';
 
 function shadeColor(color, percent) {
@@ -171,54 +169,20 @@ export default class AnalysisScreen extends React.Component {
     }
   }
 
-  renderRadioButton = (value, stateName, text) => {
+  renderRadioButton = (value, stateName, text, colour) => {
     return (
-      <View style={{ display: "flex", flexDirection: "row", alignItems: "center" }}>
-        <View style={{  }}>
-          <RadioButton
-            value={value}
-            status={this.state[stateName] === value ? 'checked' : 'unchecked'}
-            onPress={() => {this.setState({ [stateName]: value })}}
-          />
-        </View>
-        <Text style={{}}>{text}</Text>
-      </View>
-    )
-  }
-
-  renderSymptomCheckboxes = () => {
-    return this.state.Symptoms.map((symptom, index) => (
-      <View key={symptom.id} style={styles.checkbox}>
+      <View style={styles.checkbox}>
         <BouncyCheckbox
           size={25}
-          fillColor={shadeColor(symptom.colour, 40)}
+          fillColor={colour}
           unfillColor="lightgrey"
-          text={symptom.name}
+          isChecked={this.state[stateName] === value}
+          disableBuiltInState
+          text={text}
           iconStyle={{ borderColor: "#444444" }}
           textStyle={{ marginLeft: -10 }}
-          onPress={(checked) => {this.checkboxClicked(checked, symptom.id, "Symptom", symptom.name)}}
+          onPress={(checked) => {this.setState({ [stateName]: value })}}
         />
-      </View>
-    ));
-  }
-
-  renderGraphCheckboxes = (things, things2) => {
-    console.log(things, things2);
-    return (
-      <View style={{marginLeft: 30}}>
-        {this.renderRadioButton("bar", "GraphType", "Bar chart")}
-        {this.renderRadioButton("line", "GraphType", "Line chart")}
-        {this.renderRadioButton("heat", "GraphType", "Heat map")}
-      </View>
-    );
-  }
-
-  renderPeriodCheckboxes = () => {
-    return (
-      <View style={{marginLeft: 30}}>
-        {this.renderRadioButton("week-average", "GraphPeriodType", "Week")}
-        {this.renderRadioButton("month-average", "GraphPeriodType", "Month")}
-        {this.renderRadioButton("year-average", "GraphPeriodType", "Year")}
       </View>
     );
   }
@@ -235,12 +199,51 @@ export default class AnalysisScreen extends React.Component {
     }
   }
 
+  RenderSymptomCheckboxes = () => {
+    return this.state.Symptoms.map((symptom, index) => (
+      <View key={symptom.id} style={styles.checkbox}>
+        <BouncyCheckbox
+          size={25}
+          fillColor={shadeColor(symptom.colour, 40)}
+          unfillColor="lightgrey"
+          text={symptom.name}
+          iconStyle={{ borderColor: "#444444" }}
+          textStyle={{ marginLeft: -10 }}
+          onPress={(checked) => {this.checkboxClicked(checked, symptom.id, "Symptom", symptom.name)}}
+        />
+      </View>
+    ));
+  }
+
   renderTabs = () => {
+
+    const RenderGraphCheckboxes = () => {
+      console.log("rendering graph options");
+      return (
+        <View style={{marginLeft: 30}}>
+          {this.renderRadioButton("bar", "GraphType", "Bar chart", "#E7D5E1")}
+          {this.renderRadioButton("line", "GraphType", "Line chart", "#FAEEC4")}
+          {this.renderRadioButton("heat", "GraphType", "Heat map", "#C3D8D1")}
+        </View>
+      );
+    };
+
+    const RenderPeriodCheckboxes = () => {
+      console.log("rendering period options");
+      return (
+        <View style={{marginLeft: 30}}>
+          {this.renderRadioButton("week-average", "GraphPeriodType", "Week", "#E7D5E1")}
+          {this.renderRadioButton("month-average", "GraphPeriodType", "Month", "#FAEEC4")}
+          {this.renderRadioButton("year-average", "GraphPeriodType", "Year", "#C3D8D1")}
+        </View>
+      );
+    };
+
     return (
       <Tab.Navigator>
-        <Tab.Screen name="Graph" component={this.renderGraphCheckboxes} />
-        <Tab.Screen name="Period" component={this.renderPeriodCheckboxes} />
-        <Tab.Screen name="Data" component={this.renderSymptomCheckboxes} />
+        <Tab.Screen name="Graph" children={() => <RenderGraphCheckboxes/>} />
+        <Tab.Screen name="Period" children={() => <RenderPeriodCheckboxes/>} />
+        <Tab.Screen name="Data" component={this.RenderSymptomCheckboxes} />
       </Tab.Navigator>
     );
   }

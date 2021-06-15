@@ -23,7 +23,18 @@ const SymptomInstances = [
   { id: 15, typeId: 4, date: '2021-02-18', startTime: '01:30', endTime: '07:00', severity: 45, notes: 'note15' },
   { id: 17, typeId: 2, date: '2021-02-04', startTime: '21:00', endTime: '22:25', severity: 12, notes: 'note16' },
   { id: 18, typeId: 4, date: '2021-02-12', startTime: '14:30', endTime: '22:00', severity: 28, notes: 'note17' },
-  { id: 16, typeId: 1, date: '2021-03-01', startTime: '12:40', endTime: '12:55', severity: 78, notes: 'note18' }
+  { id: 16, typeId: 1, date: '2021-03-01', startTime: '12:40', endTime: '12:55', severity: 78, notes: 'note18' },
+
+  { id: 19, typeId: 1, date: '2021-05-04', startTime: '12:40', endTime: '12:55', severity: 78, notes: 'note18' },
+  { id: 20, typeId: 1, date: '2021-05-04', startTime: '12:40', endTime: '12:55', severity: 78, notes: 'note18' },
+  { id: 21, typeId: 1, date: '2021-05-04', startTime: '21:00', endTime: '22:25', severity: 12, notes: 'note11' },
+  { id: 22, typeId: 1, date: '2021-05-04', startTime: '14:30', endTime: '23:00', severity: 28, notes: 'note12' },
+  { id: 23, typeId: 1, date: '2021-05-04', startTime: '11:40', endTime: '15:05', severity: 30, notes: 'note13' },
+  { id: 24, typeId: 1, date: '2021-05-04', startTime: '19:00', endTime: '19:25', severity: 69, notes: 'note14' },
+  { id: 25, typeId: 1, date: '2021-05-04', startTime: '01:30', endTime: '07:00', severity: 45, notes: 'note15' },
+  { id: 27, typeId: 1, date: '2021-05-04', startTime: '21:00', endTime: '22:25', severity: 12, notes: 'note16' },
+  { id: 28, typeId: 1, date: '2021-05-04', startTime: '14:30', endTime: '22:00', severity: 28, notes: 'note17' },
+  { id: 26, typeId: 1, date: '2021-05-04', startTime: '12:40', endTime: '12:55', severity: 78, notes: 'note18' }
 ]
 
 const Treatments = [
