@@ -3,6 +3,7 @@ import { StyleSheet, View, TouchableOpacity, Text, ScrollView, ActivityIndicator
 import AsyncManager from './AsyncManager';
 import BouncyCheckbox from "react-native-bouncy-checkbox";
 import ChartsComponent from './ChartsComponent';
+import AnalysisTabs from './AnalysisTabs';
 import { createMaterialTopTabNavigator } from '@react-navigation/material-top-tabs';
 
 function shadeColor(color, percent) {
@@ -142,52 +143,7 @@ export default class AnalysisScreen extends React.Component {
     }
   }
 
-  checkboxClicked = async (checked, id, type, name) => {
-    let selectedData = this.state.SelectedData;
-
-    let stringId = type+" "+id+" "+name;
-
-    if (checked) {
-      selectedData.push(stringId);
-    } else {
-      let index = selectedData.findIndex((val) => {
-        return val===(stringId);
-      });
-      selectedData.splice(index, 1);
-    }
-
-    selectedData = selectedData.sort(function (data1, data2) {
-      if (data1.split(' ')[2] > data2.split(' ')[2]) {
-        return 1;
-      } else {
-        return -1;
-      }
-    })
-
-    if (this._mounted = true) {
-      this.setState({ SelectedData: selectedData });
-    }
-  }
-
-  renderRadioButton = (value, stateName, text, colour) => {
-    return (
-      <View style={styles.checkbox}>
-        <BouncyCheckbox
-          size={25}
-          fillColor={colour}
-          unfillColor="lightgrey"
-          isChecked={this.state[stateName] === value}
-          disableBuiltInState
-          text={text}
-          iconStyle={{ borderColor: "#444444" }}
-          textStyle={{ marginLeft: -10 }}
-          onPress={(checked) => {this.setState({ [stateName]: value })}}
-        />
-      </View>
-    );
-  }
-
-  renderGraph = (type, period) => {
+  renderGraph = (type, period, selectedData) => {
     if (!this.state.Symptoms.length) {
       return (
         <View style={styles.spinner}>
@@ -195,67 +151,24 @@ export default class AnalysisScreen extends React.Component {
         </View>
       );
     } else {
-      return <ChartsComponent type={type} period={period} state={{...this.state}} navigation={{...this.props.navigation}}/>
+      return <ChartsComponent type={type} period={period} selectedData={selectedData} state={{...this.state}} navigation={{...this.props.navigation}}/>
     }
   }
 
-  RenderSymptomCheckboxes = () => {
-    return this.state.Symptoms.map((symptom, index) => (
-      <View key={symptom.id} style={styles.checkbox}>
-        <BouncyCheckbox
-          size={25}
-          fillColor={shadeColor(symptom.colour, 40)}
-          unfillColor="lightgrey"
-          text={symptom.name}
-          iconStyle={{ borderColor: "#444444" }}
-          textStyle={{ marginLeft: -10 }}
-          onPress={(checked) => {this.checkboxClicked(checked, symptom.id, "Symptom", symptom.name)}}
-        />
-      </View>
-    ));
-  }
-
-  renderTabs = () => {
-
-    const RenderGraphCheckboxes = () => {
-      console.log("rendering graph options");
-      return (
-        <View style={{marginLeft: 30}}>
-          {this.renderRadioButton("bar", "GraphType", "Bar chart", "#E7D5E1")}
-          {this.renderRadioButton("line", "GraphType", "Line chart", "#FAEEC4")}
-          {this.renderRadioButton("heat", "GraphType", "Heat map", "#C3D8D1")}
-        </View>
-      );
-    };
-
-    const RenderPeriodCheckboxes = () => {
-      console.log("rendering period options");
-      return (
-        <View style={{marginLeft: 30}}>
-          {this.renderRadioButton("week-average", "GraphPeriodType", "Week", "#E7D5E1")}
-          {this.renderRadioButton("month-average", "GraphPeriodType", "Month", "#FAEEC4")}
-          {this.renderRadioButton("year-average", "GraphPeriodType", "Year", "#C3D8D1")}
-        </View>
-      );
-    };
-
-    return (
-      <Tab.Navigator>
-        <Tab.Screen name="Graph" children={() => <RenderGraphCheckboxes/>} />
-        <Tab.Screen name="Period" children={() => <RenderPeriodCheckboxes/>} />
-        <Tab.Screen name="Data" component={this.RenderSymptomCheckboxes} />
-      </Tab.Navigator>
-    );
+  updateGraph = (graphType, period, selectedData) => {
+    console.log(selectedData.length);
+    this.setState({ GraphType: graphType, GraphPeriodType: period, SelectedData: selectedData });
+    console.log("Updated inside the parent screen!");
   }
 
   render() {
     return (
       <View style={styles.container}>
         <View style={styles.top}>
-          {this.renderGraph(this.state.GraphType, this.state.GraphPeriodType)}
+          {this.renderGraph(this.state.GraphType, this.state.GraphPeriodType, this.state.SelectedData)}
         </View>
         <View style={styles.bottom}>
-          {this.renderTabs()}
+          <AnalysisTabs updateGraph={this.updateGraph} symptoms={this.state.Symptoms}/>
         </View>
       </View>
     );

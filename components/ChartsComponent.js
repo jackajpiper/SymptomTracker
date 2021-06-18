@@ -367,7 +367,6 @@ export default class ChartsComponent extends React.PureComponent {
         let type = this.state[typeName+"s"].find((t) => t.id === id);
         colourList.push(shadeColour(type.colour, 40));
         let instances = this.state[typeName+"Instances"].filter((instance) => {return instance.typeId === id});
-        console.log(moment("2021-01-01").month());
         for (let i=0; i<12; i++) {
           data[i].push(instances.filter((instance) => { return moment(instance.date).month() === (i) }).length);
         }
@@ -537,7 +536,6 @@ export default class ChartsComponent extends React.PureComponent {
                 <HeatMap
                   numberOfLines={7}
                   values={dataArr}
-                  onBlockPress={this.click}
                   colors={colourIntervals}
                   blocksSize={33}
                 />
@@ -571,7 +569,6 @@ export default class ChartsComponent extends React.PureComponent {
               <HeatMap
                 numberOfLines={7}
                 values={dataArr}
-                onBlockPress={this.click}
                 colors={colourIntervals}
                 blocksSize={40}
               />
@@ -608,7 +605,6 @@ export default class ChartsComponent extends React.PureComponent {
               <HeatMap
                 numberOfLines={12}
                 values={dataArr}
-                onBlockPress={this.click}
                 colors={colourIntervals}
                 blocksSize={24}
               />
@@ -636,14 +632,9 @@ export default class ChartsComponent extends React.PureComponent {
     return { scaleMultiple: lengthMultiple, itemPercentage: barPercentage };
   }
 
-  click = (item) => {
-    console.log(`Value: ${item.value}`);
-    console.log(`Index: ${item.index}`);
-  };
-
   renderGraph = (type) => {
     if (type === "bar") {
-      let selectedData = this.buildSelectedBarData(this.state.SelectedData, this.props.period);
+      let selectedData = this.buildSelectedBarData(this.props.selectedData, this.props.period);
       let widths = this.calculateBarWidths(selectedData.data && selectedData.data.length, 12, 31, 1, 0.8, 0.4);
 
       return (
