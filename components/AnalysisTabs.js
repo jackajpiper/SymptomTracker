@@ -77,8 +77,6 @@ export default class AnalysisTabs extends React.Component {
     this.updateGraph = this.props.updateGraph;
 
     this.state = {
-      Symptoms: this.props.symptoms || [],
-      SymptomInstances: this.props.symptomInstances || [],
       GraphType: "",
       GraphPeriodType: "",
       SelectedData: []
@@ -118,8 +116,7 @@ export default class AnalysisTabs extends React.Component {
 
   updateGraphData = (key, value) => {
     this.setState({ [key]: value }, () => {
-      console.log("erojgnborehorjhbpn", this.state.GraphType, this.state.GraphPeriodType, this.state.SelectedData);
-      this.updateGraph(this.state.GraphType, this.state.GraphPeriodType, this.state.SelectedData);
+      this.updateGraph(this.state.GraphType, this.state.GraphPeriodType, JSON.parse(JSON.stringify(this.state.SelectedData)));
     });
   }
 

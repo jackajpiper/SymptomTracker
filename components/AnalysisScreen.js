@@ -156,9 +156,7 @@ export default class AnalysisScreen extends React.Component {
   }
 
   updateGraph = (graphType, period, selectedData) => {
-    console.log(selectedData.length);
     this.setState({ GraphType: graphType, GraphPeriodType: period, SelectedData: selectedData });
-    console.log("Updated inside the parent screen!");
   }
 
   render() {

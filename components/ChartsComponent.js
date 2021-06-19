@@ -192,7 +192,7 @@ function getColourIntervals(colour, num) {
   return colours;
 }
 
-export default class ChartsComponent extends React.PureComponent {
+export default class ChartsComponent extends React.Component {
   constructor(props) {
     super(props);
 
@@ -259,6 +259,12 @@ export default class ChartsComponent extends React.PureComponent {
     if(this.willFocusListener && typeof this.willFocusListener.remove === "function") {
       this.willFocusListener.remove();
     };
+  }
+
+  shouldComponentUpdate = (nextProps, nextState) => {
+    return this.props.type !== nextProps.type
+        || this.props.period !== nextProps.period
+        || JSON.stringify(this.props.selectedData) !== JSON.stringify(nextProps.selectedData);
   }
 
   selectedBarDataByMonth = (selectedData) => {
@@ -665,7 +671,8 @@ export default class ChartsComponent extends React.PureComponent {
         </ScrollView>
       )
     } else if (type === "line") {
-      let selectedData = this.selectedLineDataByMonth(this.state.SelectedData, this.props.period);
+      let selectedData = this.selectedLineDataByMonth(this.props.selectedData, this.props.period);
+      // console.log("doing line graph", selectedData); 
 
       let maxVisible = 10;
       let numOfItems = selectedData.datasets && selectedData.datasets[0] && selectedData.datasets[0].data.length;
@@ -706,9 +713,9 @@ export default class ChartsComponent extends React.PureComponent {
         )
       }
     } else if (type === "heat") {
-      let heatGraph = this.buildHeatChart(this.state.SelectedData, this.props.period);
+      let heatGraph = this.buildHeatChart(this.props.selectedData, this.props.period);
 
-      if (this.state.SelectedData.length) {
+      if (this.props.selectedData.length) {
         return heatGraph;
       } else {
         return (
