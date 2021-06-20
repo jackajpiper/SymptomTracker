@@ -611,8 +611,11 @@ export default class ChartsComponent extends React.Component {
       let selectedData = this.state.GraphData;
       let widths = selectedData.widths;
       if (!widths) {
-        selectedData = {data: []};
-        widths = {scaleMultiple: 1, itemPercentage: 0.8}
+        return (
+          <View style={{width: "100%", height: "100%", display: "flex", justifyContent: "center"}}>
+            <ActivityIndicator animating={this.state.isLoading} size="large" color="cornflowerblue" />
+          </View>
+        )
       }
 
       return (
@@ -640,15 +643,16 @@ export default class ChartsComponent extends React.Component {
               }
             }}
           />
-          <View style={{zIndex: 999, position: this.state.isLoading ? "absolute" : "relative", top: 100, left: ((this.state.graphWidth))/2}}>
-            <ActivityIndicator size="large" color="cornflowerblue" />
-          </View>
         </ScrollView>
       )
     } else if (type === "line") {
       let selectedData = this.state.GraphData;
-      if (!selectedData.datasets) {
-        selectedData.datasets = [];
+      if (!(selectedData.datasets && selectedData.datasets.length)) {
+        return (
+          <View style={{width: "100%", height: "100%", display: "flex", justifyContent: "center"}}>
+            <ActivityIndicator animating={this.state.isLoading} size="large" color="cornflowerblue" />
+          </View>
+        )
       }
 
       let maxVisible = 10;
@@ -657,41 +661,32 @@ export default class ChartsComponent extends React.Component {
         ? Math.round((numOfItems / maxVisible)*10)/10
         : 1;
 
-      if (selectedData.datasets[0]) {
-        return (
-          <ScrollView horizontal={true} showsHorizontalScrollIndicator={lengthMultiple !== 1} scrollEnabled={lengthMultiple !== 1}>
-            <LineChart
-              data={selectedData}
-              width={(this.state.graphWidth+30) * lengthMultiple}
-              height={220}
-              chartConfig={{
-                backgroundGradientFrom: "white",
-                backgroundGradientTo: "white",
-                decimalPlaces: 0,
-                color: (opacity = 1) => `rgba(20, 20, 20, ${opacity})`,
-                labelColor: (opacity = 1) => `rgba(20, 20, 20, ${opacity})`,
-                propsForDots: {
-                  r: "6",
-                  strokeWidth: "2",
-                  stroke: "#777777"
-                }
-              }}
-              bezier
-              style={{
-                marginLeft: -30,
-                borderRadius: 16
-              }}
-            />
-            <View style={{zIndex: 999, position: this.state.isLoading ? "absolute" : "relative", top: 100, left: ((this.state.graphWidth))/2}}>
-              <ActivityIndicator size="large" color="cornflowerblue" />
-            </View>
-          </ScrollView>
-        )
-      } else {
-        return (
-          <View></View>
-        )
-      }
+      return (
+        <ScrollView horizontal={true} showsHorizontalScrollIndicator={lengthMultiple !== 1} scrollEnabled={lengthMultiple !== 1}>
+          <LineChart
+            data={selectedData}
+            width={(this.state.graphWidth+30) * lengthMultiple}
+            height={220}
+            chartConfig={{
+              backgroundGradientFrom: "white",
+              backgroundGradientTo: "white",
+              decimalPlaces: 0,
+              color: (opacity = 1) => `rgba(20, 20, 20, ${opacity})`,
+              labelColor: (opacity = 1) => `rgba(20, 20, 20, ${opacity})`,
+              propsForDots: {
+                r: "6",
+                strokeWidth: "2",
+                stroke: "#777777"
+              }
+            }}
+            bezier
+            style={{
+              marginLeft: -30,
+              borderRadius: 16
+            }}
+          />
+        </ScrollView>
+      )
     } else if (type === "heat") {
       let heatGraph = this.buildHeatChart(this.state.GraphData);
 
