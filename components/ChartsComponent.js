@@ -490,9 +490,6 @@ export default class ChartsComponent extends React.Component {
               </View>
             </View>
           </View>
-          <View style={{zIndex: 999, position: this.state.isLoading ? "absolute" : "relative", top: 100, left: ((this.state.graphWidth))/2}}>
-            <ActivityIndicator size="large" color="cornflowerblue" />
-          </View>
         </View>
       )
 
@@ -517,9 +514,6 @@ export default class ChartsComponent extends React.Component {
                 blocksSize={40}
               />
             </View>
-          </View>
-          <View style={{zIndex: 999, position: this.state.isLoading ? "absolute" : "relative", top: 100, left: ((this.state.graphWidth))/2}}>
-            <ActivityIndicator size="large" color="cornflowerblue" />
           </View>
         </View>
       )
@@ -550,9 +544,12 @@ export default class ChartsComponent extends React.Component {
               />
             </View>
           </View>
-          <View style={{zIndex: 999, position: this.state.isLoading ? "absolute" : "relative", top: 100, left: ((this.state.graphWidth))/2}}>
-            <ActivityIndicator size="large" color="cornflowerblue" />
-          </View>
+        </View>
+      )
+    } else {
+      return (
+        <View style={{width: "100%", height: "100%", display: "flex", justifyContent: "center"}}>
+          <ActivityIndicator animating={this.state.isLoading} size="large" color="cornflowerblue" />
         </View>
       )
     }
@@ -576,7 +573,7 @@ export default class ChartsComponent extends React.Component {
   }
 
   updateData = async () => {
-    this.setState({isLoading: true});
+    this.setState({GraphData: {}, isLoading: true});
   }
 
   componentDidUpdate = (prevProps, prevState, snapshot) => {
@@ -698,13 +695,7 @@ export default class ChartsComponent extends React.Component {
     } else if (type === "heat") {
       let heatGraph = this.buildHeatChart(this.state.GraphData);
 
-      if (this.props.selectedData.length) {
-        return heatGraph;
-      } else {
-        return (
-          <View></View>
-        )
-      }
+      return heatGraph;
     }
   }
 
