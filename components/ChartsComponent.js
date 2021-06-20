@@ -1,6 +1,6 @@
 import React from 'react'
-import { StyleSheet, View, ScrollView, Text, DrawerLayoutAndroidComponent } from "react-native";
-import { StackedBarChart, LineChart, ContributionGraph } from 'react-native-chart-kit'
+import { StyleSheet, View, ScrollView, Text, ActivityIndicator } from "react-native";
+import { StackedBarChart, LineChart } from 'react-native-chart-kit'
 import moment from "moment";
 import AsyncManager from './AsyncManager';
 import HeatMap from 'react-native-heatmap-chart';
@@ -201,6 +201,7 @@ export default class ChartsComponent extends React.Component {
 
     this.state = props.state;
     this.state.graphWidth = 0;
+    this.state.GraphData = {};
   }
 
   pollUpdates = async () => {
@@ -264,7 +265,8 @@ export default class ChartsComponent extends React.Component {
   shouldComponentUpdate = (nextProps, nextState) => {
     return this.props.type !== nextProps.type
         || this.props.period !== nextProps.period
-        || JSON.stringify(this.props.selectedData) !== JSON.stringify(nextProps.selectedData);
+        || JSON.stringify(this.props.selectedData) !== JSON.stringify(nextProps.selectedData)
+        || this.state.isLoading !== nextState.isLoading;
   }
 
   buildSelectedBarData = (selectedData, period, start, end) => {
@@ -320,7 +322,9 @@ export default class ChartsComponent extends React.Component {
       });
     }
 
-    return {data: data, barColors: colourList, labels: dates};
+    let widths = this.calculateBarWidths(data && data.length, 12, 31, 1, 0.8, 0.4)
+
+    return {data: data, barColors: colourList, labels: dates, widths: widths};
   }
 
   selectedLineDataByMonth = (selectedData, rangeType, start, end) => {
@@ -412,9 +416,10 @@ export default class ChartsComponent extends React.Component {
 
   }
 
-  buildHeatChart = (selectedData, rangeType, start, end) => {
+  buildSelectedHeatData = (selectedData, period, start, end) => {
     let colours = [];
     let dataArr = [];
+    let colourIntervals = [];
 
     let allInstances = [];
     selectedData.forEach((selected) => {
@@ -426,15 +431,29 @@ export default class ChartsComponent extends React.Component {
 
       allInstances = allInstances.concat(instances);
     });
+    colourIntervals = getColourIntervals(getAverageColour(colours), 4);
     
-    if (rangeType === "month-average") {
+    if (period === "month-average") {
       for (let i = 1; i < 32; i++) {
         let filtered = allInstances.filter(function (instance) { return parseInt(moment(instance.date).format("D")) === i; });
         dataArr.push(filtered.length);
       }
-      
-      let colourIntervals = getColourIntervals(getAverageColour(colours), 4);
+    } else if (period === "week-average") {
+      for (let i = 1; i <= 7; i++) {
+        let filtered = allInstances.filter(function (instance) { return parseInt(moment(instance.date).day()) === i; });
+        dataArr.push(filtered.length);
+      }
+    } else if (period === "year-average") {
+      for (let i = 1; i <= 12; i++) {
+        let filtered = allInstances.filter(function (instance) { return parseInt(moment(instance.date).month())+1 === i; });
+        dataArr.push(filtered.length);
+      }
+    }
+    return {period: period, values: dataArr, colours: colourIntervals};
+  }
 
+  buildHeatChart = (data) => {
+    if (data.period === "month-average") {
       return (
         <View style={{ paddingTop: 30, paddingLeft: 10, display: "flex" }}>
           <View style={styles.monthList}>
@@ -464,24 +483,20 @@ export default class ChartsComponent extends React.Component {
               <View style={{ width: 190, height: 265 }}>
                 <HeatMap
                   numberOfLines={7}
-                  values={dataArr}
-                  colors={colourIntervals}
+                  values={data.values}
+                  colors={data.colours}
                   blocksSize={33}
                 />
               </View>
             </View>
           </View>
+          <View style={{zIndex: 999, position: this.state.isLoading ? "absolute" : "relative", top: 100, left: ((this.state.graphWidth))/2}}>
+            <ActivityIndicator size="large" color="cornflowerblue" />
+          </View>
         </View>
       )
 
-    } else if (rangeType === "week-average") {
-      for (let i = 1; i <= 7; i++) {
-        let filtered = allInstances.filter(function (instance) { return parseInt(moment(instance.date).day()) === i; });
-        dataArr.push(filtered.length);
-      }
-      
-      let colourIntervals = getColourIntervals(getAverageColour(colours), 4);
-
+    } else if (data.period === "week-average") {
       return (
         <View style={{ paddingTop: 70 }}>
           <View style={styles.weekList}>
@@ -497,22 +512,18 @@ export default class ChartsComponent extends React.Component {
             <View style={{ width: 50, height: 312 }}>
               <HeatMap
                 numberOfLines={7}
-                values={dataArr}
-                colors={colourIntervals}
+                values={data.values}
+                colors={data.colours}
                 blocksSize={40}
               />
             </View>
           </View>
+          <View style={{zIndex: 999, position: this.state.isLoading ? "absolute" : "relative", top: 100, left: ((this.state.graphWidth))/2}}>
+            <ActivityIndicator size="large" color="cornflowerblue" />
+          </View>
         </View>
       )
-    } else if (rangeType === "year-average") {
-      for (let i = 1; i <= 12; i++) {
-        let filtered = allInstances.filter(function (instance) { return parseInt(moment(instance.date).month())+1 === i; });
-        dataArr.push(filtered.length);
-      }
-      
-      let colourIntervals = getColourIntervals(getAverageColour(colours), 4);
-
+    } else if (data.period === "year-average") {
       return (
         <View style={{ paddingTop: 80 }}>
           <View style={styles.yearList}>
@@ -533,11 +544,14 @@ export default class ChartsComponent extends React.Component {
             <View style={{ width: 40, height: 340 }}>
               <HeatMap
                 numberOfLines={12}
-                values={dataArr}
-                colors={colourIntervals}
+                values={data.values}
+                colors={data.colours}
                 blocksSize={24}
               />
             </View>
+          </View>
+          <View style={{zIndex: 999, position: this.state.isLoading ? "absolute" : "relative", top: 100, left: ((this.state.graphWidth))/2}}>
+            <ActivityIndicator size="large" color="cornflowerblue" />
           </View>
         </View>
       )
@@ -561,10 +575,48 @@ export default class ChartsComponent extends React.Component {
     return { scaleMultiple: lengthMultiple, itemPercentage: barPercentage };
   }
 
+  updateData = async () => {
+    this.setState({isLoading: true});
+  }
+
+  componentDidUpdate = (prevProps, prevState, snapshot) => {
+    if (prevState.isLoading === false) {
+      setTimeout(() => {
+        this.setState({isLoading: false});
+      }, 0);
+      return;
+    }
+
+    let calculateData = function () {};
+    switch (this.props.type) {
+      case "bar":
+        calculateData = this.buildSelectedBarData;
+        break;
+      case "line":
+        calculateData = this.selectedLineDataByMonth;
+        break;
+      case "heat":
+        calculateData = this.buildSelectedHeatData;
+        break;
+    }
+    
+    this.setState({GraphData: calculateData(this.props.selectedData, this.props.period)}, () => {
+      setTimeout(() => {
+        this.setState({isLoading: false}, () => {
+          this.forceUpdate();
+        });
+      }, 0);
+    });
+  }
+
   renderGraph = (type) => {
     if (type === "bar") {
-      let selectedData = this.buildSelectedBarData(this.props.selectedData, this.props.period);
-      let widths = this.calculateBarWidths(selectedData.data && selectedData.data.length, 12, 31, 1, 0.8, 0.4);
+      let selectedData = this.state.GraphData;
+      let widths = selectedData.widths;
+      if (!widths) {
+        selectedData = {data: []};
+        widths = {scaleMultiple: 1, itemPercentage: 0.8}
+      }
 
       return (
         <ScrollView horizontal={true} showsHorizontalScrollIndicator={widths.scaleMultiple !== 1} scrollEnabled={widths.scaleMultiple !== 1}>
@@ -591,11 +643,16 @@ export default class ChartsComponent extends React.Component {
               }
             }}
           />
+          <View style={{zIndex: 999, position: this.state.isLoading ? "absolute" : "relative", top: 100, left: ((this.state.graphWidth))/2}}>
+            <ActivityIndicator size="large" color="cornflowerblue" />
+          </View>
         </ScrollView>
       )
     } else if (type === "line") {
-      let selectedData = this.selectedLineDataByMonth(this.props.selectedData, this.props.period);
-      // console.log("doing line graph", selectedData); 
+      let selectedData = this.state.GraphData;
+      if (!selectedData.datasets) {
+        selectedData.datasets = [];
+      }
 
       let maxVisible = 10;
       let numOfItems = selectedData.datasets && selectedData.datasets[0] && selectedData.datasets[0].data.length;
@@ -628,6 +685,9 @@ export default class ChartsComponent extends React.Component {
                 borderRadius: 16
               }}
             />
+            <View style={{zIndex: 999, position: this.state.isLoading ? "absolute" : "relative", top: 100, left: ((this.state.graphWidth))/2}}>
+              <ActivityIndicator size="large" color="cornflowerblue" />
+            </View>
           </ScrollView>
         )
       } else {
@@ -636,7 +696,7 @@ export default class ChartsComponent extends React.Component {
         )
       }
     } else if (type === "heat") {
-      let heatGraph = this.buildHeatChart(this.props.selectedData, this.props.period);
+      let heatGraph = this.buildHeatChart(this.state.GraphData);
 
       if (this.props.selectedData.length) {
         return heatGraph;
@@ -702,5 +762,5 @@ const styles = StyleSheet.create({
     paddingBottom: 15,
     width: 325,
     marginLeft: 15
-  },
+  }
 });

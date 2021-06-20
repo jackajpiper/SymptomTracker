@@ -151,12 +151,13 @@ export default class AnalysisScreen extends React.Component {
         </View>
       );
     } else {
-      return <ChartsComponent type={type} period={period} selectedData={selectedData} state={{...this.state}} navigation={{...this.props.navigation}}/>
+      return <ChartsComponent ref={chart => {this.chart = chart}} type={type} period={period} selectedData={selectedData} state={{...this.state}} navigation={{...this.props.navigation}}/>
     }
   }
 
-  updateGraph = (graphType, period, selectedData) => {
-    this.setState({ GraphType: graphType, GraphPeriodType: period, SelectedData: selectedData });
+  updateGraph = async (graphType, period, selectedData) => {
+    this.setState({ GraphType: graphType, GraphPeriodType: period, SelectedData: selectedData }); // not fully sure why we need this
+    this.chart.updateData();
   }
 
   render() {
