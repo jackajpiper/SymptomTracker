@@ -282,10 +282,14 @@ export default class ChartsComponent extends React.Component {
         let typeName = selected.split(' ')[0];
         let id = parseInt(selected.split(' ')[1]);
         let type = this.state[typeName+"s"].find((t) => t.id === id);
-        colourList.push(shadeColour(type.colour, 40));
         let instances = this.state[typeName+"Instances"].filter((instance) => {return instance.typeId === id});
-        for (let i=0; i<7; i++) {
-          data[i].push(instances.filter((instance) => { return moment(instance.date).day()-1 === (i) }).length);
+        if (instances.length !== 0) {
+          colourList.push(shadeColour(type.colour, 40));
+          for (let i=0; i<7; i++) {
+            data[i].push(instances.filter((instance) => { return moment(instance.date).day() === (i) }).length);
+          }
+        } else if (selectedData.length === 1) {
+          return {};
         }
       });
     } else if (period === "year-average") {
