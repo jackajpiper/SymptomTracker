@@ -120,8 +120,8 @@ export default class AnalysisTabs extends React.Component {
     });
   }
 
-  RenderSymptomCheckboxes = () => {
-    return this.props.symptoms.map((symptom, index) => (
+  RenderCheckboxes = (type) => {
+    return this.props[type.toLowerCase() + "s"].map((symptom, index) => (
       <View key={symptom.id} style={styles.checkbox}>
         <BouncyCheckbox
           size={25}
@@ -130,10 +130,26 @@ export default class AnalysisTabs extends React.Component {
           text={symptom.name}
           iconStyle={{ borderColor: "#444444" }}
           textStyle={{ marginLeft: -10 }}
-          onPress={(checked) => {this.checkboxClicked(checked, symptom.id, "Symptom", symptom.name)}}
+          onPress={(checked) => {this.checkboxClicked(checked, symptom.id, type, symptom.name)}}
         />
       </View>
     ));
+  }
+
+  RenderDataTab = () => {
+    return (
+      <View style={{display: "flex", flexDirection: "row"}}>
+        <View style={{flex: 1}}>
+            {this.RenderCheckboxes("Symptom")}
+        </View>
+        <View style={{flex: 1}}>
+            {this.RenderCheckboxes("Trigger")}
+        </View>
+        <View style={{flex: 1}}>
+            {this.RenderCheckboxes("Treatment")}
+        </View>
+      </View>
+    );
   }
 
   render() {
@@ -181,7 +197,7 @@ export default class AnalysisTabs extends React.Component {
       <Tab.Navigator>
         <Tab.Screen name="Graph" children={() => <RenderGraphCheckboxes/>} />
         <Tab.Screen name="Period" children={() => <RenderPeriodCheckboxes/>} />
-        <Tab.Screen name="Data" children={() => <this.RenderSymptomCheckboxes/>} />
+        <Tab.Screen name="Data" children={() => <this.RenderDataTab/>} />
       </Tab.Navigator>
     );
   }

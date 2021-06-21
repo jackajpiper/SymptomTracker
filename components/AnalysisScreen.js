@@ -167,7 +167,11 @@ export default class AnalysisScreen extends React.Component {
           {this.renderGraph(this.state.GraphType, this.state.GraphPeriodType, this.state.SelectedData)}
         </View>
         <View style={styles.bottom}>
-          <AnalysisTabs updateGraph={this.updateGraph} symptoms={this.state.Symptoms}/>
+          <AnalysisTabs
+            updateGraph={this.updateGraph}
+            symptoms={this.state.Symptoms}
+            triggers={this.state.Triggers}
+            treatments={this.state.Treatments}/>
         </View>
       </View>
     );
