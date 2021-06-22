@@ -1,15 +1,10 @@
 import _ from 'lodash';
 import React from 'react';
-import {Alert, TextInput, ScrollView, StyleSheet, View, Text, TouchableOpacity} from 'react-native';
+import {ScrollView, StyleSheet, View, TouchableOpacity, Text} from 'react-native';
 import moment from "moment";
-import {LinearGradient} from 'expo-linear-gradient';
-import AsyncManager from './AsyncManager';
-import { Ionicons } from '@expo/vector-icons';
-import RNPickerSelect from 'react-native-picker-select';
-import DateTimePicker from '@react-native-community/datetimepicker';
-import Toast from 'react-native-simple-toast';
 import BouncyCheckbox from "react-native-bouncy-checkbox";
 import { createMaterialTopTabNavigator } from '@react-navigation/material-top-tabs';
+import Toast from 'react-native-simple-toast';
 
 
 const today = moment().format("YYYY-MM-DD");
@@ -76,10 +71,14 @@ export default class AnalysisTabs extends React.Component {
 
     this.updateGraph = this.props.updateGraph;
 
+    let origin = { GraphType: "", GraphPeriodType: "", SelectedData: [] };
+
     this.state = {
       GraphType: "",
       GraphPeriodType: "",
-      SelectedData: []
+      SelectedData: [],
+      Origin: origin,
+      refreshEnabled: false
     };
   }
 
@@ -110,14 +109,43 @@ export default class AnalysisTabs extends React.Component {
     })
 
     if (this._mounted = true) {
-      this.updateGraphData("SelectedData", selectedData);
+      this.updateData("SelectedData", selectedData);
     }
   };
 
-  updateGraphData = (key, value) => {
+  updateOrigin = () => {
+    let origin = {};
+    origin.GraphType = this.state.GraphType;
+    origin.GraphPeriodType = this.state.GraphPeriodType;
+    origin.SelectedData = JSON.parse(JSON.stringify(this.state.SelectedData));
+    this.setState({Origin: origin, refreshEnabled: false});
+  }
+
+  updateData = (key, value) => {
     this.setState({ [key]: value }, () => {
-      this.updateGraph(this.state.GraphType, this.state.GraphPeriodType, JSON.parse(JSON.stringify(this.state.SelectedData)));
+      let origin = this.state.Origin;
+
+      if (origin.GraphType !== this.state.GraphType
+        || origin.GraphPeriodType !== this.state.GraphPeriodType
+        || JSON.stringify(origin.SelectedData) !== JSON.stringify(this.state.SelectedData)) {
+        this.setState({refreshEnabled: true});
+      } else {
+        this.setState({refreshEnabled: false});
+      }
     });
+  }
+
+  clickedRefresh = () => {
+    if (this.state.GraphType.length && this.state.GraphPeriodType.length) {
+      this.updateGraph(this.state.GraphType, this.state.GraphPeriodType, JSON.parse(JSON.stringify(this.state.SelectedData)));
+      this.updateOrigin();
+    } else {
+      if (!this.state.GraphType.length) {
+        Toast.show("Please select a graph type");
+      } else if (!this.state.GraphPeriodType.length) {
+        Toast.show("Please select a period");
+      }
+    }
   }
 
   RenderCheckboxes = (type) => {
@@ -138,15 +166,22 @@ export default class AnalysisTabs extends React.Component {
 
   RenderDataTab = () => {
     return (
-      <View style={{display: "flex", flexDirection: "row"}}>
+      <View style={{display: "flex", flexDirection: "row", height: "100%"}}>
         <View style={{flex: 1}}>
+          <ScrollView>
             {this.RenderCheckboxes("Symptom")}
+          </ScrollView>
         </View>
         <View style={{flex: 1}}>
+          <ScrollView>
             {this.RenderCheckboxes("Trigger")}
+          </ScrollView>
         </View>
-        <View style={{flex: 1}}>
+        <View style={{flex: 1, display: "flex", flexDirection: "column"}}>
+          <ScrollView style={{flex: 1}}>
             {this.RenderCheckboxes("Treatment")}
+          </ScrollView>
+          <View style={{height: 65}}></View>
         </View>
       </View>
     );
@@ -165,7 +200,7 @@ export default class AnalysisTabs extends React.Component {
             text={text}
             iconStyle={{ borderColor: "#444444" }}
             textStyle={{ marginLeft: -10 }}
-            onPress={(checked) => {this.updateGraphData(stateName, value)}}
+            onPress={(checked) => {this.updateData(stateName, value)}}
           />
         </View>
       );
@@ -191,14 +226,26 @@ export default class AnalysisTabs extends React.Component {
       );
     };
 
-    
-
     return (
-      <Tab.Navigator>
-        <Tab.Screen name="Graph" children={() => <RenderGraphCheckboxes/>} />
-        <Tab.Screen name="Period" children={() => <RenderPeriodCheckboxes/>} />
-        <Tab.Screen name="Data" children={() => <this.RenderDataTab/>} />
-      </Tab.Navigator>
+      <View style={{height: "100%", width: "100%"}}>
+        <Tab.Navigator>
+          <Tab.Screen name="Graph" children={() => <RenderGraphCheckboxes/>} />
+          <Tab.Screen name="Period" children={() => <RenderPeriodCheckboxes/>} />
+          <Tab.Screen name="Data" children={() => <this.RenderDataTab/>} />
+        </Tab.Navigator>
+        <View style={styles.floatyBoi}>
+          <TouchableOpacity
+            style={[styles.refreshButton,
+              {backgroundColor: this.state.refreshEnabled ? "#00ABEB" : "white", borderColor: this.state.refreshEnabled ? "black" : "lightgrey"}]}
+            onPress={this.clickedRefresh}
+            disabled={!this.state.refreshEnabled}>
+            <Text
+              style={[styles.refreshText, {color: this.state.refreshEnabled ? "white" : "grey"}]}>
+              Refresh data
+            </Text>
+          </TouchableOpacity>
+        </View>
+      </View>
     );
   }
 }
@@ -209,5 +256,29 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     overflow: "hidden"
+  },
+  floatyBoi: {
+    position: "absolute",
+    bottom: 0,
+    right: 0,
+    height: 65,
+    width: "33%",
+    paddingBottom: 10,
+    paddingRight: 10
+  },
+  refreshButton: {
+    height: "100%",
+    width: "100%",
+    display: "flex",
+    justifyContent: "center",
+    margin: 10,
+    marginTop: 0,
+    marginLeft: 0,
+    borderRadius: 20,
+    borderWidth: 2
+  },
+  refreshText: {
+    textAlign: 'center',
+    fontSize: 16
   }
 });
