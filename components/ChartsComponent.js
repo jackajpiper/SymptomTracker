@@ -285,9 +285,11 @@ export default class ChartsComponent extends React.Component {
         let instances = this.state[typeName+"Instances"].filter((instance) => {return instance.typeId === id});
         if (instances.length !== 0) {
           colourList.push(shadeColour(type.colour, 40));
-          for (let i=0; i<7; i++) {
-            data[i].push(instances.filter((instance) => { return moment(instance.date).day() === (i) }).length);
+          // because sunday is the 0th day in moment, we loop from 1 to 6 and then add sunday onto the end
+          for (let i=1; i<7; i++) {
+            data[i-1].push(instances.filter((instance) => { return moment(instance.date).day() === (i) }).length);
           }
+          data[6].push(instances.filter((instance) => { return moment(instance.date).day() === (0) }).length);
         } else if (selectedData.length === 1) {
           return {};
         }
@@ -379,10 +381,13 @@ export default class ChartsComponent extends React.Component {
         };
         let dataArr = [];
         // constructs the dictionary of dates and respective counts for this type (e.g Headache)
-        for (let i=0; i<7; i++) {
-          let dayInstances = instances.filter(function (instance) { return parseInt(moment(instance.date).day())-1 === i; });
+        // because sunday is the 0th day in moment, we loop from 1 to 6 and then add sunday onto the end
+        for (let i=1; i<7; i++) {
+          let dayInstances = instances.filter(function (instance) { return parseInt(moment(instance.date).day()) === i; });
           dataArr.push(dayInstances.length);
         }
+        let dayInstances = instances.filter(function (instance) { return parseInt(moment(instance.date).day()) === 0; });
+        dataArr.push(dayInstances.length);
   
         typeLine.data = dataArr;
         typeLines.push(typeLine);
@@ -443,10 +448,13 @@ export default class ChartsComponent extends React.Component {
         dataArr.push(filtered.length);
       }
     } else if (period === "week-average") {
-      for (let i = 1; i <= 7; i++) {
+      // because sunday is the 0th day in moment, we loop from 1 to 6 and then add sunday onto the end
+      for (let i = 1; i < 7; i++) {
         let filtered = allInstances.filter(function (instance) { return parseInt(moment(instance.date).day()) === i; });
         dataArr.push(filtered.length);
       }
+      let filtered = allInstances.filter(function (instance) { return parseInt(moment(instance.date).day()) === 0; });
+      dataArr.push(filtered.length);
     } else if (period === "year-average") {
       for (let i = 1; i <= 12; i++) {
         let filtered = allInstances.filter(function (instance) { return parseInt(moment(instance.date).month())+1 === i; });
