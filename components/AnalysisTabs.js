@@ -168,16 +168,19 @@ export default class AnalysisTabs extends React.Component {
     return (
       <View style={{display: "flex", flexDirection: "row", height: "100%"}}>
         <View style={{flex: 1}}>
+          <Text style={styles.dataTitle}>Symptoms:</Text>
           <ScrollView>
             {this.RenderCheckboxes("Symptom")}
           </ScrollView>
         </View>
         <View style={{flex: 1}}>
+          <Text style={styles.dataTitle}>Triggers:</Text>
           <ScrollView>
             {this.RenderCheckboxes("Trigger")}
           </ScrollView>
         </View>
         <View style={{flex: 1, display: "flex", flexDirection: "column"}}>
+          <Text style={styles.dataTitle}>Treatments:</Text>
           <ScrollView style={{flex: 1}}>
             {this.RenderCheckboxes("Treatment")}
           </ScrollView>
@@ -256,6 +259,16 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     overflow: "hidden"
+  },
+  checkbox: {
+    marginTop: 8
+  },
+  dataTitle: {
+    textAlign: "center",
+    fontSize: 16,
+    marginTop: 10,
+    marginBottom: 5,
+    fontWeight: "bold"
   },
   floatyBoi: {
     position: "absolute",
