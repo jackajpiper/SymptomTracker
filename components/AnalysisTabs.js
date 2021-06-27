@@ -5,6 +5,7 @@ import moment from "moment";
 import BouncyCheckbox from "react-native-bouncy-checkbox";
 import { createMaterialTopTabNavigator } from '@react-navigation/material-top-tabs';
 import Toast from 'react-native-simple-toast';
+import DateTimePicker from '@react-native-community/datetimepicker';
 
 
 const today = moment().format("YYYY-MM-DD");
@@ -71,12 +72,26 @@ export default class AnalysisTabs extends React.Component {
 
     this.updateGraph = this.props.updateGraph;
 
-    let origin = { GraphType: "", GraphPeriodType: "", SelectedData: [] };
+    let origin = {
+      GraphType: "",
+      GraphPeriodRange: "",
+      GraphPeriodType: "",
+      SelectedData: [],
+      ShowPeriodStart: false,
+      ShowPeriodEnd: false,
+      PeriodStart: new Date(),
+      PeriodEnd: new Date(),
+    };
 
     this.state = {
       GraphType: "",
+      GraphPeriodRange: "",
       GraphPeriodType: "",
       SelectedData: [],
+      ShowPeriodStart: false,
+      ShowPeriodEnd: false,
+      PeriodStart: new Date(),
+      PeriodEnd: new Date(),
       Origin: origin,
       refreshEnabled: false
     };
@@ -114,10 +129,14 @@ export default class AnalysisTabs extends React.Component {
   };
 
   updateOrigin = () => {
-    let origin = {};
-    origin.GraphType = this.state.GraphType;
-    origin.GraphPeriodType = this.state.GraphPeriodType;
-    origin.SelectedData = JSON.parse(JSON.stringify(this.state.SelectedData));
+    let origin = {
+      GraphType: this.state.GraphType,
+      GraphPeriodType: this.state.GraphPeriodType,
+      GraphPeriodRange: this.state.GraphPeriodRange,
+      SelectedData: JSON.parse(JSON.stringify(this.state.SelectedData)),
+      PeriodStart: this.state.PeriodStart,
+      PeriodEnd: this.state.PeriodEnd
+    };
     this.setState({Origin: origin, refreshEnabled: false});
   }
 
@@ -127,7 +146,10 @@ export default class AnalysisTabs extends React.Component {
 
       if (origin.GraphType !== this.state.GraphType
         || origin.GraphPeriodType !== this.state.GraphPeriodType
-        || JSON.stringify(origin.SelectedData) !== JSON.stringify(this.state.SelectedData)) {
+        || JSON.stringify(origin.SelectedData) !== JSON.stringify(this.state.SelectedData)
+        || origin.GraphPeriodRange !== this.state.GraphPeriodRange
+        || origin.PeriodStart !== this.state.PeriodStart
+        || origin.PeriodEnd !== this.state.PeriodEnd) {
         this.setState({refreshEnabled: true});
       } else {
         this.setState({refreshEnabled: false});
@@ -136,12 +158,28 @@ export default class AnalysisTabs extends React.Component {
   }
 
   clickedRefresh = () => {
-    if (this.state.GraphType.length && this.state.GraphPeriodType.length) {
-      this.updateGraph(this.state.GraphType, this.state.GraphPeriodType, JSON.parse(JSON.stringify(this.state.SelectedData)));
+
+    let start = this.state.GraphPeriodRange === "between-dates"
+      ? this.state.PeriodStart
+      : null;
+    let end = this.state.GraphPeriodRange === "between-dates"
+      ? this.state.PeriodEnd
+      : null;
+
+    if (this.state.GraphType.length && this.state.GraphPeriodRange && this.state.GraphPeriodType.length) {
+      this.updateGraph(
+        this.state.GraphType,
+        this.state.GraphPeriodType,
+        JSON.parse(JSON.stringify(this.state.SelectedData)),
+        start,
+        end
+      );
       this.updateOrigin();
     } else {
       if (!this.state.GraphType.length) {
         Toast.show("Please select a graph type");
+      } else if (!this.state.GraphPeriodRange.length) {
+        Toast.show("Please select a period range");
       } else if (!this.state.GraphPeriodType.length) {
         Toast.show("Please select a period");
       }
@@ -166,7 +204,7 @@ export default class AnalysisTabs extends React.Component {
 
   RenderDataTab = () => {
     return (
-      <View style={{display: "flex", flexDirection: "row", height: "100%"}}>
+      <View style={{display: "flex", flexDirection: "row", height: "100%", padding: 10, paddingTop: 0}}>
         <View style={{flex: 1}}>
           <Text style={styles.dataTitle}>Symptoms:</Text>
           <ScrollView>
@@ -211,7 +249,8 @@ export default class AnalysisTabs extends React.Component {
 
     const RenderGraphCheckboxes = () => {
       return (
-        <View style={{marginLeft: 30}}>
+        <View style={{marginLeft: 10}}>
+          <Text style={styles.dataTitle}>Graph Type</Text>
           {renderRadioButton("bar", "GraphType", "Bar chart", "#E7D5E1")}
           {renderRadioButton("line", "GraphType", "Line chart", "#FAEEC4")}
           {renderRadioButton("heat", "GraphType", "Heat map", "#C3D8D1")}
@@ -219,12 +258,46 @@ export default class AnalysisTabs extends React.Component {
       );
     };
 
+    const dateField = (name) => {
+      let showName = "Show"+name;
+      let enabled = this.state.GraphPeriodRange === "between-dates";
+      return (
+        <View style={{ marginTop: 10, paddingLeft: 20 }}>
+          <TouchableOpacity style={{alignSelf: 'flex-start'}} onPress={()=> {this.setState({[showName]: true})}} disabled={!enabled}>
+            <Text style={[styles.dateTime, {color: enabled ? 'black': 'grey', borderBottomColor: enabled ? 'cornflowerblue': 'grey' }]}>
+              {moment(this.state[name]).format("DD/MM/YYYY")}
+            </Text>
+          </TouchableOpacity>
+          {this.state[showName] && (
+            <DateTimePicker
+              value={this.state[name]}
+              mode={"date"}
+              display="default"
+              onChange={(event, value) => {this.setState({[showName]: false}); value && this.updateData(name, value);}}
+            />
+          )}
+        </View>
+      )
+    };
+
     const RenderPeriodCheckboxes = () => {
       return (
-        <View style={{marginLeft: 30}}>
-          {renderRadioButton("week-average", "GraphPeriodType", "Week", "#E7D5E1")}
-          {renderRadioButton("month-average", "GraphPeriodType", "Month", "#FAEEC4")}
-          {renderRadioButton("year-average", "GraphPeriodType", "Year", "#C3D8D1")}
+        <View style={{display: "flex", flexDirection: "row", paddingLeft: 10}}>
+          <View style={{flex: 1}}>
+            <Text style={styles.dataTitle}>Period & range:</Text>
+            {renderRadioButton("all-data", "GraphPeriodRange", "All Data", "#E7D5E1")}
+            {renderRadioButton("between-dates", "GraphPeriodRange", "Between:", "#FAEEC4")}
+            {dateField("PeriodStart")}
+            {dateField("PeriodEnd")}
+          </View>
+          <View style={{flex: 1, margin: 5}}>
+            {renderRadioButton("week-all", "GraphPeriodType", "All Weeks", "#E7D5E1")}
+            {renderRadioButton("week-average", "GraphPeriodType", "Average Week", "#FAEEC4")}
+            {renderRadioButton("month-all", "GraphPeriodType", "All Months", "#C3D8D1")}
+            {renderRadioButton("month-average", "GraphPeriodType", "Average Month", "#E7D5E1")}
+            {renderRadioButton("year-all", "GraphPeriodType", "All Years", "#FAEEC4")}
+            {renderRadioButton("year-average", "GraphPeriodType", "Average Year", "#C3D8D1")}
+          </View>
         </View>
       );
     };
@@ -264,7 +337,6 @@ const styles = StyleSheet.create({
     marginTop: 8
   },
   dataTitle: {
-    textAlign: "center",
     fontSize: 16,
     marginTop: 10,
     marginBottom: 5,
@@ -293,5 +365,13 @@ const styles = StyleSheet.create({
   refreshText: {
     textAlign: 'center',
     fontSize: 16
+  },
+  dateTime: {
+    fontSize: 16,
+    paddingVertical: 8,
+    borderBottomWidth: 1,
+    borderColor: 'cornflowerblue',
+    color: 'black',
+    paddingRight: 30
   }
 });

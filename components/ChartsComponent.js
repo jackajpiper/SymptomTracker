@@ -266,6 +266,8 @@ export default class ChartsComponent extends React.Component {
     return this.props.type !== nextProps.type
         || this.props.period !== nextProps.period
         || JSON.stringify(this.props.selectedData) !== JSON.stringify(nextProps.selectedData)
+        || this.props.start !== nextProps.start
+        || this.props.end !== nextProps.end
         || this.state.isLoading !== nextState.isLoading;
   }
 
@@ -273,6 +275,7 @@ export default class ChartsComponent extends React.Component {
     let data = [];
     let dates = [];
     let colourList = [];
+    let widths = {};
     
     if (period === "week-average") {
       data = [[], [], [], [], [], [], []];
@@ -294,6 +297,8 @@ export default class ChartsComponent extends React.Component {
           return {};
         }
       });
+
+      widths = this.calculateBarWidths(data && data.length, 12, 31, 1, 0.8, 0.4)
     } else if (period === "year-average") {
       data = [[], [], [], [], [], [], [], [], [], [], [], []];
       dates = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
@@ -308,6 +313,8 @@ export default class ChartsComponent extends React.Component {
           data[i].push(instances.filter((instance) => { return moment(instance.date).month() === (i) }).length);
         }
       });
+
+      widths = this.calculateBarWidths(data && data.length, 12, 31, 1, 0.8, 0.4)
     } else if (period === "month-average") {
       data = [[], [], [], [], [], [], [], [], [], [],
               [], [], [], [], [], [], [], [], [], [],
@@ -326,9 +333,86 @@ export default class ChartsComponent extends React.Component {
           data[i].push(instances.filter((instance) => { return moment(instance.date).date() === (i+1) }).length);
         }
       });
-    }
 
-    let widths = this.calculateBarWidths(data && data.length, 12, 31, 1, 0.8, 0.4)
+      widths = this.calculateBarWidths(data && data.length, 12, 31, 1, 0.8, 0.4)
+    } else if (period === "week-all") {
+      let format = "DD MMM";
+
+      let dateDict = {};
+      selectedData.forEach((selected, index) => {
+        let typeName = selected.split(' ')[0];
+        let id = parseInt(selected.split(' ')[1]);
+        let type = this.state[typeName+"s"].find((t) => t.id === id);
+        colourList.push(shadeColour(type.colour, 40));
+
+        let instances = [];
+        if (start && end) {
+          instances = this.state[typeName+"Instances"].filter((instance) => {
+            let date = moment(instance.date);
+            return instance.typeId === id
+              && date.isSameOrAfter(start)
+              && date.isSameOrBefore(end);
+          });
+        } else {
+          instances = this.state[typeName+"Instances"].filter((instance) => {
+            return instance.typeId === id;
+          });
+        }
+
+        instances.forEach((instance) => {
+          let date = moment(instance.date);
+          let weekStart = date.day() === 0
+            ? date.clone().subtract(6, "days")
+            : date.clone().subtract(date.clone().day()-1, "days");
+          let dateString = weekStart.toISOString();
+          // making a new date object entry for the date
+          if (!dateDict[dateString]) {
+            let emptyDataEntry = [];
+            for (let i=0; i<selectedData.length; i++) {
+              emptyDataEntry.push(0);
+            }
+            dateDict[dateString] = emptyDataEntry;
+          }
+          // adding this instance to the count
+          dateDict[dateString][index]++;
+        })
+      })
+
+      // Create array of dates and corresponding data
+      var dateData = Object.keys(dateDict).map(function(date) {
+        return [date, dateDict[date]];
+      });
+
+      // Sort the array based on the date
+      dateData.sort(function(first, second) {
+        return moment(first[0]).isAfter(second[0]);
+      });
+
+      data = dateData.map((dateDatum) => {
+        return dateDatum[1];
+      });
+      dates = dateData.map((dateDatum) => {
+        return moment(dateDatum[0]).format(format);
+      });
+
+      // remove empty data
+      for(let i=selectedData.length-1; i>=0; i--) {
+        if (!(data.filter((datum) => {
+              return !!datum[i];
+            }).length)) {
+          data.map((datum) => {
+            datum.splice(i, 1);
+          });
+          colourList.splice(i, 1);
+        }
+      }
+
+      // with item percentage 0.7, ratio is 7.7 items to 1 scale
+      let sm = (data && data.length) / 7.7
+      widths.scaleMultiple = sm > 1 ? sm : 1;
+      widths.itemPercentage = 0.7;
+
+    }
 
     return {data: data, barColors: colourList, labels: dates, widths: widths};
   }
@@ -609,7 +693,7 @@ export default class ChartsComponent extends React.Component {
         break;
     }
     
-    this.setState({GraphData: calculateData(this.props.selectedData, this.props.period)}, () => {
+    this.setState({GraphData: calculateData(this.props.selectedData, this.props.period, this.props.start, this.props.end)}, () => {
       setTimeout(() => {
         this.setState({isLoading: false}, () => {
           this.forceUpdate();

@@ -75,6 +75,8 @@ export default class AnalysisScreen extends React.Component {
       Treatments: [],
       TreatmentInstances: [],
       GraphType: "",
+      PeriodStart: new Date(),
+      PeriodEnd: new Date(),
       GraphPeriodType: "",
       SelectedData: [],
     };
@@ -143,7 +145,7 @@ export default class AnalysisScreen extends React.Component {
     }
   }
 
-  renderGraph = (type, period, selectedData) => {
+  renderGraph = (type, period, selectedData, start, end) => {
     if (!this.state.Symptoms.length) {
       return (
         <View style={styles.spinner}>
@@ -151,12 +153,12 @@ export default class AnalysisScreen extends React.Component {
         </View>
       );
     } else {
-      return <ChartsComponent ref={chart => {this.chart = chart}} type={type} period={period} selectedData={selectedData} state={{...this.state}} navigation={{...this.props.navigation}}/>
+      return <ChartsComponent ref={chart => {this.chart = chart}} type={type} period={period} selectedData={selectedData} start={start} end={end} state={{...this.state}} navigation={{...this.props.navigation}}/>
     }
   }
 
-  updateGraph = async (graphType, period, selectedData) => {
-    this.setState({ GraphType: graphType, GraphPeriodType: period, SelectedData: selectedData }); // not fully sure why we need this
+  updateGraph = async (graphType, period, selectedData, start, end) => {
+    this.setState({ GraphType: graphType, GraphPeriodType: period, SelectedData: selectedData, PeriodStart: start, PeriodEnd: end }); // not fully sure why we need this
     this.chart.updateData();
   }
 
@@ -164,7 +166,7 @@ export default class AnalysisScreen extends React.Component {
     return (
       <View style={styles.container}>
         <View style={styles.top}>
-          {this.renderGraph(this.state.GraphType, this.state.GraphPeriodType, this.state.SelectedData)}
+          {this.renderGraph(this.state.GraphType, this.state.GraphPeriodType, this.state.SelectedData, this.state.PeriodStart, this.state.PeriodEnd)}
         </View>
         <View style={styles.bottom}>
           <AnalysisTabs
