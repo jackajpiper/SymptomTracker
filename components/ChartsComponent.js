@@ -350,8 +350,8 @@ export default class ChartsComponent extends React.Component {
           instances = this.state[typeName+"Instances"].filter((instance) => {
             let date = moment(instance.date);
             return instance.typeId === id
-              && date.isSameOrAfter(start)
-              && date.isSameOrBefore(end);
+              && date.isSameOrAfter(start, "days")
+              && date.isSameOrBefore(end, "days");
           });
         } else {
           instances = this.state[typeName+"Instances"].filter((instance) => {
