@@ -271,7 +271,7 @@ export default class ChartsComponent extends React.Component {
         || this.state.isLoading !== nextState.isLoading;
   }
 
-  getAllForBar(selectedData, period, start, end, format, funcName) {
+  getAllForBar(selectedData, start, end, format, funcName) {
     let data = [];
     let dates = [];
     let colourList = [];
@@ -352,6 +352,56 @@ export default class ChartsComponent extends React.Component {
     return {data: data, barColors: colourList, labels: dates, widths: widths};
   }
 
+  getAverageForBar = (selectedData, dates, start, end, length, format, scaleMultiple, itemPercentage) => {
+    let colourList = [];
+    let data = [];
+    let widths = { scaleMultiple: scaleMultiple, itemPercentage: itemPercentage };
+    for (let i=0; i<length; i++) {
+      data.push([]);
+    }
+
+    selectedData.forEach((selected) => {
+      let typeName = selected.split(' ')[0];
+      let id = parseInt(selected.split(' ')[1]);
+      let type = this.state[typeName+"s"].find((t) => t.id === id);
+      let instances = [];
+      if (start && end) {
+        instances = this.state[typeName+"Instances"].filter((instance) => {
+          let date = moment(instance.date);
+          return instance.typeId === id
+            && date.isSameOrAfter(start, "days")
+            && date.isSameOrBefore(end, "days");
+        });
+      } else {
+        instances = this.state[typeName+"Instances"].filter((instance) => {
+          return instance.typeId === id;
+        });
+      }
+      if (instances.length !== 0) {
+        colourList.push(shadeColour(type.colour, 40));
+        for (let i=1; i<=length; i++) {
+          data[i-1].push(instances.filter((instance) => {return parseInt(moment(instance.date).format(format)) === (i) }).length);
+        }
+      } else if (selectedData.length === 1) {
+        return {};
+      }
+    });
+
+    // remove empty data
+    for(let i=selectedData.length-1; i>=0; i--) {
+      if (!(data.filter((datum) => {
+            return !!datum[i];
+          }).length)) {
+        data.map((datum) => {
+          datum.splice(i, 1);
+        });
+        colourList.splice(i, 1);
+      }
+    }
+
+    return {data: data, barColors: colourList, labels: dates, widths: widths};
+  }
+
   buildSelectedBarData = (selectedData, period, start, end) => {
     let data = [];
     let dates = [];
@@ -359,69 +409,23 @@ export default class ChartsComponent extends React.Component {
     let widths = {};
     
     if (period === "week-average") {
-      data = [[], [], [], [], [], [], []];
       dates = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
-
-      selectedData.forEach((selected) => {
-        let typeName = selected.split(' ')[0];
-        let id = parseInt(selected.split(' ')[1]);
-        let type = this.state[typeName+"s"].find((t) => t.id === id);
-        let instances = this.state[typeName+"Instances"].filter((instance) => {return instance.typeId === id});
-        if (instances.length !== 0) {
-          colourList.push(shadeColour(type.colour, 40));
-          // because sunday is the 0th day in moment, we loop from 1 to 6 and then add sunday onto the end
-          for (let i=1; i<7; i++) {
-            data[i-1].push(instances.filter((instance) => { return moment(instance.date).day() === (i) }).length);
-          }
-          data[6].push(instances.filter((instance) => { return moment(instance.date).day() === (0) }).length);
-        } else if (selectedData.length === 1) {
-          return {};
-        }
-      });
-
-      widths = this.calculateBarWidths(data && data.length, 12, 31, 1, 0.8, 0.4)
+      // format 'E' is ISO weekday, where sunday is the 7th day
+      return this.getAverageForBar(selectedData, dates, start, end, 7, "E", 1, 0.7);
     } else if (period === "year-average") {
-      data = [[], [], [], [], [], [], [], [], [], [], [], []];
       dates = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
-
-      selectedData.forEach((selected) => {
-        let typeName = selected.split(' ')[0];
-        let id = parseInt(selected.split(' ')[1]);
-        let type = this.state[typeName+"s"].find((t) => t.id === id);
-        colourList.push(shadeColour(type.colour, 40));
-        let instances = this.state[typeName+"Instances"].filter((instance) => {return instance.typeId === id});
-        for (let i=0; i<12; i++) {
-          data[i].push(instances.filter((instance) => { return moment(instance.date).month() === (i) }).length);
-        }
-      });
-
-      widths = this.calculateBarWidths(data && data.length, 12, 31, 1, 0.8, 0.4)
+      return this.getAverageForBar(selectedData, dates, start, end, 12, "M", 1, 0.5);
     } else if (period === "month-average") {
-      data = [[], [], [], [], [], [], [], [], [], [],
-              [], [], [], [], [], [], [], [], [], [],
-              [], [], [], [], [], [], [], [], [], [], []];
       dates = ["1", "2", "3", "4", "5", "6", "7", "8", "9", "10",
               "11", "12", "13", "14", "15", "16", "17", "18", "19", "20",
               "21", "22", "23", "24", "25", "26", "27", "28", "29", "30", "31"];
-
-      selectedData.forEach((selected) => {
-        let typeName = selected.split(' ')[0];
-        let id = parseInt(selected.split(' ')[1]);
-        let type = this.state[typeName+"s"].find((t) => t.id === id);
-        colourList.push(shadeColour(type.colour, 40));
-        let instances = this.state[typeName+"Instances"].filter((instance) => {return instance.typeId === id});
-        for (let i=0; i<31; i++) {
-          data[i].push(instances.filter((instance) => { return moment(instance.date).date() === (i+1) }).length);
-        }
-      });
-
-      widths = this.calculateBarWidths(data && data.length, 12, 31, 1, 0.8, 0.4)
+      return this.getAverageForBar(selectedData, dates, start, end, 31, "D", 2, 0.4);
     } else if (period === "week-all") {
-      return this.getAllForBar(selectedData, period, start, end, "DD MMM", "day");
+      return this.getAllForBar(selectedData, start, end, "DD MMM", "day");
     } else if (period === "month-all") {
-      return this.getAllForBar(selectedData, period, start, end, "MMM YY", "date");
+      return this.getAllForBar(selectedData, start, end, "MMM YY", "date");
     } else if (period === "year-all") {
-      return this.getAllForBar(selectedData, period, start, end, "YYYY", "dayOfYear");
+      return this.getAllForBar(selectedData, start, end, "YYYY", "dayOfYear");
     }
 
     return {data: data, barColors: colourList, labels: dates, widths: widths};
