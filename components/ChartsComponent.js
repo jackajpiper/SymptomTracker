@@ -357,13 +357,19 @@ export default class ChartsComponent extends React.Component {
     let data = [];
     let widths = { scaleMultiple: scaleMultiple, itemPercentage: itemPercentage };
     for (let i=0; i<length; i++) {
-      data.push([]);
+      let emptyDataEntry = [];
+      for (let i=0; i<selectedData.length; i++) {
+        emptyDataEntry.push(0);
+      }
+      data[i] = emptyDataEntry;
     }
 
-    selectedData.forEach((selected) => {
+    selectedData.forEach((selected, index) => {
       let typeName = selected.split(' ')[0];
       let id = parseInt(selected.split(' ')[1]);
       let type = this.state[typeName+"s"].find((t) => t.id === id);
+      colourList.push(shadeColour(type.colour, 40));
+
       let instances = [];
       if (start && end) {
         instances = this.state[typeName+"Instances"].filter((instance) => {
@@ -377,11 +383,13 @@ export default class ChartsComponent extends React.Component {
           return instance.typeId === id;
         });
       }
+
       if (instances.length !== 0) {
-        colourList.push(shadeColour(type.colour, 40));
-        for (let i=1; i<=length; i++) {
-          data[i-1].push(instances.filter((instance) => {return parseInt(moment(instance.date).format(format)) === (i) }).length);
-        }
+        instances.forEach((instance) => {
+          let date = moment(instance.date);
+          let dayNum = parseInt(date.format(format)) - 1;
+          data[dayNum][index]++;
+        });
       } else if (selectedData.length === 1) {
         return {};
       }
@@ -410,8 +418,7 @@ export default class ChartsComponent extends React.Component {
     
     if (period === "week-average") {
       dates = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
-      // format 'E' is ISO weekday, where sunday is the 7th day
-      return this.getAverageForBar(selectedData, dates, start, end, 7, "E", 1, 0.7);
+      return this.getAverageForBar(selectedData, dates, start, end, 7, "E", 1, 0.7); // 'E' is ISO weekday, where sunday is the 7th day
     } else if (period === "year-average") {
       dates = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
       return this.getAverageForBar(selectedData, dates, start, end, 12, "M", 1, 0.5);
