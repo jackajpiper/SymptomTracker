@@ -278,40 +278,40 @@ export default class ChartsComponent extends React.Component {
     let widths = {};
     let dateDict = {};
 
+    let dateCheck = (date) => {
+      if (start && end) {
+        return date.isSameOrAfter(start, "days") && date.isSameOrBefore(end, "days");
+      }
+      return true;
+    }
+
     selectedData.forEach((selected, index) => {
       let typeName = selected.split(' ')[0];
       let id = parseInt(selected.split(' ')[1]);
       let type = this.state[typeName+"s"].find((t) => t.id === id);
       colourList.push(shadeColour(type.colour, 40));
 
-      let instances = [];
-      if (start && end) {
-        instances = this.state[typeName+"Instances"].filter((instance) => {
-          let date = moment(instance.date);
-          return instance.typeId === id
-            && date.isSameOrAfter(start, "days")
-            && date.isSameOrBefore(end, "days");
-        });
-      } else {
-        instances = this.state[typeName+"Instances"].filter((instance) => {
-          return instance.typeId === id;
-        });
-      }
+      let instances = this.state[typeName+"Instances"].filter((instance) => {
+        return instance.typeId === id;
+      });
 
       instances.forEach((instance) => {
         let date = moment(instance.date);
         let monthStart = date.clone().subtract(date.clone()[funcName]()-1, "days");
         let dateString = monthStart.toISOString();
-        // making a new date object entry for the date
-        if (!dateDict[dateString]) {
-          let emptyDataEntry = [];
-          for (let i=0; i<selectedData.length; i++) {
-            emptyDataEntry.push(0);
+        if (dateCheck(date)) {
+          // making a new date object entry for the date
+          if (!dateDict[dateString]) {
+            let emptyDataEntry = [];
+            for (let i=0; i<selectedData.length; i++) {
+              emptyDataEntry.push(0);
+            }
+            dateDict[dateString] = emptyDataEntry;
           }
-          dateDict[dateString] = emptyDataEntry;
+          // adding this instance to the count
+          dateDict[dateString][index]++;
         }
-        // adding this instance to the count
-        dateDict[dateString][index]++;
+        
       })
     })
 
@@ -356,6 +356,14 @@ export default class ChartsComponent extends React.Component {
     let colourList = [];
     let data = [];
     let widths = { scaleMultiple: scaleMultiple, itemPercentage: itemPercentage };
+
+    let dateCheck = (date) => {
+      if (start && end) {
+        return date.isSameOrAfter(start, "days") && date.isSameOrBefore(end, "days");
+      }
+      return true;
+    }
+
     for (let i=0; i<length; i++) {
       let emptyDataEntry = [];
       for (let i=0; i<selectedData.length; i++) {
@@ -369,26 +377,15 @@ export default class ChartsComponent extends React.Component {
       let id = parseInt(selected.split(' ')[1]);
       let type = this.state[typeName+"s"].find((t) => t.id === id);
       colourList.push(shadeColour(type.colour, 40));
-
-      let instances = [];
-      if (start && end) {
-        instances = this.state[typeName+"Instances"].filter((instance) => {
-          let date = moment(instance.date);
-          return instance.typeId === id
-            && date.isSameOrAfter(start, "days")
-            && date.isSameOrBefore(end, "days");
-        });
-      } else {
-        instances = this.state[typeName+"Instances"].filter((instance) => {
-          return instance.typeId === id;
-        });
-      }
+      let instances = this.state[typeName+"Instances"].filter((instance) => { return instance.typeId === id; });
 
       if (instances.length !== 0) {
         instances.forEach((instance) => {
           let date = moment(instance.date);
           let dayNum = parseInt(date.format(format)) - 1;
-          data[dayNum][index]++;
+          if (dateCheck(date)) {
+            data[dayNum][index]++;
+          }
         });
       } else if (selectedData.length === 1) {
         return {};
