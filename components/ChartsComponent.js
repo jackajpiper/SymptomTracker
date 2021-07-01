@@ -4,6 +4,7 @@ import { StackedBarChart, LineChart } from 'react-native-chart-kit'
 import moment from "moment";
 import AsyncManager from './AsyncManager';
 import HeatMap from 'react-native-heatmap-chart';
+import Toast from 'react-native-simple-toast';
 
 function shadeColour(color, percent) {
 
@@ -435,96 +436,149 @@ export default class ChartsComponent extends React.Component {
     return {data: data, barColors: colourList, labels: dates, widths: widths};
   }
 
-  selectedLineDataByMonth = (selectedData, rangeType, start, end) => {
+  buildSelectedLineData = (selectedData, period, start, end) => {
+    if (period === "week-average") {
+      let dates = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
+      return this.getAverageForLine(selectedData, dates, start, end, 7, "E", 1, 0.7);
+    } else if (period === "month-average") {
+      let dates = ["1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11",
+                  "12", "13", "14", "15", "16", "17", "18", "19", "20", "21",
+                  "22", "23", "24", "25", "26", "27", "28", "29", "30", "31"];
+      return this.getAverageForLine(selectedData, dates, start, end, 31, "D", 2, 0.4);
+    } else if (period === "year-average") {
+      let dates = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+      return this.getAverageForLine(selectedData, dates, start, end, 12, "M", 1, 0.5);
+    } else if (period === "week-all") {
+      return this.getAllForLine(selectedData, start, end, "DD MMM", "day");
+    } else if (period === "month-all") {
+      return this.getAllForLine(selectedData, start, end, "MMM YY", "date");
+    } else if (period === "year-all") {
+      return this.getAllForLine(selectedData, start, end, "YYYY", "dayOfYear");
+    }
+  }
+
+  getAverageForLine = (selectedData, dates, start, end, length, format, scaleMultiple) => {
     let typeLines = [];
     let typeList = [];
-    let dates = [];
 
-    if (rangeType === "year-average") {
-
-      dates = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
-
-      selectedData.forEach((selected) => {
-        let typeName = selected.split(' ')[0];
-        let id = parseInt(selected.split(' ')[1]);
-        let type = this.state[typeName+"s"].find((t) => t.id === id);
-        typeList.push(type.name);
-        let instances = this.state[typeName+"Instances"].filter((instance) => {return instance.typeId === id});
-  
-        let typeLine = {
-          data: [],
-          color: (opacity = 1) => shadeColour(type.colour, 40)
-        };
-        let dataArr = [];
-        // constructs the dictionary of dates and respective counts for this type (e.g Headache)
-        for (let i=0; i<12; i++) {
-          let dayInstances = instances.filter(function (instance) { return parseInt(moment(instance.date).month()) === i; });
-          dataArr.push(dayInstances.length);
-        }
-  
-        typeLine.data = dataArr;
-        typeLines.push(typeLine);
-      });
-      
-    } else if (rangeType === "week-average") {
-
-      dates = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
-
-      selectedData.forEach((selected) => {
-        let typeName = selected.split(' ')[0];
-        let id = parseInt(selected.split(' ')[1]);
-        let type = this.state[typeName+"s"].find((t) => t.id === id);
-        typeList.push(type.name);
-        let instances = this.state[typeName+"Instances"].filter((instance) => {return instance.typeId === id});
-  
-        let typeLine = {
-          data: [],
-          color: (opacity = 1) => shadeColour(type.colour, 40)
-        };
-        let dataArr = [];
-        // constructs the dictionary of dates and respective counts for this type (e.g Headache)
-        // because sunday is the 0th day in moment, we loop from 1 to 6 and then add sunday onto the end
-        for (let i=1; i<7; i++) {
-          let dayInstances = instances.filter(function (instance) { return parseInt(moment(instance.date).day()) === i; });
-          dataArr.push(dayInstances.length);
-        }
-        let dayInstances = instances.filter(function (instance) { return parseInt(moment(instance.date).day()) === 0; });
-        dataArr.push(dayInstances.length);
-  
-        typeLine.data = dataArr;
-        typeLines.push(typeLine);
-      });
-
-    } else if (rangeType === "month-average") {
-
-      dates = ["1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11",
-              "12", "13", "14", "15", "16", "17", "18", "19", "20", "21",
-              "22", "23", "24", "25", "26", "27", "28", "29", "30", "31"];
-
-      selectedData.forEach((selected) => {
-        let typeName = selected.split(' ')[0];
-        let id = parseInt(selected.split(' ')[1]);
-        let type = this.state[typeName+"s"].find((t) => t.id === id);
-        typeList.push(type.name);
-        let instances = this.state[typeName+"Instances"].filter((instance) => {return instance.typeId === id});
-  
-        let typeLine = {
-          data: [],
-          color: (opacity = 1) => shadeColour(type.colour, 40)
-        };
-        let dataArr = [];
-        dates.forEach(function (date) {
-          let dayInstances = instances.filter(function (instance) { return moment(instance.date).date() === parseInt(date); });
-          dataArr.push(dayInstances.length);
-        });
-  
-        typeLine.data = dataArr;
-        typeLines.push(typeLine);
-      });
+    let dateCheck = (date) => {
+      if (start && end) {
+        return date.isSameOrAfter(start, "days") && date.isSameOrBefore(end, "days");
+      }
+      return true;
     }
 
-    return { datasets: typeLines, labels: dates };
+    selectedData.forEach((selected) => {
+      let typeName = selected.split(' ')[0];
+      let id = parseInt(selected.split(' ')[1]);
+      let type = this.state[typeName+"s"].find((t) => t.id === id);
+      typeList.push(type.name);
+      let instances = this.state[typeName+"Instances"].filter((instance) => {return instance.typeId === id});
 
+      let emptyDataEntry = [];
+      for (let i=0; i<length; i++) {
+        emptyDataEntry.push(0);
+      }
+      let typeLine = {
+        data: [],
+        color: (opacity = 1) => shadeColour(type.colour, 40)
+      };
+      let dataArr = emptyDataEntry;
+      instances.forEach((instance) => {
+        let date = moment(instance.date);
+        let dayNum = parseInt(date.format(format)) - 1;
+        if (dateCheck(date)) {
+          dataArr[dayNum]++;
+        }
+      })
+
+      typeLine.data = dataArr;
+      typeLines.push(typeLine);
+    });
+
+    return { datasets: typeLines, labels: dates, multiple: scaleMultiple };
+  }
+
+  getAllForLine(selectedData, start, end, format, funcName) {
+    let dates = [];
+    let dateDict = {};
+
+    let dateCheck = (date) => {
+      if (start && end) {
+        return date.isSameOrAfter(start, "days") && date.isSameOrBefore(end, "days");
+      }
+      return true;
+    }
+
+    selectedData.forEach((selected, index) => {
+      let typeName = selected.split(' ')[0];
+      let id = parseInt(selected.split(' ')[1]);
+
+      let instances = this.state[typeName+"Instances"].filter((instance) => {
+        return instance.typeId === id;
+      });
+
+      instances.forEach((instance) => {
+        let date = moment(instance.date);
+        let monthStart = date.clone().subtract(date.clone()[funcName]()-1, "days");
+        let dateString = monthStart.toISOString();
+        if (dateCheck(date)) {
+          // making a new date object entry for the date
+          if (!dateDict[dateString]) {
+            let emptyDataEntry = [];
+            for (let i=0; i<selectedData.length; i++) {
+              emptyDataEntry.push(0);
+            }
+            dateDict[dateString] = emptyDataEntry;
+          }
+          // adding this instance to the count
+          dateDict[dateString][index]++;
+        }
+        
+      })
+    })
+
+    // Create array of dates and corresponding data
+    var dateData = Object.keys(dateDict).map(function(date) {
+      return [date, dateDict[date]];
+    });
+
+    // Sort the array based on the date
+    dateData.sort(function(first, second) {
+      return moment(first[0]).isAfter(second[0]);
+    });
+
+    // build a dataset for each of the selected data
+    let typeLines = [];
+    selectedData.forEach((selected, index) => {
+      let typeName = selected.split(' ')[0];
+      let id = parseInt(selected.split(' ')[1]);
+      let type = this.state[typeName+"s"].find((t) => t.id === id);
+
+      let typeData = dateData.map((dateDatum) => {
+        return dateDatum[1][index];
+      });
+      let typeLine = {
+        data: typeData,
+        color: (opacity = 1) => shadeColour(type.colour, 40)
+      };
+      typeLines.push(typeLine);
+    });
+
+    dates = dateData.map((dateDatum) => {
+      return moment(dateDatum[0]).format(format);
+    });
+
+    // with item percentage 0.7, ratio is 7.7 items to 1 scale
+    let sm = (typeLines && typeLines[0] && typeLines[0].data.length) / 7.7;
+    let scaleMultiple = sm > 1 ? sm : 1;
+
+    !dates.length && (dates = [moment(start || moment()).format(format)]);
+    typeLines.forEach((typeLine) => {
+      !typeLine.data.length && (typeLine.data = [0]);
+    });
+
+    return {datasets: typeLines, labels: dates, multiple: scaleMultiple};
   }
 
   buildSelectedHeatData = (selectedData, period, start, end) => {
@@ -704,7 +758,7 @@ export default class ChartsComponent extends React.Component {
         calculateData = this.buildSelectedBarData;
         break;
       case "line":
-        calculateData = this.selectedLineDataByMonth;
+        calculateData = this.buildSelectedLineData;
         break;
       case "heat":
         calculateData = this.buildSelectedHeatData;
@@ -767,17 +821,20 @@ export default class ChartsComponent extends React.Component {
             <ActivityIndicator animating={this.state.isLoading} size="large" color="cornflowerblue" />
           </View>
         )
+      } else if (selectedData.datasets[0].data.length > 200) {
+        return (
+          <View style={{width: "100%", height: "100%", display: "flex", justifyContent: "center"}}>
+            <Text style={{ textAlign: 'center' }}>{"I can't render "+selectedData.datasets[0].data.length+" different columns, I'd die!"}</Text>
+            <Text style={{ textAlign: 'center' }}>{"Try choosing a smaller range, less than 200 columns"}</Text>
+          </View>
+        )
       }
 
-      let maxVisible = 10;
-      let numOfItems = selectedData.datasets && selectedData.datasets[0] && selectedData.datasets[0].data.length;
-      let lengthMultiple = numOfItems > maxVisible
-        ? Math.round((numOfItems / maxVisible)*10)/10
-        : 1;
-
+      let lengthMultiple = selectedData.multiple;
       return (
         <ScrollView horizontal={true} showsHorizontalScrollIndicator={lengthMultiple !== 1} scrollEnabled={lengthMultiple !== 1}>
           <LineChart
+            fromZero
             data={selectedData}
             width={(this.state.graphWidth+30) * lengthMultiple}
             height={220}
