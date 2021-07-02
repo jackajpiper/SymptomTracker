@@ -199,66 +199,10 @@ export default class ChartsComponent extends React.Component {
     this.props = props;
     this.navigation = props.navigation;
 
-    this.state = props.state;
-    this.state.graphWidth = 0;
-    this.state.GraphData = {};
-  }
-
-  pollUpdates = async () => {
-    let symptomResult = await AsyncManager.pollUpdates("Analysis", "symptoms");
-    let treatmentResult = await AsyncManager.pollUpdates("Analysis", "treatments");
-    let triggerResult = await AsyncManager.pollUpdates("Analysis", "triggers");
-
-    let newSymptoms = symptomResult.Symptoms;
-    let newSymptomInstances = symptomResult.Instances;
-    let newTreatments = treatmentResult.Treatments;
-    let newTreatmentInstances = treatmentResult.Instances;
-    let newTriggers = triggerResult.Triggers;
-    let newTriggerInstances = triggerResult.Instances;
-
-    if (newSymptoms) {
-      this.setState({Symptoms: newSymptoms});
-    } else {
-      newSymptoms = this.state.Symptoms;
-    }
-    if (newSymptomInstances) {
-      this.setState({SymptomInstances: newSymptomInstances});
-    } else {
-      newSymptomInstances = this.state.SymptomInstances;
-    }
-    if (newTreatments) {
-      this.setState({Treatments: newTreatments});
-    } else {
-      newTreatments = this.state.Treatments;
-    }
-    if (newTreatmentInstances) {
-      this.setState({TreatmentInstances: newTreatmentInstances});
-    } else {
-      newTreatmentInstances = this.state.TreatmentInstances;
-    }
-    if (newTriggers) {
-      this.setState({Triggers: newTriggers});
-    } else {
-      newTriggers = this.state.Triggers;
-    }
-    if(newTriggerInstances) {
-      this.setState({TriggerInstances: newTriggerInstances});
-    } else {
-      newTriggerInstances = this.state.TriggerInstances;
-    }
-  }
-
-  async componentDidMount() {
-    this.willFocusListener = this.navigation.addListener('focus', async () => {
-      await this.pollUpdates();
-    });
-    this._mounted = true;
-  }
-
-  componentWillUnmount = () => {
-    this._mounted = false;
-    if(this.willFocusListener && typeof this.willFocusListener.remove === "function") {
-      this.willFocusListener.remove();
+    this.state = {
+      graphWidth: 0,
+      GraphData: {},
+      isLoading: false
     };
   }
 
@@ -294,9 +238,9 @@ export default class ChartsComponent extends React.Component {
     selectedData.forEach((selected, index) => {
       let typeName = selected.split(' ')[0];
       let id = parseInt(selected.split(' ')[1]);
-      let type = this.state[typeName+"s"].find((t) => t.id === id);
+      let type = this.props[typeName+"s"].find((t) => t.id === id);
       colourList.push(shadeColour(type.colour, 40));
-      let instances = this.state[typeName+"Instances"].filter((instance) => { return instance.typeId === id; });
+      let instances = this.props[typeName+"Instances"].filter((instance) => { return instance.typeId === id; });
 
       if (instances.length !== 0) {
         instances.forEach((instance) => {
@@ -343,10 +287,10 @@ export default class ChartsComponent extends React.Component {
     selectedData.forEach((selected, index) => {
       let typeName = selected.split(' ')[0];
       let id = parseInt(selected.split(' ')[1]);
-      let type = this.state[typeName+"s"].find((t) => t.id === id);
+      let type = this.props[typeName+"s"].find((t) => t.id === id);
       colourList.push(shadeColour(type.colour, 40));
 
-      let instances = this.state[typeName+"Instances"].filter((instance) => {
+      let instances = this.props[typeName+"Instances"].filter((instance) => {
         return instance.typeId === id;
       });
 
@@ -468,9 +412,9 @@ export default class ChartsComponent extends React.Component {
     selectedData.forEach((selected) => {
       let typeName = selected.split(' ')[0];
       let id = parseInt(selected.split(' ')[1]);
-      let type = this.state[typeName+"s"].find((t) => t.id === id);
+      let type = this.props[typeName+"s"].find((t) => t.id === id);
       typeList.push(type.name);
-      let instances = this.state[typeName+"Instances"].filter((instance) => {return instance.typeId === id});
+      let instances = this.props[typeName+"Instances"].filter((instance) => {return instance.typeId === id});
 
       let emptyDataEntry = [];
       for (let i=0; i<length; i++) {
@@ -511,7 +455,7 @@ export default class ChartsComponent extends React.Component {
       let typeName = selected.split(' ')[0];
       let id = parseInt(selected.split(' ')[1]);
 
-      let instances = this.state[typeName+"Instances"].filter((instance) => {
+      let instances = this.props[typeName+"Instances"].filter((instance) => {
         return instance.typeId === id;
       });
 
@@ -569,7 +513,7 @@ export default class ChartsComponent extends React.Component {
     selectedData.forEach((selected, index) => {
       let typeName = selected.split(' ')[0];
       let id = parseInt(selected.split(' ')[1]);
-      let type = this.state[typeName+"s"].find((t) => t.id === id);
+      let type = this.props[typeName+"s"].find((t) => t.id === id);
 
       let typeData = dateData.map((dateDatum) => {
         return dateDatum[1][index];
@@ -649,9 +593,9 @@ export default class ChartsComponent extends React.Component {
     selectedData.forEach((selected) => {
       let typeName = selected.split(' ')[0];
       let id = parseInt(selected.split(' ')[1]);
-      let type = this.state[typeName+"s"].filter((type) => {return type.id === id})[0];
+      let type = this.props[typeName+"s"].filter((type) => {return type.id === id})[0];
       colours.push(type.colour);
-      let instances = this.state[typeName+"Instances"].filter((instance) => {
+      let instances = this.props[typeName+"Instances"].filter((instance) => {
         return instance.typeId === id && dateCheck(moment(instance.date));
       });
 

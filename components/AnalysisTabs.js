@@ -101,6 +101,10 @@ export default class AnalysisTabs extends React.Component {
     this._mounted = true;
   }
 
+  enableRefresh = () => {
+    !this.validate() && this.setState({refreshEnabled: true});
+  }
+
   checkboxClicked = async (checked, id, type, name) => {
     let selectedData = this.state.SelectedData;
 

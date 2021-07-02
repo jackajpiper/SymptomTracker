@@ -124,6 +124,9 @@ export default class AnalysisScreen extends React.Component {
     let newSymptoms = symptomResult.Symptoms;
     let newTreatments = treatmentResult.Treatments;
     let newTriggers = triggerResult.Triggers;
+    let newSymptomInstances = symptomResult.Instances;
+    let newTreatmentInstances = treatmentResult.Instances;
+    let newTriggerInstances = triggerResult.Instances;
 
     if (newSymptoms) {
       this.setState({Symptoms: newSymptoms});
@@ -143,6 +146,30 @@ export default class AnalysisScreen extends React.Component {
     } else {
       newTriggers = this.state.Triggers;
     }
+    if (newSymptomInstances) {
+      this.setState({SymptomInstances: newSymptomInstances});
+      oneChanged = true;
+    } else {
+      newSymptomInstances = this.state.SymptomInstances;
+    }
+    if (newTreatmentInstances) {
+      this.setState({TreatmentInstances: newTreatmentInstances});
+      oneChanged = true;
+    } else {
+      newTreatmentInstances = this.state.TreatmentInstances;
+    }
+    if (newTriggerInstances) {
+      this.setState({TriggerInstances: newTriggerInstances});
+      oneChanged = true;
+    } else {
+      newTriggerInstances = this.state.TriggerInstances;
+    }
+
+    if (oneChanged) {
+      // if the system gets instant-refreshed, this stops working
+      // need to hard refresh to reset it
+      this.tabs.enableRefresh();
+    }
   }
 
   renderGraph = (type, period, selectedData, start, end) => {
@@ -153,7 +180,21 @@ export default class AnalysisScreen extends React.Component {
         </View>
       );
     } else {
-      return <ChartsComponent ref={chart => {this.chart = chart}} type={type} period={period} selectedData={selectedData} start={start} end={end} state={{...this.state}} navigation={{...this.props.navigation}}/>
+      return <ChartsComponent
+        ref={chart => {this.chart = chart}}
+        Symptoms={this.state.Symptoms}
+        Triggers={this.state.Triggers}
+        Treatments={this.state.Treatments}
+        SymptomInstances={this.state.SymptomInstances}
+        TriggerInstances={this.state.TriggerInstances}
+        TreatmentInstances={this.state.TreatmentInstances}
+        type={type}
+        period={period}
+        selectedData={selectedData}
+        start={start}
+        end={end}
+        state={{...this.state}}
+        navigation={{...this.props.navigation}}/>
     }
   }
 
@@ -170,6 +211,7 @@ export default class AnalysisScreen extends React.Component {
         </View>
         <View style={styles.bottom}>
           <AnalysisTabs
+            ref={tabs => {this.tabs = tabs}}
             updateGraph={this.updateGraph}
             symptoms={this.state.Symptoms}
             triggers={this.state.Triggers}
