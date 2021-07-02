@@ -619,9 +619,31 @@ export default class ChartsComponent extends React.Component {
   }
 
   buildSelectedHeatData = (selectedData, period, start, end) => {
+    let dateCheck = (date) => {
+      if (start && end) {
+        return date.isSameOrAfter(start, "days") && date.isSameOrBefore(end, "days");
+      }
+      return true;
+    }
+
     let colours = [];
     let dataArr = [];
-    let colourIntervals = [];
+    let format = "";
+    switch(period) {
+      case "week-average":
+        dataArr = [[0],[0],[0],[0],[0],[0],[0]];
+        format = "E";
+        break;
+      case "month-average":
+        dataArr = [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0
+                  ,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0];
+        format = "D";
+        break;
+      case "year-average":
+        dataArr = [0,0,0,0,0,0,0,0,0,0,0,0];
+        format = "M";
+        break;
+    }
 
     let allInstances = [];
     selectedData.forEach((selected) => {
@@ -629,31 +651,18 @@ export default class ChartsComponent extends React.Component {
       let id = parseInt(selected.split(' ')[1]);
       let type = this.state[typeName+"s"].filter((type) => {return type.id === id})[0];
       colours.push(type.colour);
-      let instances = this.state[typeName+"Instances"].filter((instance) => {return instance.typeId === id});
+      let instances = this.state[typeName+"Instances"].filter((instance) => {
+        return instance.typeId === id && dateCheck(moment(instance.date));
+      });
 
       allInstances = allInstances.concat(instances);
     });
     colourIntervals = getColourIntervals(getAverageColour(colours), 4);
-    
-    if (period === "month-average") {
-      for (let i = 1; i < 32; i++) {
-        let filtered = allInstances.filter(function (instance) { return parseInt(moment(instance.date).format("D")) === i; });
-        dataArr.push(filtered.length);
-      }
-    } else if (period === "week-average") {
-      // because sunday is the 0th day in moment, we loop from 1 to 6 and then add sunday onto the end
-      for (let i = 1; i < 7; i++) {
-        let filtered = allInstances.filter(function (instance) { return parseInt(moment(instance.date).day()) === i; });
-        dataArr.push(filtered.length);
-      }
-      let filtered = allInstances.filter(function (instance) { return parseInt(moment(instance.date).day()) === 0; });
-      dataArr.push(filtered.length);
-    } else if (period === "year-average") {
-      for (let i = 1; i <= 12; i++) {
-        let filtered = allInstances.filter(function (instance) { return parseInt(moment(instance.date).month())+1 === i; });
-        dataArr.push(filtered.length);
-      }
-    }
+
+    allInstances.forEach((instance) => {
+      dataArr[moment(instance.date).format(format)-1]++;
+    });
+
     return {period: period, values: dataArr, colours: colourIntervals};
   }
 

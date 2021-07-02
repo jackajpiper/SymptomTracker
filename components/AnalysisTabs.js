@@ -157,8 +157,28 @@ export default class AnalysisTabs extends React.Component {
     });
   }
 
-  clickedRefresh = () => {
+  validate = () => {
+    let message = "";
 
+    if (!this.state.GraphType.length) {
+      message = "Please select a graph type";
+    } else if (!this.state.GraphPeriodRange.length) {
+      message = "Please select a period range";
+    } else if (!this.state.GraphPeriodType.length) {
+      message = "Please select a period";
+    } else if (this.state.GraphType === "heat" && this.state.GraphPeriodType.includes("all")) {
+      message = "Heat graph can only show average data. Please change the period";
+    }
+
+    return message;
+  }
+
+  clickedRefresh = () => {
+    let error = this.validate();
+    if (error) {
+      Toast.show(error);
+      return;
+    }
     let start = this.state.GraphPeriodRange === "between-dates"
       ? this.state.PeriodStart
       : null;
@@ -166,24 +186,14 @@ export default class AnalysisTabs extends React.Component {
       ? this.state.PeriodEnd
       : null;
 
-    if (this.state.GraphType.length && this.state.GraphPeriodRange && this.state.GraphPeriodType.length) {
-      this.updateGraph(
-        this.state.GraphType,
-        this.state.GraphPeriodType,
-        JSON.parse(JSON.stringify(this.state.SelectedData)),
-        start,
-        end
-      );
-      this.updateOrigin();
-    } else {
-      if (!this.state.GraphType.length) {
-        Toast.show("Please select a graph type");
-      } else if (!this.state.GraphPeriodRange.length) {
-        Toast.show("Please select a period range");
-      } else if (!this.state.GraphPeriodType.length) {
-        Toast.show("Please select a period");
-      }
-    }
+    this.updateGraph(
+      this.state.GraphType,
+      this.state.GraphPeriodType,
+      JSON.parse(JSON.stringify(this.state.SelectedData)),
+      start,
+      end
+    );
+    this.updateOrigin();
   }
 
   RenderCheckboxes = (type) => {
