@@ -37,6 +37,8 @@ const SymptomInstances = [
   { id: 26, typeId: 1, date: '2021-05-04', startTime: '12:40', endTime: '12:55', severity: 78, notes: 'note18' }
 ]
 
+AsyncManager.setSymptomInstances(SymptomInstances);
+
 const Treatments = [
   { id: 1, name: "Ibuprofen", colour: "#b87aa8", unitTypeId: 1, unit: "Pills"},
   { id: 1, name: "Meditation", colour: "#b5b87a", unit: "Grams"},
@@ -88,12 +90,6 @@ const DiaryData = [
 //    -- follow that up by implementing themes
 //  -- make a onboarding thing for new users
 //  -- implement settings
-//  -- implement the diary?
-
-// ANALYSIS TAB
-//  -- track one item against another to look for correlation
-//    -- find some kind of calculated correlation score
-//  -- select one symptom and be presented with statistically likely triggers
 
 // EDGE CASES
 //  -- symptom/trigger/treatment name being super long
