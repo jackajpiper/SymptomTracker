@@ -272,7 +272,7 @@ export default class ChartsComponent extends React.Component {
         || this.state.isLoading !== nextState.isLoading;
   }
 
-  getAllForBar(selectedData, start, end, format, funcName) {
+  getAllForBar(selectedData, start, end, format, funcName, addFormat) {
     let data = [];
     let dates = [];
     let colourList = [];
@@ -317,14 +317,33 @@ export default class ChartsComponent extends React.Component {
     })
 
     // Create array of dates and corresponding data
-    var dateData = Object.keys(dateDict).map(function(date) {
+    let dictData = Object.keys(dateDict).map(function(date) {
       return [date, dateDict[date]];
     });
 
     // Sort the array based on the date
-    dateData.sort(function(first, second) {
+    dictData.sort(function(first, second) {
       return moment(first[0]).isAfter(second[0]);
     });
+
+    // fill out the array to include empty date intervals
+    if (!start) {
+      start = moment(dictData && dictData[0] && dictData[0][0]);
+    } else {
+      let date = moment(start);
+      start = date.clone().subtract(date.clone()[funcName]()-1, "days");
+    }
+    let dateData = [];
+    let emptyData = selectedData.map(() => { return 0; });
+    for (let i=0; i<dictData.length; i++) {
+      if (start.isSame(dictData[i][0], "days")) {
+        dateData.push(dictData[i]);
+      } else {
+        dateData.push([start.toISOString(), emptyData]);
+        i--;
+      }
+      start.add(1, addFormat);
+    }
 
     data = dateData.map((dateDatum) => {
       return dateDatum[1];
@@ -426,11 +445,11 @@ export default class ChartsComponent extends React.Component {
               "21", "22", "23", "24", "25", "26", "27", "28", "29", "30", "31"];
       return this.getAverageForBar(selectedData, dates, start, end, 31, "D", 2, 0.4);
     } else if (period === "week-all") {
-      return this.getAllForBar(selectedData, start, end, "DD MMM", "day");
+      return this.getAllForBar(selectedData, start, end, "DD MMM", "day", "w");
     } else if (period === "month-all") {
-      return this.getAllForBar(selectedData, start, end, "MMM YY", "date");
+      return this.getAllForBar(selectedData, start, end, "MMM YY", "date", "M");
     } else if (period === "year-all") {
-      return this.getAllForBar(selectedData, start, end, "YYYY", "dayOfYear");
+      return this.getAllForBar(selectedData, start, end, "YYYY", "dayOfYear", "y");
     }
 
     return {data: data, barColors: colourList, labels: dates, widths: widths};
@@ -449,11 +468,11 @@ export default class ChartsComponent extends React.Component {
       let dates = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
       return this.getAverageForLine(selectedData, dates, start, end, 12, "M", 1, 0.5);
     } else if (period === "week-all") {
-      return this.getAllForLine(selectedData, start, end, "DD MMM", "day");
+      return this.getAllForLine(selectedData, start, end, "DD MMM", "day", "w");
     } else if (period === "month-all") {
-      return this.getAllForLine(selectedData, start, end, "MMM YY", "date");
+      return this.getAllForLine(selectedData, start, end, "MMM YY", "date", "M");
     } else if (period === "year-all") {
-      return this.getAllForLine(selectedData, start, end, "YYYY", "dayOfYear");
+      return this.getAllForLine(selectedData, start, end, "YYYY", "dayOfYear", "y");
     }
   }
 
@@ -499,7 +518,7 @@ export default class ChartsComponent extends React.Component {
     return { datasets: typeLines, labels: dates, multiple: scaleMultiple };
   }
 
-  getAllForLine(selectedData, start, end, format, funcName) {
+  getAllForLine(selectedData, start, end, format, funcName, addFormat) {
     let dates = [];
     let dateDict = {};
 
@@ -539,14 +558,33 @@ export default class ChartsComponent extends React.Component {
     })
 
     // Create array of dates and corresponding data
-    var dateData = Object.keys(dateDict).map(function(date) {
+    let dictData = Object.keys(dateDict).map(function(date) {
       return [date, dateDict[date]];
     });
 
     // Sort the array based on the date
-    dateData.sort(function(first, second) {
+    dictData.sort(function(first, second) {
       return moment(first[0]).isAfter(second[0]);
     });
+
+    // fill out the array to include empty date intervals
+    if (!start) {
+      start = moment(dictData && dictData[0] && dictData[0][0]);
+    } else {
+      let date = moment(start);
+      start = date.clone().subtract(date.clone()[funcName]()-1, "days");
+    }
+    let dateData = [];
+    let emptyData = selectedData.map(() => { return 0; });
+    for (let i=0; i<dictData.length; i++) {
+      if (start.isSame(dictData[i][0], "days")) {
+        dateData.push(dictData[i]);
+      } else {
+        dateData.push([start.toISOString(), emptyData]);
+        i--;
+      }
+      start.add(1, addFormat);
+    }
 
     // build a dataset for each of the selected data
     let typeLines = [];
