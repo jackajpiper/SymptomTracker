@@ -4,7 +4,6 @@ import { StackedBarChart, LineChart } from 'react-native-chart-kit'
 import moment from "moment";
 import AsyncManager from './AsyncManager';
 import HeatMap from 'react-native-heatmap-chart';
-import Toast from 'react-native-simple-toast';
 
 function shadeColour(color, percent) {
 
@@ -272,6 +271,61 @@ export default class ChartsComponent extends React.Component {
         || this.state.isLoading !== nextState.isLoading;
   }
 
+  getAverageForBar = (selectedData, dates, start, end, length, format, scaleMultiple, itemPercentage) => {
+    let colourList = [];
+    let data = [];
+    let widths = { scaleMultiple: scaleMultiple, itemPercentage: itemPercentage };
+
+    let dateCheck = (date) => {
+      if (start && end) {
+        return date.isSameOrAfter(start, "days") && date.isSameOrBefore(end, "days");
+      }
+      return true;
+    }
+
+    for (let i=0; i<length; i++) {
+      let emptyDataEntry = [];
+      for (let i=0; i<selectedData.length; i++) {
+        emptyDataEntry.push(0);
+      }
+      data[i] = emptyDataEntry;
+    }
+
+    selectedData.forEach((selected, index) => {
+      let typeName = selected.split(' ')[0];
+      let id = parseInt(selected.split(' ')[1]);
+      let type = this.state[typeName+"s"].find((t) => t.id === id);
+      colourList.push(shadeColour(type.colour, 40));
+      let instances = this.state[typeName+"Instances"].filter((instance) => { return instance.typeId === id; });
+
+      if (instances.length !== 0) {
+        instances.forEach((instance) => {
+          let date = moment(instance.date);
+          let dayNum = parseInt(date.format(format)) - 1;
+          if (dateCheck(date)) {
+            data[dayNum][index]++;
+          }
+        });
+      } else if (selectedData.length === 1) {
+        return {};
+      }
+    });
+
+    // remove empty data
+    for(let i=selectedData.length-1; i>=0; i--) {
+      if (!(data.filter((datum) => {
+            return !!datum[i];
+          }).length)) {
+        data.map((datum) => {
+          datum.splice(i, 1);
+        });
+        colourList.splice(i, 1);
+      }
+    }
+
+    return {data: data, barColors: colourList, labels: dates, widths: widths};
+  }
+
   getAllForBar(selectedData, start, end, format, funcName, addFormat) {
     let data = [];
     let dates = [];
@@ -372,61 +426,6 @@ export default class ChartsComponent extends React.Component {
     return {data: data, barColors: colourList, labels: dates, widths: widths};
   }
 
-  getAverageForBar = (selectedData, dates, start, end, length, format, scaleMultiple, itemPercentage) => {
-    let colourList = [];
-    let data = [];
-    let widths = { scaleMultiple: scaleMultiple, itemPercentage: itemPercentage };
-
-    let dateCheck = (date) => {
-      if (start && end) {
-        return date.isSameOrAfter(start, "days") && date.isSameOrBefore(end, "days");
-      }
-      return true;
-    }
-
-    for (let i=0; i<length; i++) {
-      let emptyDataEntry = [];
-      for (let i=0; i<selectedData.length; i++) {
-        emptyDataEntry.push(0);
-      }
-      data[i] = emptyDataEntry;
-    }
-
-    selectedData.forEach((selected, index) => {
-      let typeName = selected.split(' ')[0];
-      let id = parseInt(selected.split(' ')[1]);
-      let type = this.state[typeName+"s"].find((t) => t.id === id);
-      colourList.push(shadeColour(type.colour, 40));
-      let instances = this.state[typeName+"Instances"].filter((instance) => { return instance.typeId === id; });
-
-      if (instances.length !== 0) {
-        instances.forEach((instance) => {
-          let date = moment(instance.date);
-          let dayNum = parseInt(date.format(format)) - 1;
-          if (dateCheck(date)) {
-            data[dayNum][index]++;
-          }
-        });
-      } else if (selectedData.length === 1) {
-        return {};
-      }
-    });
-
-    // remove empty data
-    for(let i=selectedData.length-1; i>=0; i--) {
-      if (!(data.filter((datum) => {
-            return !!datum[i];
-          }).length)) {
-        data.map((datum) => {
-          datum.splice(i, 1);
-        });
-        colourList.splice(i, 1);
-      }
-    }
-
-    return {data: data, barColors: colourList, labels: dates, widths: widths};
-  }
-
   buildSelectedBarData = (selectedData, period, start, end) => {
     let data = [];
     let dates = [];
@@ -453,27 +452,6 @@ export default class ChartsComponent extends React.Component {
     }
 
     return {data: data, barColors: colourList, labels: dates, widths: widths};
-  }
-
-  buildSelectedLineData = (selectedData, period, start, end) => {
-    if (period === "week-average") {
-      let dates = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
-      return this.getAverageForLine(selectedData, dates, start, end, 7, "E", 1, 0.7);
-    } else if (period === "month-average") {
-      let dates = ["1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11",
-                  "12", "13", "14", "15", "16", "17", "18", "19", "20", "21",
-                  "22", "23", "24", "25", "26", "27", "28", "29", "30", "31"];
-      return this.getAverageForLine(selectedData, dates, start, end, 31, "D", 2, 0.4);
-    } else if (period === "year-average") {
-      let dates = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
-      return this.getAverageForLine(selectedData, dates, start, end, 12, "M", 1, 0.5);
-    } else if (period === "week-all") {
-      return this.getAllForLine(selectedData, start, end, "DD MMM", "day", "w");
-    } else if (period === "month-all") {
-      return this.getAllForLine(selectedData, start, end, "MMM YY", "date", "M");
-    } else if (period === "year-all") {
-      return this.getAllForLine(selectedData, start, end, "YYYY", "dayOfYear", "y");
-    }
   }
 
   getAverageForLine = (selectedData, dates, start, end, length, format, scaleMultiple) => {
@@ -619,6 +597,27 @@ export default class ChartsComponent extends React.Component {
     return {datasets: typeLines, labels: dates, multiple: scaleMultiple};
   }
 
+  buildSelectedLineData = (selectedData, period, start, end) => {
+    if (period === "week-average") {
+      let dates = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
+      return this.getAverageForLine(selectedData, dates, start, end, 7, "E", 1, 0.7);
+    } else if (period === "month-average") {
+      let dates = ["1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11",
+                  "12", "13", "14", "15", "16", "17", "18", "19", "20", "21",
+                  "22", "23", "24", "25", "26", "27", "28", "29", "30", "31"];
+      return this.getAverageForLine(selectedData, dates, start, end, 31, "D", 2, 0.4);
+    } else if (period === "year-average") {
+      let dates = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+      return this.getAverageForLine(selectedData, dates, start, end, 12, "M", 1, 0.5);
+    } else if (period === "week-all") {
+      return this.getAllForLine(selectedData, start, end, "DD MMM", "day", "w");
+    } else if (period === "month-all") {
+      return this.getAllForLine(selectedData, start, end, "MMM YY", "date", "M");
+    } else if (period === "year-all") {
+      return this.getAllForLine(selectedData, start, end, "YYYY", "dayOfYear", "y");
+    }
+  }
+
   buildSelectedHeatData = (selectedData, period, start, end) => {
     let colours = [];
     let dataArr = [];
@@ -761,23 +760,6 @@ export default class ChartsComponent extends React.Component {
     }
   }
 
-  calculateBarWidths = (itemCount, maxVisible, maxScaled, lengthStart, maxBarPercentage, minBarPercentage) => {
-    let lengthMultiple;
-    let barPercentage;
-    let r = itemCount/maxScaled;
-    if (itemCount <= maxVisible) {
-      lengthMultiple = lengthStart;
-      barPercentage = maxBarPercentage - (r*minBarPercentage);
-    } else if (itemCount >= maxScaled) {
-      lengthMultiple = lengthStart+r;
-      barPercentage = minBarPercentage;
-    } else {
-      lengthMultiple = lengthStart+r;
-      barPercentage = maxBarPercentage - (r*minBarPercentage);
-    }
-    return { scaleMultiple: lengthMultiple, itemPercentage: barPercentage };
-  }
-
   updateData = async () => {
     this.setState({GraphData: {}, isLoading: true});
   }
@@ -897,9 +879,7 @@ export default class ChartsComponent extends React.Component {
         </ScrollView>
       )
     } else if (type === "heat") {
-      let heatGraph = this.buildHeatChart(this.state.GraphData);
-
-      return heatGraph;
+      return this.buildHeatChart(this.state.GraphData);
     }
   }
 
