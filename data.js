@@ -77,12 +77,20 @@ const DiaryData = [
   { id: 8, date: "2021-03-23", text: "It was warm today." }
 ]
 
+// CHANGES TO MODULES
+//  -- react-native-calendars\src\expandableCalendar\Context\Presenter.js
+//    -- line 42, added ! to reverse the today button arrow direction
+
+
 // TODO
 //  -- sort out calendar ordering, render data by month etc
+//    -- anything you do to the calendar, do to the diary calendar too
 //  -- stop constantly lightening the colours and just save them in the lightened state
 //    -- currently uses saturation of 30 and lightness of 60
 //    -- used in Edit(Symptom/Trigger/Treatment)Screen
 //    -- also used when calculating average colour for the heat graph
+//  -- make the save/delete buttons standard across the app
+//    -- currently there's the old version used in most places, and a new sexy version used for the diary
 //  -- make severity an optional attribute for symptoms
 //    -- maybe expand the system to allow custom severity/dose tracking
 //  -- make the title on the homepage more stylish
@@ -90,6 +98,7 @@ const DiaryData = [
 //    -- follow that up by implementing themes
 //  -- make a onboarding thing for new users
 //  -- implement settings
+//  -- implement import/export
 
 // EDGE CASES
 //  -- symptom/trigger/treatment name being super long
@@ -97,7 +106,9 @@ const DiaryData = [
 // Settings
 //  -- themes
 //    -- light mode/dark mode
-//    -- 
+//    -- primary/secondary colours?
+//      -- right now it's cornflowerblue and white(?)
+//  -- rename the symptom trackers e.g Jane's Symptom Tracker
 
 
 //  -- EXTESION IDEAS
