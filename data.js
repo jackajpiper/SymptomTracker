@@ -78,13 +78,18 @@ const DiaryData = [
 ]
 
 // CHANGES TO MODULES
-//  -- react-native-calendars\src\expandableCalendar\Context\Presenter.js
-//    -- line 42, added ! to reverse the today button arrow direction
+//  -- react-native-calendars\src\expandableCalendar\agendaList.js
+//    -- line 204: renderSectionHeader changed to renderSectionFooter
+//    -- line 205: added inverted on new line
+
+// ALTERNATIVE APP NAME
+//  -- Anne's Symptom Tracker
+//  -- Annie's Symtom Tracker
+//  -- Anna's Symptom Tracker
+//  -- Sophie's Symptom Tracker
 
 
 // TODO
-//  -- sort out calendar ordering, render data by month etc
-//    -- anything you do to the calendar, do to the diary calendar too
 //  -- stop constantly lightening the colours and just save them in the lightened state
 //    -- currently uses saturation of 30 and lightness of 60
 //    -- used in Edit(Symptom/Trigger/Treatment)Screen
@@ -92,7 +97,8 @@ const DiaryData = [
 //  -- make the save/delete buttons standard across the app
 //    -- currently there's the old version used in most places, and a new sexy version used for the diary
 //  -- make severity an optional attribute for symptoms
-//    -- maybe expand the system to allow custom severity/dose tracking
+//    -- add 'Track severity?' to edit symptom screen
+//    -- consider adding eqivalent optional scales for triggers and treatments
 //  -- make the title on the homepage more stylish
 //  -- implement dark mode
 //    -- follow that up by implementing themes

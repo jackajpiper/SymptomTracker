@@ -75,7 +75,7 @@ function processInstances(symptomInstances, symptoms, treatmentInstances, treatm
   });
 
   function compareOnDay(a, b) {
-    return a.startTime.localeCompare(b.startTime);
+    return b.startTime.localeCompare(a.startTime);
   }
   
   var todayObj = {startTime: "00:00"};
