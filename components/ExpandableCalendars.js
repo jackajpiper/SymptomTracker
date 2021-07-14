@@ -100,59 +100,6 @@ function processInstances(symptomInstances, symptoms, treatmentInstances, treatm
   return dateArr;
 }
 
-function shadeColor(color, percent) {
-
-  var R = parseInt(color.substring(1,3),16);
-  var G = parseInt(color.substring(3,5),16);
-  var B = parseInt(color.substring(5,7),16);
-
-  let mag = Math.sqrt(R*R + G*G + B*B);
-  R = (R / mag) * 255;
-  G = (G / mag) * 255;
-  B = (B / mag) * 255;
-
-  R = parseInt(R * (100 + percent) / 100);
-  G = parseInt(G * (100 + percent) / 100);
-  B = parseInt(B * (100 + percent) / 100);
-
-  if(percent > 0) {
-    if(R !== 0) {
-      if(G === 0) {
-        G = Math.floor(R * percent / 100);
-      }
-      if(B === 0) {
-        B = Math.floor(R * percent / 100);
-      }
-    }
-    if(G !== 0) {
-      if(R === 0) {
-        R = Math.floor(G * percent / 100);
-      }
-      if(B === 0) {
-        B = Math.floor(G * percent / 100);
-      }
-    }
-    if(B !== 0) {
-      if(G === 0) {
-        G = Math.floor(B * percent / 100);
-      }
-      if(B === 0) {
-        R = Math.floor(B * percent / 100);
-      }
-    }
-  }
-
-  R = (R<255)?R:255;
-  G = (G<255)?G:255;
-  B = (B<255)?B:255;
-
-  var RR = ((R.toString(16).length==1)?"0"+R.toString(16):R.toString(16));
-  var GG = ((G.toString(16).length==1)?"0"+G.toString(16):G.toString(16));
-  var BB = ((B.toString(16).length==1)?"0"+B.toString(16):B.toString(16));
-
-  return "#"+RR+GG+BB;
-}
-
 function getContrastYIQ(hexcolor){
   hexcolor = hexcolor.replace("#", "");
   var r = parseInt(hexcolor.substr(0,2),16);
@@ -287,14 +234,13 @@ export default class ExpandableCalendarScreen extends Component {
     }
 
     let colour = item.colour;
-    let lighterColour = shadeColor(colour, 60);
-    let textColour = getContrastYIQ(lighterColour);
+    let textColour = getContrastYIQ(colour);
     let lighterTextColour = textColour === 'black' ? 'grey' : 'silver';
 
     if (item.type === "symptom") {
       return (
         <LinearGradient 
-          colors={['white', lighterColour]}
+          colors={['white', colour]}
           style = { styles.container }
           start={{ x: 0.5, y: 0.5 }}
           end={{ x: 1, y: 0.5 }}>
@@ -316,7 +262,7 @@ export default class ExpandableCalendarScreen extends Component {
     } else if (item.type === "treatment") {
       return (
         <LinearGradient 
-          colors={['white', lighterColour]}
+          colors={['white', colour]}
           style = { styles.container }
           start={{ x: 0.5, y: 0.5 }}
           end={{ x: 1, y: 0.5 }}>
@@ -335,7 +281,7 @@ export default class ExpandableCalendarScreen extends Component {
     } else if (item.type === "trigger") {
       return (
         <LinearGradient 
-          colors={['white', lighterColour]}
+          colors={['white', colour]}
           style = { styles.container }
           start={{ x: 0.5, y: 0.5 }}
           end={{ x: 1, y: 0.5 }}>

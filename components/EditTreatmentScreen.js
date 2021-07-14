@@ -201,7 +201,7 @@ export default class TreatmentsListScreen extends Component {
                 trackStyle={[{height: 12}]}
                 thumbStyle={styles.thumb}
                 useNativeDriver={true}
-                onColorChange={(colour, end) => {end === 'end' ? this.updateField('colour', HSLToHex(colour.h, 30, 60)) : undefined}}
+                onColorChange={(colour, end) => {end === 'end' ? this.updateField('colour', HSLToHex(colour.h, 100, 85)) : undefined}}
             />
           </View>
 
