@@ -1,14 +1,10 @@
 import _ from 'lodash';
 import React, {Component} from 'react';
-import {Alert, StyleSheet, View, Text, TextInput, TouchableOpacity} from 'react-native';
-import moment from "moment";
+import {Alert, StyleSheet, View, Text, TextInput, TouchableOpacity, Keyboard} from 'react-native';
 import {SliderHuePicker} from 'react-native-slider-color-picker';
-import {LinearGradient} from 'expo-linear-gradient';
 import Toast from 'react-native-simple-toast';
 import AsyncManager from './AsyncManager';
-import { Ionicons } from '@expo/vector-icons';
-
-const today = moment().format("YYYY-MM-DD");
+import { FontAwesome, AntDesign } from '@expo/vector-icons';
 
 function HSLToHex(h,s,l) {
   s /= 100;
@@ -85,6 +81,30 @@ export default class SymptomsListScreen extends Component {
     });
   }
 
+  componentDidMount = () => {
+    this.updateHeader();
+  }
+
+  updateHeader = () => {
+    let header = !this.state.origin.id
+      ? <View style={{flex: 1, flexDirection: "row", paddingTop: 15}}>
+          <TouchableOpacity style={{paddingRight: 25}} onPress={() => {this.onSubmit(); Keyboard.dismiss()}}>
+            <FontAwesome name="save" size={28} color="#009ad4" />
+          </TouchableOpacity>
+        </View>
+      : <View style={{flex: 1, flexDirection: "row", paddingTop: 15}}>
+          <TouchableOpacity style={{paddingRight: 25}} onPress={this.onDelete}>
+            <AntDesign name="delete" size={28} color="red" />
+          </TouchableOpacity>
+          <TouchableOpacity style={{paddingRight: 25}} onPress={() => {this.onSubmit(); Keyboard.dismiss()}}>
+            <FontAwesome name="save" size={28} color="#009ad4" />
+          </TouchableOpacity>
+        </View>
+    this.props.navigation.setOptions({
+      headerRight: () => header
+    });
+  }
+
   validate = () => {
     if (!this.state.name) {
       return "Please select a name";
@@ -146,38 +166,6 @@ export default class SymptomsListScreen extends Component {
   }
 
   render() {
-    let saveBtn;
-    let deleteBtn;
-    if (this.isNew) {
-      saveBtn = 
-      <LinearGradient 
-        colors={['white', this.state.dirty ? this.state.colour : 'grey']}
-        style={styles.buttonContainer}
-        start={{ x: 0.4, y: 0.5 }}
-        end={{ x: 1, y: 0.5 }}>
-
-        <TouchableOpacity style={styles.mainButton} onPress={this.onSubmit} disabled={!this.state.dirty}>
-          <Text style={[styles.mainButtonText, {color: this.state.dirty ? 'black' : 'grey'}]}>Create Symptom</Text>
-        </TouchableOpacity>
-      </LinearGradient>
-    } else {
-      saveBtn =
-      (<LinearGradient 
-        colors={['white', this.state.dirty ? this.state.colour : 'grey']}
-        style={[styles.buttonContainer, {right: 85}]}
-        start={{ x: 0.4, y: 0.5 }}
-        end={{ x: 1, y: 0.5 }}>
-
-        <TouchableOpacity style={styles.mainButton} onPress={this.onSubmit} disabled={!this.state.dirty}>
-          <Text style={[styles.mainButtonText, {color: this.state.dirty ? 'black' : 'grey'}]}>Save Symptom</Text>
-        </TouchableOpacity>
-      </LinearGradient>);
-      deleteBtn = 
-      (<TouchableOpacity style={[styles.buttonContainer, {width: "18%", backgroundColor: "#e62200", display: "flex", justifyContent: "center"}]} onPress={this.onDelete}>
-        <Ionicons style={{textAlign: "center"}} name="trash-outline" size={32} color="black" />
-      </TouchableOpacity>);
-    }
-
     return (
       <View style={styles.container}>
         <View style={styles.form}>
@@ -204,9 +192,6 @@ export default class SymptomsListScreen extends Component {
                 onColorChange={(colour, end) => {end === 'end' ? this.updateField('colour', HSLToHex(colour.h, 100, 85)) : undefined}}
             />
           </View>
-
-          {saveBtn}
-          {deleteBtn}
         </View>
       </View>
     )

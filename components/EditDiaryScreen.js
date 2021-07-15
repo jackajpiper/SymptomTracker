@@ -4,10 +4,8 @@ import {Alert, ScrollView, StyleSheet, View, KeyboardAvoidingView, Keyboard, Tex
 import moment from "moment";
 import Toast from 'react-native-simple-toast';
 import AsyncManager from './AsyncManager';
-import { FontAwesome, AntDesign, Ionicons } from '@expo/vector-icons';
+import { FontAwesome, AntDesign } from '@expo/vector-icons';
 import DateTimePicker from '@react-native-community/datetimepicker';
-
-const today = moment().format("YYYY-MM-DD");
 
 export default class EditDiaryScreen extends Component {
   constructor(props) {

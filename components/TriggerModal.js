@@ -1,10 +1,9 @@
 import _ from 'lodash';
 import React from 'react';
-import {Alert, TextInput, ScrollView, StyleSheet, View, Text, TouchableOpacity} from 'react-native';
+import {Alert, TextInput, ScrollView, StyleSheet, View, Text, TouchableOpacity, Keyboard} from 'react-native';
 import moment from "moment";
-import {LinearGradient} from 'expo-linear-gradient';
 import AsyncManager from './AsyncManager';
-import { Ionicons } from '@expo/vector-icons';
+import { FontAwesome, AntDesign, Ionicons } from '@expo/vector-icons';
 import RNPickerSelect from 'react-native-picker-select';
 import DateTimePicker from '@react-native-community/datetimepicker';
 import Toast from 'react-native-simple-toast';
@@ -155,35 +154,24 @@ export default class TriggerModal extends React.Component {
 
   render() {
     let buttons;
+    let size = 40;
     if (this.isNew) {
       buttons = 
-      <LinearGradient 
-        colors={['white', this.state.dirty ? this.state.colour : 'grey']}
-        style={formStyles.buttonContainer}
-        start={{ x: 0.4, y: 0.5 }}
-        end={{ x: 1, y: 0.5 }}>
-
-        <TouchableOpacity style={formStyles.mainButton} onPress={this.onSubmit} disabled={!this.state.dirty}>
-          <Text style={[formStyles.mainButtonText, {color: this.state.dirty ? 'black' : 'grey'}]}>Add Trigger</Text>
-        </TouchableOpacity>
-      </LinearGradient>
+        <View style={{display: "flex", flexDirection: "row", justifyContent: "flex-end"}}>
+          <TouchableOpacity style={{borderWidth: 2, padding: 5, borderRadius: 4, borderColor: "#009ad4"}} onPress={() => {this.onSubmit(); Keyboard.dismiss()}}>
+            <FontAwesome name="save" size={size} color="#009ad4" />
+          </TouchableOpacity>
+        </View>
     } else {
       buttons =
-      <View style={{display: "flex", flexDirection: "row", justifyContent: "space-between"}}>
-        <LinearGradient 
-          colors={['white', this.state.dirty ? this.state.colour : 'grey']}
-          style={[formStyles.buttonContainer, {width: "80%"}]}
-          start={{ x: 0.4, y: 0.5 }}
-          end={{ x: 1, y: 0.5 }}>
-          <TouchableOpacity style={formStyles.mainButton} onPress={this.onSubmit} disabled={!this.state.dirty}>
-            <Text style={[formStyles.mainButtonText, {color: this.state.dirty ? 'black' : 'grey'}]}>Save Trigger</Text>
+        <View style={{display: "flex", flexDirection: "row", justifyContent: "space-between"}}>
+          <TouchableOpacity style={{borderWidth: 2, padding: 5, borderRadius: 4, borderColor: "red", marginRight: 40}} onPress={this.onDelete}>
+            <AntDesign name="delete" size={size} color="red" />
           </TouchableOpacity>
-        </LinearGradient>
-          
-        <TouchableOpacity style={[formStyles.buttonContainer, {width: "18%", backgroundColor: "#e62200", display: "flex", justifyContent: "center"}]} onPress={this.onDelete}>
-          <Ionicons style={{textAlign: "center"}} name="trash-outline" size={32} color="black" />
-        </TouchableOpacity>
-      </View>
+          <TouchableOpacity style={{borderWidth: 2, padding: 5, borderRadius: 4, borderColor: "#009ad4"}} onPress={() => {this.onSubmit(); Keyboard.dismiss()}}>
+            <FontAwesome name="save" size={size} color="#009ad4" />
+          </TouchableOpacity>
+        </View>
     }
 
     return (
