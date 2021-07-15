@@ -7,6 +7,7 @@ import { FontAwesome, AntDesign, Ionicons } from '@expo/vector-icons';
 import RNPickerSelect from 'react-native-picker-select';
 import DateTimePicker from '@react-native-community/datetimepicker';
 import Toast from 'react-native-simple-toast';
+import Slider from '@react-native-community/slider';
 
 function shadeColour(color, percent) {
   if (color === "cornflowerblue") {
@@ -88,9 +89,13 @@ export default class TreatmentModal extends React.Component {
       };
     });
     
+    let treatment = this.treatments.find(x => x.id === origin.treatmentId);
     this.colour = this.id
-      ? this.treatments.find(x => x.id === origin.treatmentId).colour
+      ? treatment.colour
       : "cornflowerblue";
+    this.showSlider = this.id
+      ? treatment.trackSlider
+      : false;
 
     this.state = {
       treatmentId: origin.treatmentId,
@@ -103,16 +108,18 @@ export default class TreatmentModal extends React.Component {
       showStartTime: false,
       showEndTime: false,
       dirty: false,
-      colour: this.colour
+      colour: this.colour,
+      showSlider: this.showSlider
     };
   }
 
   updateField = (field, value) => {
     if (field === 'treatmentId') {
+      let treatment = this.treatments.find(treatment => treatment.id === value);
       let colour = value
-        ? this.treatments.find(treatment => treatment.id === value).colour
+        ? treatment.colour
         : "cornflowerblue";
-      this.setState({colour: colour});
+      this.setState({colour: colour, showSlider: treatment.trackSlider});
     }
     if (field === 'startTime') {
       if (moment(value, "HH:mm").isAfter(moment(this.state.endTime, "HH:mm"))) {
@@ -339,6 +346,20 @@ export default class TreatmentModal extends React.Component {
                 )}
               </View>
             </View>
+            {this.state.showSlider && <View style={[formStyles.field, formStyles.sliderField]}>
+              <Text style={formStyles.fieldLabel}>{"Amount  ("+(this.state.severity || 50)+")"}</Text>
+              <View style={{ marginLeft: -20, marginRight: -20, paddingTop: 10 }}>
+                <Slider
+                  value={this.state.severity || 50}
+                  step={1}
+                  minimumValue={1}
+                  maximumValue={100}
+                  minimumTrackTintColor={underlineColour}
+                  maximumTrackTintColor="#000000"
+                  onValueChange={(value) => this.updateField("severity", value)}
+                />
+              </View>
+            </View>}
             <View style={[formStyles.field, {paddingBottom: 10}]}>
               <Text style={formStyles.fieldLabel}>Notes:</Text>
               <TextInput

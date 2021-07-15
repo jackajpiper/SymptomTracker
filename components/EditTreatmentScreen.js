@@ -1,6 +1,6 @@
 import _ from 'lodash';
 import React, {Component} from 'react';
-import {Alert, StyleSheet, View, Text, TextInput, TouchableOpacity, Keyboard} from 'react-native';
+import {Alert, StyleSheet, View, Text, TextInput, TouchableOpacity, Keyboard, Switch} from 'react-native';
 import {SliderHuePicker} from 'react-native-slider-color-picker';
 import Toast from 'react-native-simple-toast';
 import AsyncManager from './AsyncManager';
@@ -55,6 +55,7 @@ export default class TreatmentsListScreen extends Component {
       isLoading: true,
       name: props.route.params.treatment.name,
       colour: props.route.params.treatment.colour,
+      trackSlider: props.route.params.treatment.trackSlider,
       origin: props.route.params.treatment,
       dirty: false
     };
@@ -123,6 +124,7 @@ export default class TreatmentsListScreen extends Component {
       var treatment = this.state.origin;
       treatment.name = this.state.name;
       treatment.colour = this.state.colour;
+      treatment.trackSlider = this.state.trackSlider;
       await this.updateTreatmentStorage(treatment);
       if (this.isNew) {
         this.props.navigation.goBack();
@@ -190,6 +192,19 @@ export default class TreatmentsListScreen extends Component {
                 thumbStyle={styles.thumb}
                 useNativeDriver={true}
                 onColorChange={(colour, end) => {end === 'end' ? this.updateField('colour', HSLToHex(colour.h, 100, 85)) : undefined}}
+            />
+          </View>
+          
+          <View style={styles.field}>
+            <Text style={[styles.fieldLabel, {marginTop: 15}]}>Track dosage?</Text>
+            <Text style={[styles.fieldLabel, {marginBottom: 15}]}>(Show slider when creating a record)</Text>
+            <Switch
+              style={{alignSelf: "flex-start"}}
+              trackColor={{ false: "#767577", true: "#81b0ff" }}
+              thumbColor={"cornflowerblue"}
+              ios_backgroundColor="#3e3e3e"
+              onValueChange={(val) => {this.updateField("trackSlider", val)}}
+              value={this.state.trackSlider}
             />
           </View>
         </View>

@@ -90,9 +90,13 @@ export default class SymptomModal extends React.Component {
       };
     });
     
+    let symptom = this.symptoms.find(x => x.id === origin.symptomId);
     this.colour = this.id
-      ? this.symptoms.find(x => x.id === origin.symptomId).colour
+      ? symptom.colour
       : "cornflowerblue";
+    this.showSlider = this.id
+      ? symptom.trackSlider
+      : false;
 
     this.state = {
       symptomId: origin.symptomId,
@@ -106,16 +110,18 @@ export default class SymptomModal extends React.Component {
       showStartTime: false,
       showEndTime: false,
       dirty: false,
-      colour: this.colour
+      colour: this.colour,
+      showSlider: this.showSlider
     };
   }
 
   updateField = (field, value) => {
     if (field === 'symptomId') {
+      let symptom = this.symptoms.find(symptom => symptom.id === value);
       let colour = value
-        ? this.symptoms.find(symptom => symptom.id === value).colour
+        ? symptom.colour
         : "cornflowerblue";
-      this.setState({colour: colour});
+      this.setState({colour: colour, showSlider: symptom.trackSlider});
     }
     if (field === 'startTime') {
       if (moment(value, "HH:mm").isAfter(moment(this.state.endTime, "HH:mm"))) {
@@ -343,7 +349,7 @@ export default class SymptomModal extends React.Component {
                 )}
               </View>
             </View>
-            <View style={[formStyles.field, formStyles.sliderField]}>
+            {this.state.showSlider && <View style={[formStyles.field, formStyles.sliderField]}>
               <Text style={formStyles.fieldLabel}>{"Severity  ("+this.state.severity+")"}</Text>
               <View style={{ marginLeft: -20, marginRight: -20, paddingTop: 10 }}>
                 <Slider
@@ -356,7 +362,7 @@ export default class SymptomModal extends React.Component {
                   onValueChange={(value) => this.updateField("severity", value)}
                 />
               </View>
-            </View>
+            </View>}
             <View style={[formStyles.field, {paddingBottom: 10}]}>
               <Text style={formStyles.fieldLabel}>Notes:</Text>
               <TextInput
