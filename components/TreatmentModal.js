@@ -8,8 +8,61 @@ import RNPickerSelect from 'react-native-picker-select';
 import DateTimePicker from '@react-native-community/datetimepicker';
 import Toast from 'react-native-simple-toast';
 
+function shadeColour(color, percent) {
+  if (color === "cornflowerblue") {
+    color = "#6495ED";
+  }
 
-const today = moment().format("YYYY-MM-DD");
+  var R = parseInt(color.substring(1,3),16);
+  var G = parseInt(color.substring(3,5),16);
+  var B = parseInt(color.substring(5,7),16);
+
+  let mag = Math.sqrt(R*R + G*G + B*B);
+  R = (R / mag) * 255;
+  G = (G / mag) * 255;
+  B = (B / mag) * 255;
+
+  R = parseInt(R * (100 + percent) / 100);
+  G = parseInt(G * (100 + percent) / 100);
+  B = parseInt(B * (100 + percent) / 100);
+
+  if(percent > 0) {
+    if(R !== 0) {
+      if(G === 0) {
+        G = Math.floor(R * percent / 100);
+      }
+      if(B === 0) {
+        B = Math.floor(R * percent / 100);
+      }
+    }
+    if(G !== 0) {
+      if(R === 0) {
+        R = Math.floor(G * percent / 100);
+      }
+      if(B === 0) {
+        B = Math.floor(G * percent / 100);
+      }
+    }
+    if(B !== 0) {
+      if(G === 0) {
+        G = Math.floor(B * percent / 100);
+      }
+      if(B === 0) {
+        R = Math.floor(B * percent / 100);
+      }
+    }
+  }
+
+  R = (R<255)?R:255;
+  G = (G<255)?G:255;
+  B = (B<255)?B:255;
+
+  var RR = ((R.toString(16).length==1)?"0"+R.toString(16):R.toString(16));
+  var GG = ((G.toString(16).length==1)?"0"+G.toString(16):G.toString(16));
+  var BB = ((B.toString(16).length==1)?"0"+B.toString(16):B.toString(16));
+
+  return "#"+RR+GG+BB;
+}
 
 export default class TreatmentModal extends React.Component {
 
@@ -155,6 +208,42 @@ export default class TreatmentModal extends React.Component {
   }
 
   render() {
+    let underlineColour = shadeColour(this.state.colour || "#6495ED", 20);
+    let pickerStyles = StyleSheet.create({
+      inputIOS: {
+        fontSize: 16,
+        paddingVertical: 12,
+        paddingHorizontal: 10,
+        borderWidth: 1,
+        borderColor: 'gray',
+        borderRadius: 4,
+        color: 'black',
+        paddingRight: 30, // to ensure the text is never behind the icon
+      },
+      inputAndroid: {
+        height: 50,
+        fontSize: 20,
+        paddingVertical: 8,
+        borderBottomWidth: 1,
+        borderColor: underlineColour,
+        color: 'black',
+        paddingRight: 30, // to ensure the text is never behind the icon
+      },
+      placeholder: {
+        color: '#B4B4B9'
+      }
+    });
+    let dynamicStyles = {
+        dateTime: {
+        fontSize: 20,
+        paddingVertical: 8,
+        borderBottomWidth: 1,
+        borderColor: underlineColour,
+        color: 'black',
+        paddingRight: 30
+      }
+    }
+
     let buttons;
     let size = 40;
     if (this.isNew) {
@@ -188,7 +277,7 @@ export default class TreatmentModal extends React.Component {
               <RNPickerSelect
                 onValueChange={value => {this.updateField("treatmentId", value)}}
                 value={this.state.treatmentId}
-                style={pickerSelectStyles}
+                style={pickerStyles}
                 useNativeAndroidPickerStyle={false}
                 placeholder={{ label: "Select a treatment..." }}
                 Icon={() => {
@@ -200,7 +289,7 @@ export default class TreatmentModal extends React.Component {
             <View style={formStyles.field}>
               <Text style={formStyles.fieldLabel}>Date:</Text>
               <TouchableOpacity style={formStyles.basicInput} onPress={()=> {this.setState({showDate: true})}}>
-                <Text style={formStyles.dateTime}>
+                <Text style={dynamicStyles.dateTime}>
                   {this.formatDateTime(this.state.date, "date")}
                 </Text>
               </TouchableOpacity>
@@ -218,7 +307,7 @@ export default class TreatmentModal extends React.Component {
               <View style={formStyles.columnView}>
                 <Text style={formStyles.fieldLabel}>Start Time:</Text>
                 <TouchableOpacity style={formStyles.basicInput} onPress={()=> {this.setState({showStartTime: true})}}>
-                  <Text style={formStyles.dateTime}>
+                  <Text style={dynamicStyles.dateTime}>
                     {this.formatDateTime(this.state.startTime, "time")}
                   </Text>
                 </TouchableOpacity>
@@ -235,7 +324,7 @@ export default class TreatmentModal extends React.Component {
               <View style={formStyles.columnView}>
                 <Text style={formStyles.fieldLabel}>End Time:</Text>
                 <TouchableOpacity style={formStyles.basicInput} onPress={()=> {this.setState({showEndTime: true})}}>
-                  <Text style={formStyles.dateTime}>
+                  <Text style={dynamicStyles.dateTime}>
                     {this.formatDateTime(this.state.endTime, "time")}
                   </Text>
                 </TouchableOpacity>
@@ -257,7 +346,7 @@ export default class TreatmentModal extends React.Component {
                 onChangeText={text => this.updateField('notes', text)}
                 placeholder="Notes"
                 placeholderTextColor="#B4B4B9"
-                underlineColorAndroid='cornflowerblue'
+                underlineColorAndroid={underlineColour}
                 value={this.state.notes}
               />
             </View>
@@ -268,31 +357,6 @@ export default class TreatmentModal extends React.Component {
       );
   }
 }
-
-const pickerSelectStyles = StyleSheet.create({
-  inputIOS: {
-    fontSize: 16,
-    paddingVertical: 12,
-    paddingHorizontal: 10,
-    borderWidth: 1,
-    borderColor: 'gray',
-    borderRadius: 4,
-    color: 'black',
-    paddingRight: 30, // to ensure the text is never behind the icon
-  },
-  inputAndroid: {
-    height: 50,
-    fontSize: 20,
-    paddingVertical: 8,
-    borderBottomWidth: 1,
-    borderColor: 'cornflowerblue',
-    color: 'black',
-    paddingRight: 30, // to ensure the text is never behind the icon
-  },
-  placeholder: {
-    color: '#B4B4B9'
-  }
-});
 
 const formStyles = StyleSheet.create({
   container: {
@@ -343,14 +407,6 @@ const formStyles = StyleSheet.create({
     borderRadius: 8,
     color: 'black',
     paddingRight: 30, // to ensure the text is never behind the icon
-  },
-  dateTime: {
-    fontSize: 20,
-    paddingVertical: 8,
-    borderBottomWidth: 1,
-    borderColor: 'cornflowerblue',
-    color: 'black',
-    paddingRight: 30
   },
   rowField: {
     paddingBottom: 20,
