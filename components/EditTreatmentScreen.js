@@ -234,28 +234,5 @@ const styles = StyleSheet.create({
       },
       shadowRadius: 2,
       shadowOpacity: 0.35,
-  },
-  buttonContainer: {
-    position: 'absolute',
-    bottom:20,
-    right: 20,
-    width: '60%',
-    height: 65,
-    backgroundColor: 'cornflowerblue',
-    justifyContent: 'center',
-    marginTop: 20,
-    borderRadius:10,
-    alignSelf: "flex-end",
-  },
-  mainButtonText: {
-    color: 'black',
-    marginLeft: 16,
-    fontSize: 16,
-    textAlign: 'left',
-  },
-  mainButton: {
-    height: "100%",
-    flexDirection: 'row',
-    alignItems: 'center',
   }
 });

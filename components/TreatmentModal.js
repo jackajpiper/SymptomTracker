@@ -327,25 +327,6 @@ const formStyles = StyleSheet.create({
     height: 50,
     fontSize: 20
   },
-  buttonContainer: {
-    width: '100%',
-    height: 55,
-    backgroundColor: 'cornflowerblue',
-    justifyContent: 'center',
-    borderRadius:10,
-    alignSelf: "flex-end",
-  },
-  mainButtonText: {
-    color: 'black',
-    marginLeft: 16,
-    fontSize: 16,
-    textAlign: 'left',
-  },
-  mainButton: {
-    height: "100%",
-    flexDirection: 'row',
-    alignItems: 'center',
-  },
   closeBtn: {
     position: 'absolute',
     top: 20,
