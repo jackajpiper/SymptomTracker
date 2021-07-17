@@ -200,8 +200,8 @@ export default class SymptomsListScreen extends Component {
             <Text style={[styles.fieldLabel, {marginBottom: 15}]}>(Show slider when creating a record)</Text>
             <Switch
               style={{alignSelf: "flex-start"}}
-              trackColor={{ false: "#767577", true: "#81b0ff" }}
-              thumbColor={"cornflowerblue"}
+              trackColor={{ false: "#c6c6c6", true: "cornflowerblue" }}
+              thumbColor={"#00ABEB"}
               ios_backgroundColor="#3e3e3e"
               onValueChange={(val) => {this.updateField("trackSlider", val)}}
               value={this.state.trackSlider}

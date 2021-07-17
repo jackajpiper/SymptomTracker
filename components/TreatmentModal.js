@@ -347,7 +347,7 @@ export default class TreatmentModal extends React.Component {
               </View>
             </View>
             {this.state.showSlider && <View style={[formStyles.field, formStyles.sliderField]}>
-              <Text style={formStyles.fieldLabel}>{"Amount  ("+(this.state.severity || 50)+")"}</Text>
+              <Text style={formStyles.fieldLabel}>{"Dosage  ("+(this.state.severity || 50)+")"}</Text>
               <View style={{ marginLeft: -20, marginRight: -20, paddingTop: 10 }}>
                 <Slider
                   value={this.state.severity || 50}

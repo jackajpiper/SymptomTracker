@@ -90,15 +90,6 @@ const DiaryData = [
 
 
 // TODO
-//  -- stop constantly lightening the colours and just save them in the lightened state
-//    -- currently uses saturation of 30 and lightness of 60
-//    -- used in Edit(Symptom/Trigger/Treatment)Screen
-//    -- also used when calculating average colour for the heat graph
-//  -- make the save/delete buttons standard across the app
-//    -- currently there's the old version used in most places, and a new sexy version used for the diary
-//  -- make severity an optional attribute for symptoms
-//    -- add 'Track severity?' to edit symptom screen
-//    -- consider adding eqivalent optional scales for triggers and treatments
 //  -- make the title on the homepage more stylish
 //  -- implement dark mode
 //    -- follow that up by implementing themes
