@@ -2,7 +2,6 @@ import _ from 'lodash';
 import React, {Component} from 'react';
 import {StyleSheet, View, Text, TouchableOpacity} from 'react-native';
 import moment from "moment";
-import { NavigationContainer } from '@react-navigation/native';
 import { createStackNavigator } from '@react-navigation/stack';
 import SymptomsListScreen from './SymptomsListScreen.js';
 import TreatmentsListScreen from './TreatmentsListScreen.js';
@@ -12,6 +11,7 @@ import EditTreatmentScreen from './EditTreatmentScreen.js';
 import EditSymptomScreen from './EditSymptomScreen.js';
 import DiaryScreen from './DiaryScreen.js';
 import EditDiaryScreen from './EditDiaryScreen.js';
+import SettingsScreen from './SettingsScreen.js';
 import {LinearGradient} from 'expo-linear-gradient';
 
 const today = moment().format("YYYY-MM-DD");
@@ -47,16 +47,6 @@ class MainScreen extends React.Component {
           </View>
         </View>
       );
-  }
-}
-
-class SettingsScreen extends React.Component {
-  render() {
-    return (
-      <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center' }}>
-        <Text style={{fontSize: 24}}>Settings Screen</Text>
-      </View>
-    );
   }
 }
 
