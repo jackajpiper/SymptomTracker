@@ -38,7 +38,7 @@ const actions = [
 ];
 
 // takes the symptoms, symptom instances, treatments and treatment instances straight from the datastore and converts them for use
-function processInstances(symptomInstances, symptoms, treatmentInstances, treatments, triggerInstances, triggers) {
+function processInstances(symptomInstances, symptoms, treatmentInstances, treatments, triggerInstances, triggers, props) {
   let dateDict = {};
   let dateArr = [];
   console.log("there are " + symptomInstances.length + "symptom instances");
@@ -47,7 +47,7 @@ function processInstances(symptomInstances, symptoms, treatmentInstances, treatm
   symptomInstances.forEach(function (instance, index) {
     let symptom = symptoms.find(symptom => symptom.id === instance.typeId);
     instance.name = symptom.name;
-    instance.colour = ColourHelper.getColourForMode(symptom.hue, false);
+    instance.colour = ColourHelper.getColourForMode(symptom.hue, props.theme.dark);
     instance.type = "symptom";
     let day = instance.date;
     if (!dateDict[day]) {
@@ -58,7 +58,7 @@ function processInstances(symptomInstances, symptoms, treatmentInstances, treatm
   treatmentInstances.forEach(function (instance, index) {
     let treatment = treatments.find(treatment => treatment.id === instance.typeId);
     instance.name = treatment.name;
-    instance.colour = ColourHelper.getColourForMode(treatment.hue, false);
+    instance.colour = ColourHelper.getColourForMode(treatment.hue, props.theme.dark);
     instance.type = "treatment";
     let day = instance.date;
     if (!dateDict[day]) {
@@ -69,7 +69,7 @@ function processInstances(symptomInstances, symptoms, treatmentInstances, treatm
   triggerInstances.forEach(function (instance, index) {
     let trigger = triggers.find(trigger => trigger.id === instance.typeId);
     instance.name = trigger.name;
-    instance.colour = ColourHelper.getColourForMode(trigger.hue, false);
+    instance.colour = ColourHelper.getColourForMode(trigger.hue, props.theme.dark);
     instance.type = "trigger";
     let day = instance.date;
     if (!dateDict[day]) {
@@ -185,7 +185,7 @@ export default class ExpandableCalendarScreen extends Component {
     }
 
     if (oneChanged) {
-      this.setState({ITEMS: processInstances(newSymptomInstances, newSymptoms, newTreatmentInstances, newTreatments, newTriggerInstances, newTriggers)});
+      this.setState({ITEMS: processInstances(newSymptomInstances, newSymptoms, newTreatmentInstances, newTreatments, newTriggerInstances, newTriggers, this.props)});
     }
   }
 
@@ -197,7 +197,7 @@ export default class ExpandableCalendarScreen extends Component {
     let triggers = await AsyncManager.getTriggers();
     let triggerInstances = await AsyncManager.getTriggerInstances();
 
-    this.setState({ITEMS: processInstances(symptomInstances, symptoms, treatmentInstances, treatments, triggerInstances, triggers)});
+    this.setState({ITEMS: processInstances(symptomInstances, symptoms, treatmentInstances, treatments, triggerInstances, triggers, this.props)});
 
     this.setState({ 
       isLoading: false,
