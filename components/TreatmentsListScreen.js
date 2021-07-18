@@ -4,6 +4,7 @@ import {Alert, ActivityIndicator, StyleSheet, View, Text, TouchableOpacity, Flat
 import moment from "moment";
 import {LinearGradient} from 'expo-linear-gradient';
 import AsyncManager from './AsyncManager';
+import ColourHelper from './ColourHelper';
 import { FloatingAction } from "react-native-floating-action";
 
 const today = moment().format("YYYY-MM-DD");
@@ -67,9 +68,10 @@ export default class TreatmentsListScreen extends Component {
   }
 
   renderItem = ({item}) => {
+    let colour = ColourHelper.getColourForMode(item.hue, false);
     return (
       <LinearGradient 
-        colors={['white', item.colour]}
+        colors={['white', colour]}
         style = { styles.container }
         start={{ x: 0.5, y: 0.5 }}
         end={{ x: 1, y: 0.5 }}>

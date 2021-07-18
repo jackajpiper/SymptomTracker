@@ -5,6 +5,7 @@ import {ExpandableCalendar, AgendaList, CalendarProvider, WeekCalendar} from 're
 import moment from "moment";
 import {LinearGradient} from 'expo-linear-gradient';
 import AsyncManager from './AsyncManager';
+import ColourHelper from './ColourHelper';
 import { FloatingAction } from "react-native-floating-action";
 import SymptomModal from './SymptomModal';
 import TreatmentModal from './TreatmentModal';
@@ -40,10 +41,13 @@ const actions = [
 function processInstances(symptomInstances, symptoms, treatmentInstances, treatments, triggerInstances, triggers) {
   let dateDict = {};
   let dateArr = [];
+  console.log("there are " + symptomInstances.length + "symptom instances");
+  console.log("there are " + triggerInstances.length + "trigger instances");
+  console.log("there are " + treatmentInstances.length + "treatment instances");
   symptomInstances.forEach(function (instance, index) {
     let symptom = symptoms.find(symptom => symptom.id === instance.typeId);
     instance.name = symptom.name;
-    instance.colour = symptom.colour;
+    instance.colour = ColourHelper.getColourForMode(symptom.hue, false);
     instance.type = "symptom";
     let day = instance.date;
     if (!dateDict[day]) {
@@ -54,7 +58,7 @@ function processInstances(symptomInstances, symptoms, treatmentInstances, treatm
   treatmentInstances.forEach(function (instance, index) {
     let treatment = treatments.find(treatment => treatment.id === instance.typeId);
     instance.name = treatment.name;
-    instance.colour = treatment.colour;
+    instance.colour = ColourHelper.getColourForMode(treatment.hue, false);
     instance.type = "treatment";
     let day = instance.date;
     if (!dateDict[day]) {
@@ -65,7 +69,7 @@ function processInstances(symptomInstances, symptoms, treatmentInstances, treatm
   triggerInstances.forEach(function (instance, index) {
     let trigger = triggers.find(trigger => trigger.id === instance.typeId);
     instance.name = trigger.name;
-    instance.colour = trigger.colour;
+    instance.colour = ColourHelper.getColourForMode(trigger.hue, false);
     instance.type = "trigger";
     let day = instance.date;
     if (!dateDict[day]) {

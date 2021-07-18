@@ -2,7 +2,7 @@ import React from 'react'
 import { StyleSheet, View, ScrollView, Text, ActivityIndicator } from "react-native";
 import { StackedBarChart, LineChart } from 'react-native-chart-kit'
 import moment from "moment";
-import AsyncManager from './AsyncManager';
+import ColourHelper from './ColourHelper';
 import HeatMap from 'react-native-heatmap-chart';
 
 function shadeColour(color, percent) {
@@ -147,22 +147,14 @@ function HSLToHex(hsl) {
   return "#" + r + g + b;
 }
 
-function getAverageColour(colours) {
-  let hues = []
-  colours.forEach(function (colour) {
-    let hsl = hexToHSL(colour);
-    hues.push(hsl[0]);
-  });
-
+function getAverageColour(hues) {
   let totalHue = 0;
   hues.forEach(function (hue) {
     totalHue += hue;
   })
   let avgHue = Math.round(totalHue/hues.length);
 
-  let hsl = [avgHue, 30, 60]; // this is an arbitrary choice for saturation and lightness that should be corrected
-
-  let newHex = HSLToHex(hsl);
+  let newHex = ColourHelper.getColourForMode(avgHue, false, true);
   return newHex;
 }
 
@@ -239,7 +231,8 @@ export default class ChartsComponent extends React.Component {
       let typeName = selected.split(' ')[0];
       let id = parseInt(selected.split(' ')[1]);
       let type = this.props[typeName+"s"].find((t) => t.id === id);
-      colourList.push(shadeColour(type.colour, 40));
+      let typeColour = ColourHelper.getColourForMode(type.hue, false, true);
+      colourList.push(shadeColour(typeColour, 40));
       let instances = this.props[typeName+"Instances"].filter((instance) => { return instance.typeId === id; });
 
       if (instances.length !== 0) {
@@ -288,7 +281,8 @@ export default class ChartsComponent extends React.Component {
       let typeName = selected.split(' ')[0];
       let id = parseInt(selected.split(' ')[1]);
       let type = this.props[typeName+"s"].find((t) => t.id === id);
-      colourList.push(shadeColour(type.colour, 40));
+      let typeColour = ColourHelper.getColourForMode(type.hue, false, true);
+      colourList.push(shadeColour(typeColour, 40));
 
       let instances = this.props[typeName+"Instances"].filter((instance) => {
         return instance.typeId === id;
@@ -420,9 +414,10 @@ export default class ChartsComponent extends React.Component {
       for (let i=0; i<length; i++) {
         emptyDataEntry.push(0);
       }
+      let typeColour = ColourHelper.getColourForMode(type.hue, false, true);
       let typeLine = {
         data: [],
-        color: (opacity = 1) => shadeColour(type.colour, 40)
+        color: (opacity = 1) => typeColour
       };
       let dataArr = emptyDataEntry;
       instances.forEach((instance) => {
@@ -518,9 +513,10 @@ export default class ChartsComponent extends React.Component {
       let typeData = dateData.map((dateDatum) => {
         return dateDatum[1][index];
       });
+      let typeColour = ColourHelper.getColourForMode(type.hue, false, true);
       let typeLine = {
         data: typeData,
-        color: (opacity = 1) => shadeColour(type.colour, 40)
+        color: (opacity = 1) => typeColour
       };
       typeLines.push(typeLine);
     });
@@ -570,7 +566,7 @@ export default class ChartsComponent extends React.Component {
       return true;
     }
 
-    let colours = [];
+    let hues = [];
     let dataArr = [];
     let format = "";
     switch(period) {
@@ -594,14 +590,14 @@ export default class ChartsComponent extends React.Component {
       let typeName = selected.split(' ')[0];
       let id = parseInt(selected.split(' ')[1]);
       let type = this.props[typeName+"s"].filter((type) => {return type.id === id})[0];
-      colours.push(type.colour);
+      hues.push(type.hue);
       let instances = this.props[typeName+"Instances"].filter((instance) => {
         return instance.typeId === id && dateCheck(moment(instance.date));
       });
 
       allInstances = allInstances.concat(instances);
     });
-    colourIntervals = getColourIntervals(getAverageColour(colours), 4);
+    colourIntervals = getColourIntervals(getAverageColour(hues), 4);
 
     allInstances.forEach((instance) => {
       dataArr[moment(instance.date).format(format)-1]++;

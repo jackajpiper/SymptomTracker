@@ -6,6 +6,7 @@ import BouncyCheckbox from "react-native-bouncy-checkbox";
 import { createMaterialTopTabNavigator } from '@react-navigation/material-top-tabs';
 import Toast from 'react-native-simple-toast';
 import DateTimePicker from '@react-native-community/datetimepicker';
+import ColourHelper from './ColourHelper';
 
 
 const today = moment().format("YYYY-MM-DD");
@@ -152,7 +153,7 @@ export default class AnalysisTabs extends React.Component {
       <View key={symptom.id} style={styles.checkbox}>
         <BouncyCheckbox
           size={25}
-          fillColor={symptom.colour}
+          fillColor={ColourHelper.getColourForMode(symptom.hue, false, true)}
           unfillColor="lightgrey"
           text={symptom.name}
           iconStyle={{ borderColor: "#444444" }}

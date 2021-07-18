@@ -4,6 +4,7 @@ import {Alert, StyleSheet, View, Text, TextInput, TouchableOpacity, Keyboard, Sw
 import {SliderHuePicker} from 'react-native-slider-color-picker';
 import Toast from 'react-native-simple-toast';
 import AsyncManager from './AsyncManager';
+import ColourHelper from './ColourHelper';
 import { FontAwesome, AntDesign } from '@expo/vector-icons';
 
 function HSLToHex(h,s,l) {
@@ -54,7 +55,7 @@ export default class TriggersListScreen extends Component {
     this.state = {
       isLoading: true,
       name: props.route.params.trigger.name,
-      colour: props.route.params.trigger.colour,
+      hue: props.route.params.trigger.hue,
       trackSlider: props.route.params.trigger.trackSlider,
       origin: props.route.params.trigger,
       dirty: false
@@ -110,7 +111,7 @@ export default class TriggersListScreen extends Component {
     if (!this.state.name) {
       return "Please select a name";
     }
-    if (!this.state.colour) {
+    if (!this.state.hue && this.state.hue !== 0) {
       return "Please select a colour";
     }
     return "";
@@ -123,7 +124,7 @@ export default class TriggersListScreen extends Component {
     } else {
       var trigger = this.state.origin;
       trigger.name = this.state.name;
-      trigger.colour = this.state.colour;
+      trigger.hue = this.state.hue;
       trigger.trackSlider = this.state.trackSlider;
       await this.updateTriggerStorage(trigger);
       if (this.isNew) {
@@ -163,7 +164,7 @@ export default class TriggersListScreen extends Component {
     let state = this.state;
     let origin = this.state.origin;
     this.setState({[field]: value}, () => {
-      this.setState({dirty: (this.state.name != this.state.origin.name || this.state.colour != this.state.origin.colour)})
+      this.setState({dirty: (this.state.name != this.state.origin.name || this.state.hue != this.state.origin.hue)})
     });
   }
 
@@ -187,11 +188,11 @@ export default class TriggersListScreen extends Component {
             <Text style={[styles.fieldLabel, {marginBottom: 25}]}>Colour:</Text>
             <SliderHuePicker
                 ref={view => {this.sliderHuePicker = view;}}
-                oldColor={this.state.colour}
+                oldColor={ColourHelper.getColourForMode(this.state.hue, false, true)}
                 trackStyle={[{height: 12}]}
                 thumbStyle={styles.thumb}
                 useNativeDriver={true}
-                onColorChange={(colour, end) => {end === 'end' ? this.updateField('colour', HSLToHex(colour.h, 100, 85)) : undefined}}
+                onColorChange={(colour, end) => {end === 'end' ? this.updateField('hue', colour.h) : undefined}}
             />
           </View>
           

@@ -8,6 +8,7 @@ import RNPickerSelect from 'react-native-picker-select';
 import DateTimePicker from '@react-native-community/datetimepicker';
 import Toast from 'react-native-simple-toast';
 import Slider from '@react-native-community/slider';
+import ColourHelper from './ColourHelper';
 
 function shadeColour(color, percent) {
   if (color === "cornflowerblue") {
@@ -92,7 +93,7 @@ export default class SymptomModal extends React.Component {
     
     let symptom = this.symptoms.find(x => x.id === origin.symptomId);
     this.colour = this.id
-      ? symptom.colour
+      ? ColourHelper.getColourForMode(symptom.hue, false, true)
       : "cornflowerblue";
     this.showSlider = this.id
       ? symptom.trackSlider
@@ -119,9 +120,9 @@ export default class SymptomModal extends React.Component {
     if (field === 'symptomId') {
       let symptom = this.symptoms.find(symptom => symptom.id === value);
       let colour = value
-        ? symptom.colour
+        ? ColourHelper.getColourForMode(symptom.hue, false, true)
         : "cornflowerblue";
-      this.setState({colour: colour, showSlider: symptom.trackSlider});
+      this.setState({colour: colour, showSlider: symptom && symptom.trackSlider});
     }
     if (field === 'startTime') {
       if (moment(value, "HH:mm").isAfter(moment(this.state.endTime, "HH:mm"))) {
@@ -218,7 +219,7 @@ export default class SymptomModal extends React.Component {
   }
 
   render() {
-    let underlineColour = shadeColour(this.state.colour || "#6495ED", 20);
+    let underlineColour = this.state.colour;
     let pickerStyles = StyleSheet.create({
       inputIOS: {
         fontSize: 16,
