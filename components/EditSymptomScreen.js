@@ -162,7 +162,11 @@ export default class SymptomsListScreen extends Component {
 
   updateField = (field, value) => {
     this.setState({[field]: value}, () => {
-      this.setState({dirty: (this.state.name != this.state.origin.name || this.state.hue != this.state.origin.hue)})
+      this.setState({dirty: (
+        this.state.name != this.state.origin.name ||
+        this.state.hue != this.state.origin.hue ||
+        !!this.state.trackSlider != !!this.state.origin.trackSlider
+      )})
     });
   }
 
