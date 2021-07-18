@@ -12,14 +12,6 @@ import AnalysisScreen from './components/AnalysisScreen.js';
 
 console.log("Reloaded.", moment());
 
-function AnalyseTab() {
-  return (
-    <View style={ styles.tab }>
-      <Text>Analyse!</Text>
-    </View>
-  );
-}
-
 const Tab = createBottomTabNavigator();
 
 export default function App() {
