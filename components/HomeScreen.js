@@ -13,50 +13,46 @@ import DiaryScreen from './DiaryScreen.js';
 import EditDiaryScreen from './EditDiaryScreen.js';
 import SettingsScreen from './SettingsScreen.js';
 import {LinearGradient} from 'expo-linear-gradient';
+import { useTheme } from '@react-navigation/native';
 
 const today = moment().format("YYYY-MM-DD");
 const Stack = createStackNavigator();
 
-class MainScreen extends React.Component {
+function MainScreen (props) {
+  const theme = props.theme;
+  const dark = theme.dark;
 
-  renderMenuButton = (title, target, colour) => {
+  const renderMenuButton = (title, target, colour) => {
     return (
       <LinearGradient 
-        colors={['white', colour]}
+        colors={[theme.backgroundColor, colour]}
         style = { styles.buttonContainer }
         start={{ x: 0.25, y: 0.5 }}
         end={{ x: 1, y: 0.5 }}>
 
-        <TouchableOpacity style={styles.mainButton} onPress={() => this.props.navigation.navigate(target)}>
-          <Text style={[styles.mainButtonText]}>{title}</Text>
+        <TouchableOpacity style={styles.mainButton} onPress={() => props.navigation.navigate(target)}>
+          <Text style={[styles.mainButtonText, {color: theme.colors.text}]}>{title}</Text>
         </TouchableOpacity>
       </LinearGradient>
     )
   }
 
-  render() {
-    return (
-        <View style={ styles.main }>
-          <Text style={ styles.titleText }>Amy's Symptom Tracker</Text>
-          <View style={ styles.buttonList }>
-            {this.renderMenuButton("Manage Symptoms", "Symptoms", "#E7D5E1")}
-            {this.renderMenuButton("Manage Triggers", "Triggers", "#FAEEC4")}
-            {this.renderMenuButton("Manage Treatments", "Treatments", "#C3D8D1")}
-            {this.renderMenuButton("Diary", "Diary", "#F9D5C7")}
-            {this.renderMenuButton("Settings", "Settings", "#F9E2E8")}
-          </View>
-        </View>
-      );
-  }
+  return (
+    <View style={ [styles.main, {backgroundColor: theme.backgroundColor}] }>
+      <Text style={ [styles.titleText, {color: theme.colors.text}] }>Amy's Symptom Tracker</Text>
+      <View style={ styles.buttonList }>
+        {renderMenuButton("Manage Symptoms", "Symptoms", dark ? "#5C0A20" : "#E7D5E1")}
+        {renderMenuButton("Manage Triggers", "Triggers", dark ? "#5C4A0A" : "#FAEEC4")}
+        {renderMenuButton("Manage Treatments", "Treatments", dark ? "#0A5C41" : "#C3D8D1")}
+        {renderMenuButton("Diary", "Diary", dark ? "#5C210A" : "#F9D5C7")}
+        {renderMenuButton("Settings", "Settings", dark ? "#5C0A41" : "#F9E2E8")}
+      </View>
+    </View>
+  );
 }
 
-export default class HomeScreen extends Component {
-  constructor(props) {
-    super(props);
-    this.state = {
-      isLoading: true
-    };
-  }
+export default function HomeScreen (props) {
+  let theme = useTheme();
 
   editTitle = (route, obj) => {
     if (route.params[obj].id) {
@@ -66,26 +62,26 @@ export default class HomeScreen extends Component {
     }
   }
 
-  render() {
-    return (
-      <Stack.Navigator>
-        <Stack.Screen
-          name="Home"
-          component={MainScreen}
-          options={{headerShown: false}}
-        />
-        <Stack.Screen name="Symptoms" component={SymptomsListScreen} />
-        <Stack.Screen name="Treatments" component={TreatmentsListScreen} />
-        <Stack.Screen name="Triggers" component={TriggersListScreen} />
-        <Stack.Screen name="Diary" component={DiaryScreen} />
-        <Stack.Screen name="EditDiary" component={EditDiaryScreen} options={({ route }) => ({ title: this.editTitle(route, "diary") })} />
-        <Stack.Screen name="Settings" component={SettingsScreen} />
-        <Stack.Screen name="EditSymptom" component={EditSymptomScreen} options={({ route }) => ({ title: this.editTitle(route, "symptom") })} />
-        <Stack.Screen name="EditTreatment" component={EditTreatmentScreen} options={({ route }) => ({ title: this.editTitle(route, "treatment") })} />
-        <Stack.Screen name="EditTrigger" component={EditTriggerScreen} options={({ route }) => ({ title: this.editTitle(route, "trigger") })} />
-      </Stack.Navigator>
-    )
-  }
+  const setIsDarkMode = props.setIsDarkMode;
+
+  return (
+    <Stack.Navigator>
+      <Stack.Screen name="Home" options={{headerShown: false}}>
+        {(props) => <MainScreen  {...props} theme={theme} />}
+      </Stack.Screen>
+      <Stack.Screen name="Symptoms" component={SymptomsListScreen} />
+      <Stack.Screen name="Treatments" component={TreatmentsListScreen} />
+      <Stack.Screen name="Triggers" component={TriggersListScreen} />
+      <Stack.Screen name="Diary" component={DiaryScreen} />
+      <Stack.Screen name="EditDiary" component={EditDiaryScreen} options={({ route }) => ({ title: this.editTitle(route, "diary") })} />
+      <Stack.Screen name="Settings">
+        {(props) => <SettingsScreen  {...props} setIsDarkMode={setIsDarkMode} />}
+      </Stack.Screen>
+      <Stack.Screen name="EditSymptom" component={EditSymptomScreen} options={({ route }) => ({ title: this.editTitle(route, "symptom") })} />
+      <Stack.Screen name="EditTreatment" component={EditTreatmentScreen} options={({ route }) => ({ title: this.editTitle(route, "treatment") })} />
+      <Stack.Screen name="EditTrigger" component={EditTriggerScreen} options={({ route }) => ({ title: this.editTitle(route, "trigger") })} />
+    </Stack.Navigator>
+  )
 }
 
 const styles = StyleSheet.create({
@@ -117,7 +113,6 @@ const styles = StyleSheet.create({
     borderRadius:10
   },
   mainButtonText: {
-    color: 'black',
     marginLeft: 16,
     fontSize: 16,
     textAlign: 'left'

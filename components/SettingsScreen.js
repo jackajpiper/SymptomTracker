@@ -1,39 +1,46 @@
 import _ from 'lodash';
 import React, {Component} from 'react';
 import {StyleSheet, View, Text, TextInput, Switch} from 'react-native';
-import moment from "moment";
-import AsyncManager from './AsyncManager';
-import Toast from 'react-native-simple-toast';
-import { ScrollView } from 'react-native-gesture-handler';
+import { useTheme } from '@react-navigation/native';
 
-export default class SettingsScreen extends React.Component {
+export default function(props) {
+  let theme = useTheme();
+
+  return <SettingsScreen {...props} theme={theme}/>
+}
+
+class SettingsScreen extends React.Component {
   constructor(props) {
     super(props);
+
+    this.setIsDarkMode = props.setIsDarkMode;
     this.state = {
       name: "Amy's",
-      darkMode: false
+      darkMode: props.theme.dark
     };
   }
 
   updateField = (field, value) => {
-    let state = this.state;
-    let origin = this.state.origin;
-    this.setState({[field]: value}, () => {
-      // this.setState({dirty: (
-      //   this.state.name != this.state.origin.name ||
-      //   this.state.darkMode != this.state.origin.darkMode
-      // )})
-    });
+    if (field === "darkMode") {
+      this.setIsDarkMode(value);
+    }
+    this.setState({[field]: value});
   }
 
   render() {
+    const textColour = this.state.darkMode ? "#ffffff" : "#000000";
+    const fieldLabel = {
+      color: this.state.darkMode ? "#ffffff" : "grey",
+      fontSize: 18
+    }
+
     return (
       <View style={styles.container}>
         <View style={styles.field}>
-          <Text style={styles.fieldLabel}>Customise name:</Text>
+          <Text style={fieldLabel}>Customise name:</Text>
           <View style={{display: "flex", flexDirection: "row"}}>
             <TextInput
-              style={[styles.nameInput]}
+              style={[styles.nameInput, {color: textColour}]}
               onChangeText={text => this.updateField('name', text)}
               placeholder="Amy's"
               placeholderTextColor="#B4B4B9"
@@ -41,14 +48,13 @@ export default class SettingsScreen extends React.Component {
               value={this.state.name}
             />
             <View style={{display: "flex", justifyContent: "center"}}>
-              <Text style={[styles.restOfName]}>Symptom Tracker</Text>
+              <Text style={[styles.restOfName, {color: textColour}]}>Symptom Tracker</Text>
             </View>
           </View>
         </View>
           
         <View style={styles.field}>
-          <Text style={[styles.fieldLabel, {marginTop: 15}]}>Track severity?</Text>
-          <Text style={[styles.fieldLabel, {marginBottom: 15}]}>(Show slider when creating a record)</Text>
+          <Text style={[fieldLabel, {marginBottom: 15}]}>Dark Mode</Text>
           <Switch
             style={{alignSelf: "flex-start"}}
             trackColor={{ false: "#c6c6c6", true: "cornflowerblue" }}

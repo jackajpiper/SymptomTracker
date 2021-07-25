@@ -1,22 +1,38 @@
 // You can import Ionicons from @expo/vector-icons if you use Expo or
 // react-native-vector-icons/Ionicons otherwise.
-import * as React from 'react';
-import { StyleSheet, Text, View } from 'react-native';
+import React, { useEffect } from 'react';
+import { StyleSheet } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
-import { NavigationContainer } from '@react-navigation/native';
+import { NavigationContainer, DefaultTheme, DarkTheme } from '@react-navigation/native';
 import moment from "moment";
 import HomeScreen from './components/HomeScreen.js';
 import ExpandableCalendar from './components/ExpandableCalendars.js';
 import AnalysisScreen from './components/AnalysisScreen.js';
+import AsyncManager from './components/AsyncManager';
 
 console.log("Reloaded.", moment());
 
 const Tab = createBottomTabNavigator();
 
 export default function App() {
+  const [isDarkMode, setIsDarkMode] = React.useState(false);
+
+  const setMode = (val) => {
+    setIsDarkMode(val);
+    AsyncManager.setDarkMode(val);
+  }
+
+  const theme = isDarkMode ? DarkTheme : DefaultTheme;
+  
+  useEffect(() => {
+    AsyncManager.isDarkMode().then((val) => {
+      setIsDarkMode(val);
+    });
+  }, []);
+  
   return (
-    <NavigationContainer>
+    <NavigationContainer theme={theme}>
       <Tab.Navigator
         screenOptions={({ route }) => ({
           tabBarIcon: ({ focused, color, size }) => {
@@ -34,7 +50,7 @@ export default function App() {
           },
         })}
         tabBarOptions={{
-          activeTintColor: '#00ABEB',
+          activeTintColor: isDarkMode ? '#3d798f' : "#00ABEB",
           inactiveTintColor: 'gray',
           style: {
             paddingBottom: 3,
@@ -42,8 +58,12 @@ export default function App() {
           }
         }}>
         <Tab.Screen name="Calendar" component={ExpandableCalendar}/>
-        <Tab.Screen name="Home" component={HomeScreen} />
-        <Tab.Screen name="Analyse" component={AnalysisScreen} />
+        <Tab.Screen name="Home">
+          {(props) => <HomeScreen  {...props} setIsDarkMode={setMode} />}
+        </Tab.Screen>
+        <Tab.Screen name="Analyse">
+          {(props) => <AnalysisScreen  {...props} theme={theme} />}
+        </Tab.Screen>
       </Tab.Navigator>
     </NavigationContainer>
   );

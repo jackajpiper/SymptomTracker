@@ -1,28 +1,22 @@
 import _ from 'lodash';
 import React, {Component} from 'react';
-import {Alert, ActivityIndicator, StyleSheet, View, Text, TouchableOpacity, FlatList} from 'react-native';
-import moment from "moment";
+import {ActivityIndicator, StyleSheet, View, Text, TouchableOpacity, FlatList} from 'react-native';
 import {LinearGradient} from 'expo-linear-gradient';
 import AsyncManager from './AsyncManager';
 import ColourHelper from './ColourHelper';
 import { FloatingAction } from "react-native-floating-action";
+import { useTheme } from '@react-navigation/native';
 
-const today = moment().format("YYYY-MM-DD");
+export default function(props) {
+  let theme = useTheme();
+  return <SymptomsListScreen {...props} theme={theme}/>
+}
 
-const actionColour = "#00a0db";
-const actions = [
-  {
-    text: "New Symptom",
-    name: "bt_add_symptom",
-    color: actionColour,
-    position: 1
-  }
-];
-
-export default class SymptomsListScreen extends Component {
+class SymptomsListScreen extends Component {
   constructor(props) {
     super(props);
 
+    this.theme = props.theme;
     this.state = {
       isLoading: true,
       Symptoms: []
@@ -68,22 +62,39 @@ export default class SymptomsListScreen extends Component {
   }
 
   renderItem = ({item}) => {
-    let colour = ColourHelper.getColourForMode(item.hue, false);
+    let colour = ColourHelper.getColourForMode(item.hue, this.theme.dark);
+    let bgColour = this.theme.dark ? "#000000" : "#ffffff";
+    let textColour = this.theme.dark ? "#ffffff" : "#000000";
+    let borderColour = this.theme.dark ? "#444444" : "lightgrey";
     return (
       <LinearGradient 
-        colors={['white', colour]}
+        colors={[bgColour, colour]}
         style = { styles.container }
         start={{ x: 0.5, y: 0.5 }}
         end={{ x: 1, y: 0.5 }}>
 
-        <TouchableOpacity onPress={() => this.onSymptomPress(item)} style={styles.item}>
-          <Text style={[styles.itemText]}>{item.name}</Text>
+        <TouchableOpacity onPress={() => this.onSymptomPress(item)} style={[styles.item, {borderBottomColor: borderColour}]}>
+          <Text style={[styles.itemText, {color: textColour}]}>{item.name}</Text>
         </TouchableOpacity>
       </LinearGradient>
     )
   };
 
   render() {
+    const actionColour = this.props.theme.dark ? "#333333" : "#00a0db";
+    const textColour = this.props.theme.dark ? "#ffffff" : "#000000";
+    const textBackground = this.props.theme.dark ? "#333333" : "#ffffff";
+    const actions = [
+      {
+        text: "New Symptom",
+        name: "bt_add_symptom",
+        color: actionColour,
+        textBackground: textBackground,
+        textColor: textColour,
+        position: 1
+      }
+    ];
+
     if(this.state.isLoading) {
       return (
         <View style={[styles.spinner]}>
@@ -100,7 +111,7 @@ export default class SymptomsListScreen extends Component {
           />
           <FloatingAction
             actions={actions}
-            color={"#00ABEB"}
+            color={actionColour}
             onPressItem={(btn) => this.onAddPress(btn)}
           />
         </View>
@@ -120,11 +131,9 @@ const styles = StyleSheet.create({
     justifyContent: 'flex-start',
     alignItems: 'center',
     borderBottomWidth: 1,
-    borderBottomColor: 'lightgrey',
     flexDirection: 'row'
   },
   itemText: {
-    color: 'black',
     marginLeft: 16,
     fontSize: 16,
     textAlign: 'left'

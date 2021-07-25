@@ -7,19 +7,22 @@ import {LinearGradient} from 'expo-linear-gradient';
 import AsyncManager from './AsyncManager';
 import { FloatingAction } from "react-native-floating-action";
 import { Ionicons, AntDesign } from '@expo/vector-icons';
+import { useTheme } from '@react-navigation/native';
+
+export default function(props) {
+  let theme = useTheme();
+
+  theme.calendarBackground = theme.dark ? '#000000' : '#ffffff';
+  theme.backgroundColor = theme.dark ? '#000000' : '#ffffff';
+  theme.dayTextColor = theme.dark ? '#ffffff' : '#2d4150';
+  theme.monthTextColor = theme.dark ? '#ffffff' : '#2d4150';
+  theme.selectedDayBackgroundColor = theme.dark ? '#0a465c' : "#00a0db";
+
+  return <DiaryScreen {...props} theme={theme}/>
+}
 
 
 const today = moment().format("YYYY-MM-DD");
-
-const actionColour = "#00a0db";
-const actions = [
-  {
-    text: "Add Entry",
-    name: "bt_add_entry",
-    color: actionColour,
-    position: 1
-  }
-];
 
 function processDiaries(diaries) {
   let dateDict = {};
@@ -47,7 +50,7 @@ function processDiaries(diaries) {
   return dateArr;
 }
 
-export default class DiaryScreen extends Component {
+class DiaryScreen extends Component {
   constructor(props) {
     super(props);
 
@@ -95,7 +98,7 @@ export default class DiaryScreen extends Component {
 
   renderToday() {
     return (
-      <View style = { [{backgroundColor: '#f5f5f5'}, styles.container] }>
+      <View style = { [{ backgroundColor: this.props.theme.dark ? "#333333" : "#f5f5f5" }, styles.container] }>
         <TouchableOpacity onPress={() => this.clickedNew()} style={styles.item}>
           <Ionicons style={{textAlign: "center", paddingTop: 4}} name="reader-outline" size={28} color="darkgrey" />
           <Text style={styles.emptyItemText}>How are you feeling today?</Text>
@@ -108,17 +111,18 @@ export default class DiaryScreen extends Component {
     if (!item.text.length) {
       return this.renderToday();
     }
+    let textColour = this.props.theme.colors.text;
 
     return (
       <LinearGradient 
-        colors={['white', 'white']}
+        colors={[this.props.theme.colors.card, this.props.theme.colors.card]}
         style = { styles.container }
         start={{ x: 0.7, y: 0.5 }}
         end={{ x: 1, y: 0.5 }}>
 
         <TouchableOpacity onPress={() => this.itemPressed(item)} style={styles.item}>
           <Ionicons style={{textAlign: "center", paddingTop: 4}} name="reader-outline" size={28} color="#009ad4" />
-          <Text numberOfLines={1} style={styles.itemTitleText}>{item.title || item.alternateTitle}</Text>
+          <Text numberOfLines={1} style={[styles.itemTitleText, {color: textColour}]}>{item.title || item.alternateTitle}</Text>
           <View style={styles.itemButtonContainer}>
           </View>
         </TouchableOpacity>
@@ -143,6 +147,20 @@ export default class DiaryScreen extends Component {
   }
 
   render() {
+    const actionColour = this.props.theme.dark ? "#000000" : "#00a0db";
+    const textColour = this.props.theme.dark ? "#ffffff" : "#000000";
+    const textBackground = this.props.theme.dark ? "#000000" : "#ffffff";
+    const actions = [
+      {
+        text: "Add Entry",
+        name: "bt_add_entry",
+        color: actionColour,
+        textBackground: textBackground,
+        textColor: textColour,
+        position: 1
+      }
+    ];
+
     if(this.state.isLoading) {
       return (
         <View style={[styles.spinner]}>
@@ -152,17 +170,20 @@ export default class DiaryScreen extends Component {
     } else {
       return (
         <CalendarProvider
+          theme={this.props.theme}
           date={today}
           showTodayButton
           disabledOpacity={0.6}
         >
           <ExpandableCalendar
+            theme={this.props.theme}
             disableAllTouchEventsForDisabledDays
             firstDay={1}
             markedDates={this.getMarkedDates()}
             style = {styles.expandableCalendar}
           />
           <AgendaList
+            theme={this.props.theme}
             sections={this.state.Diaries}
             extraData={this.state}
             renderItem={this.renderItem}
@@ -170,7 +191,7 @@ export default class DiaryScreen extends Component {
           />
           <FloatingAction
             actions={actions}
-            color={"#00ABEB"}
+            color={actionColour}
             onPressItem={name => { this.clickedNew(name)}}
           />
         </CalendarProvider>
@@ -190,18 +211,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     height: "100%"
   },
-  itemTimeText: {
-    color: 'black'
-  },
-  itemSeverityText: {
-    color: 'grey',
-    fontSize: 12,
-    marginTop: 4,
-    marginLeft: 4,
-    textAlign: 'right'
-  },
   itemTitleText: {
-    color: 'black',
     marginLeft: 16,
     fontSize: 16,
     marginTop: 8,

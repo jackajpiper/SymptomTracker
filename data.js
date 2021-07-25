@@ -81,6 +81,9 @@ const DiaryData = [
 //  -- react-native-calendars\src\expandableCalendar\agendaList.js
 //    -- line 204: renderSectionHeader changed to renderSectionFooter
 //    -- line 205: added inverted on new line
+//  -- react-native-calendars\src\expandableCalendar\style.js
+//    -- line 149: added theme ternary statement to change colour
+//      -- used to be: "backgroundColor: 'white',"
 
 // ALTERNATIVE APP NAME
 //  -- Anne's Symptom Tracker
@@ -91,21 +94,16 @@ const DiaryData = [
 
 // TODO
 //  -- make the title on the homepage more stylish
-//  -- implement dark mode
-//    -- follow that up by implementing themes
-//  -- make a onboarding thing for new users
 //  -- implement settings
-//  -- implement import/export
+//  -- make a onboarding thing for new users
 
 // EDGE CASES
 //  -- symptom/trigger/treatment name being super long
 
 // Settings
-//  -- themes
-//    -- light mode/dark mode
-//    -- primary/secondary colours?
-//      -- right now it's cornflowerblue and white(?)
+//  -- light mode/dark mode
 //  -- rename the symptom trackers e.g Jane's Symptom Tracker
+//  -- import/export
 
 
 //  -- EXTESION IDEAS

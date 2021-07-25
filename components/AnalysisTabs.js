@@ -153,11 +153,11 @@ export default class AnalysisTabs extends React.Component {
       <View key={symptom.id} style={styles.checkbox}>
         <BouncyCheckbox
           size={25}
-          fillColor={ColourHelper.getColourForMode(symptom.hue, false, true)}
-          unfillColor="lightgrey"
+          fillColor={ColourHelper.getColourForMode(symptom.hue, this.props.theme.dark, true, this.props.theme.dark)}
+          unfillColor={this.props.theme.dark ? "#444444" : "lightgrey"}
           text={symptom.name}
           iconStyle={{ borderColor: "#444444" }}
-          textStyle={{ marginLeft: -10 }}
+          textStyle={{ marginLeft: -10, color: this.props.theme.colors.text }}
           onPress={(checked) => {this.checkboxClicked(checked, symptom.id, type, symptom.name)}}
         />
       </View>
@@ -168,19 +168,19 @@ export default class AnalysisTabs extends React.Component {
     return (
       <View style={{display: "flex", flexDirection: "row", height: "100%", padding: 10, paddingTop: 0}}>
         <View style={{flex: 1}}>
-          <Text style={styles.dataTitle}>Symptoms:</Text>
+          <Text style={[styles.dataTitle, {color: this.props.theme.colors.text}]}>Symptoms:</Text>
           <ScrollView>
             {this.RenderCheckboxes("Symptom")}
           </ScrollView>
         </View>
         <View style={{flex: 1}}>
-          <Text style={styles.dataTitle}>Triggers:</Text>
+          <Text style={[styles.dataTitle, {color: this.props.theme.colors.text}]}>Triggers:</Text>
           <ScrollView>
             {this.RenderCheckboxes("Trigger")}
           </ScrollView>
         </View>
         <View style={{flex: 1, display: "flex", flexDirection: "column"}}>
-          <Text style={styles.dataTitle}>Treatments:</Text>
+          <Text style={[styles.dataTitle, {color: this.props.theme.colors.text}]}>Treatments:</Text>
           <ScrollView style={{flex: 1}}>
             {this.RenderCheckboxes("Treatment")}
           </ScrollView>
@@ -191,18 +191,19 @@ export default class AnalysisTabs extends React.Component {
   }
 
   render() {
+    const dark = this.props.theme.dark;
     const renderRadioButton = (value, stateName, text, colour) => {
       return (
         <View style={styles.checkbox}>
           <BouncyCheckbox
             size={25}
             fillColor={colour}
-            unfillColor="lightgrey"
+            unfillColor={this.props.theme.dark ? "#444444" : "lightgrey"}
             isChecked={this.state[stateName] === value}
             disableBuiltInState
             text={text}
             iconStyle={{ borderColor: "#444444" }}
-            textStyle={{ marginLeft: -10 }}
+            textStyle={{ marginLeft: -10, color: this.props.theme.colors.text }}
             onPress={(checked) => {this.updateData(stateName, value)}}
           />
         </View>
@@ -212,10 +213,10 @@ export default class AnalysisTabs extends React.Component {
     const RenderGraphCheckboxes = () => {
       return (
         <View style={{marginLeft: 10}}>
-          <Text style={styles.dataTitle}>Graph Type</Text>
-          {renderRadioButton("bar", "GraphType", "Bar chart", "#E7D5E1")}
-          {renderRadioButton("line", "GraphType", "Line chart", "#FAEEC4")}
-          {renderRadioButton("heat", "GraphType", "Heat map", "#C3D8D1")}
+          <Text style={[styles.dataTitle, {color: this.props.theme.colors.text}]}>Graph Type</Text>
+          {renderRadioButton("bar", "GraphType", "Bar chart", dark ? "#5C0A20" : "#E7D5E1")}
+          {renderRadioButton("line", "GraphType", "Line chart", dark ? "#5C4A0A" : "#FAEEC4")}
+          {renderRadioButton("heat", "GraphType", "Heat map", dark ? "#0A5C41" : "#C3D8D1")}
         </View>
       );
     };
@@ -226,7 +227,7 @@ export default class AnalysisTabs extends React.Component {
       return (
         <View style={{ marginTop: 10, paddingLeft: 20 }}>
           <TouchableOpacity style={{alignSelf: 'flex-start'}} onPress={()=> {this.setState({[showName]: true})}} disabled={!enabled}>
-            <Text style={[styles.dateTime, {color: enabled ? 'black': 'grey', borderBottomColor: enabled ? 'cornflowerblue': 'grey' }]}>
+            <Text style={[styles.dateTime, {color: enabled ? this.props.theme.colors.text: 'grey', borderBottomColor: enabled ? 'cornflowerblue': 'grey' }]}>
               {moment(this.state[name]).format("DD/MM/YYYY")}
             </Text>
           </TouchableOpacity>
@@ -246,23 +247,33 @@ export default class AnalysisTabs extends React.Component {
       return (
         <View style={{display: "flex", flexDirection: "row", paddingLeft: 10}}>
           <View style={{flex: 1}}>
-            <Text style={styles.dataTitle}>Period & range:</Text>
-            {renderRadioButton("all-data", "GraphPeriodRange", "All Data", "#E7D5E1")}
-            {renderRadioButton("between-dates", "GraphPeriodRange", "Between:", "#FAEEC4")}
+            <Text style={[styles.dataTitle, {color: this.props.theme.colors.text}]}>Period & range:</Text>
+            {renderRadioButton("all-data", "GraphPeriodRange", "All Data", dark ? "#5C0A20" : "#E7D5E1")}
+            {renderRadioButton("between-dates", "GraphPeriodRange", "Between:", dark ? "#5C4A0A" : "#FAEEC4")}
             {dateField("PeriodStart")}
             {dateField("PeriodEnd")}
           </View>
           <View style={{flex: 1, margin: 5}}>
-            {renderRadioButton("week-all", "GraphPeriodType", "All Weeks", "#E7D5E1")}
-            {renderRadioButton("week-average", "GraphPeriodType", "Average Week", "#FAEEC4")}
-            {renderRadioButton("month-all", "GraphPeriodType", "All Months", "#C3D8D1")}
-            {renderRadioButton("month-average", "GraphPeriodType", "Average Month", "#E7D5E1")}
-            {renderRadioButton("year-all", "GraphPeriodType", "All Years", "#FAEEC4")}
-            {renderRadioButton("year-average", "GraphPeriodType", "Average Year", "#C3D8D1")}
+            {renderRadioButton("week-all", "GraphPeriodType", "All Weeks", dark ? "#5C0A20" : "#E7D5E1")}
+            {renderRadioButton("week-average", "GraphPeriodType", "Average Week", dark ? "#5C4A0A" : "#FAEEC4")}
+            {renderRadioButton("month-all", "GraphPeriodType", "All Months", dark ? "#0A5C41" : "#C3D8D1")}
+            {renderRadioButton("month-average", "GraphPeriodType", "Average Month", dark ? "#5C0A20" : "#E7D5E1")}
+            {renderRadioButton("year-all", "GraphPeriodType", "All Years", dark ? "#5C4A0A" : "#FAEEC4")}
+            {renderRadioButton("year-average", "GraphPeriodType", "Average Year", dark ? "#0A5C41" : "#C3D8D1")}
           </View>
         </View>
       );
     };
+
+    const floatyBG = dark
+      ? this.state.refreshEnabled ? "#0a465c" : "#444444"
+      : this.state.refreshEnabled ? "#00ABEB" : "white";
+    const floatyBorder = dark
+      ? this.state.refreshEnabled ? "grey" : "black"
+      : this.state.refreshEnabled ? "black" : "lightgrey";
+    const floatyText = dark
+      ? this.state.refreshEnabled ? "white" : "lightgrey"
+      : this.state.refreshEnabled ? "white" : "grey";
 
     return (
       <View style={{height: "100%", width: "100%"}}>
@@ -274,11 +285,11 @@ export default class AnalysisTabs extends React.Component {
         <View style={styles.floatyBoi}>
           <TouchableOpacity
             style={[styles.refreshButton,
-              {backgroundColor: this.state.refreshEnabled ? "#00ABEB" : "white", borderColor: this.state.refreshEnabled ? "black" : "lightgrey"}]}
+              {backgroundColor: floatyBG, borderColor: floatyBorder}]}
             onPress={this.clickedRefresh}
             disabled={!this.state.refreshEnabled}>
             <Text
-              style={[styles.refreshText, {color: this.state.refreshEnabled ? "white" : "grey"}]}>
+              style={[styles.refreshText, {color: floatyText}]}>
               Refresh data
             </Text>
           </TouchableOpacity>

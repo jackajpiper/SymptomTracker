@@ -6,11 +6,18 @@ import Toast from 'react-native-simple-toast';
 import AsyncManager from './AsyncManager';
 import { FontAwesome, AntDesign } from '@expo/vector-icons';
 import DateTimePicker from '@react-native-community/datetimepicker';
+import { useTheme } from '@react-navigation/native';
 
-export default class EditDiaryScreen extends Component {
+export default function(props) {
+  let theme = useTheme();
+  return <EditDiaryScreen {...props} theme={theme}/>
+}
+
+class EditDiaryScreen extends Component {
   constructor(props) {
     super(props);
 
+    this.theme = props.theme;
     let origin = JSON.parse(JSON.stringify(props.route.params.diary));
     origin.date = origin.date ? new Date(origin.date) : new Date();
 
@@ -154,15 +161,24 @@ export default class EditDiaryScreen extends Component {
   }
 
   render() {
+    const textColour = this.theme.dark ? "#ffffff" : "#000000";
+    const bgColour = this.theme.dark ? "#000000" : "#ffffff";
+    const fieldLabel = {
+      color: this.theme.dark ? "#ffffff" : "grey",
+      fontSize: 18
+    }
+
+
     return (
-      <View style={styles.container}>
+      <View style={[styles.container, {backgroundColor: bgColour}]}>
         <View style={styles.container}>
           <View style={[styles.section, styles.title]}>
             <View style={{flex: 1, flexDirection: "row"}}>
               <TextInput
                 ref={this.titleText}
-                style={{fontWeight: "600", fontSize: 18, flex: 1}}
+                style={{fontWeight: "600", fontSize: 18, flex: 1, color: textColour}}
                 placeholder="Title..."
+                placeholderTextColor="#B4B4B9"
                 onChangeText={(text) => this.setState({title:text})}
                 value={this.state.title}/>
               <TouchableOpacity style={{marginRight: -10, paddingTop: 0, justifyContent: "center"}} onPress={()=> {this.setState({showDate: true})}}>
@@ -173,10 +189,11 @@ export default class EditDiaryScreen extends Component {
           <View style={[styles.section, styles.text]}>
               <KeyboardAvoidingView behavior={Platform.OS === "ios" ? "padding" : "height"}>
                 <ScrollView>
-                  <TextInput style={[styles.text]}
+                  <TextInput style={[styles.text, {color: textColour}]}
                     onFocus={() => {this.setState({titleShown: false})}}
                     underlineColorAndroid="transparent"
                     placeholder="How are you feeling today?"
+                    placeholderTextColor="#B4B4B9"
                     onChangeText={(text) => this.setState({text:text})}
                     value={this.state.text}
                     multiline={true}/>
@@ -201,8 +218,7 @@ export default class EditDiaryScreen extends Component {
 const styles = StyleSheet.create({
   container: {
     margin: 10,
-    flex: 1,
-    backgroundColor: "white"
+    flex: 1
   },
   section: {
     padding: 15,

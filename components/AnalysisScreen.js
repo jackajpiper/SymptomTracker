@@ -116,15 +116,17 @@ export default class AnalysisScreen extends React.Component {
   }
 
   renderGraph = (type, period, selectedData, start, end) => {
+    let bgColour = this.props.theme.dark ? "#000000" : "#ffffff";
     if (!this.state.Symptoms.length) {
       return (
-        <View style={styles.spinner}>
+        <View style={[styles.spinner, {backgroundColor: bgColour}]}>
           <ActivityIndicator size="large" color="cornflowerblue" />
         </View>
       );
     } else {
       return <ChartsComponent
         ref={chart => {this.chart = chart}}
+        theme = {this.props.theme}
         Symptoms={this.state.Symptoms}
         Triggers={this.state.Triggers}
         Treatments={this.state.Treatments}
@@ -155,6 +157,7 @@ export default class AnalysisScreen extends React.Component {
         <View style={styles.bottom}>
           <AnalysisTabs
             ref={tabs => {this.tabs = tabs}}
+            theme = {this.props.theme}
             updateGraph={this.updateGraph}
             symptoms={this.state.Symptoms}
             triggers={this.state.Triggers}

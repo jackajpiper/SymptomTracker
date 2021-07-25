@@ -5,59 +5,6 @@ import moment from "moment";
 import ColourHelper from './ColourHelper';
 import HeatMap from 'react-native-heatmap-chart';
 
-function shadeColour(color, percent) {
-
-  var R = parseInt(color.substring(1,3),16);
-  var G = parseInt(color.substring(3,5),16);
-  var B = parseInt(color.substring(5,7),16);
-
-  let mag = Math.sqrt(R*R + G*G + B*B);
-  R = (R / mag) * 255;
-  G = (G / mag) * 255;
-  B = (B / mag) * 255;
-
-  R = parseInt(R * (100 + percent) / 100);
-  G = parseInt(G * (100 + percent) / 100);
-  B = parseInt(B * (100 + percent) / 100);
-
-  if(percent > 0) {
-    if(R !== 0) {
-      if(G === 0) {
-        G = Math.floor(R * percent / 100);
-      }
-      if(B === 0) {
-        B = Math.floor(R * percent / 100);
-      }
-    }
-    if(G !== 0) {
-      if(R === 0) {
-        R = Math.floor(G * percent / 100);
-      }
-      if(B === 0) {
-        B = Math.floor(G * percent / 100);
-      }
-    }
-    if(B !== 0) {
-      if(G === 0) {
-        G = Math.floor(B * percent / 100);
-      }
-      if(B === 0) {
-        R = Math.floor(B * percent / 100);
-      }
-    }
-  }
-
-  R = (R<255)?R:255;
-  G = (G<255)?G:255;
-  B = (B<255)?B:255;
-
-  var RR = ((R.toString(16).length==1)?"0"+R.toString(16):R.toString(16));
-  var GG = ((G.toString(16).length==1)?"0"+G.toString(16):G.toString(16));
-  var BB = ((B.toString(16).length==1)?"0"+B.toString(16):B.toString(16));
-
-  return "#"+RR+GG+BB;
-}
-
 function hexToHSL(H) {
   // Convert hex to RGB first
   let r = 0, g = 0, b = 0;
@@ -147,14 +94,33 @@ function HSLToHex(hsl) {
   return "#" + r + g + b;
 }
 
-function getAverageColour(hues) {
-  let totalHue = 0;
-  hues.forEach(function (hue) {
-    totalHue += hue;
+function getAverageHue(hues) {
+  let avgHue;
+  hues.forEach((hue, index) => {
+    if (!index) { // first hue
+      avgHue = hue;
+    } else {
+      let diff = hue - avgHue; // distance from avgHue to this hue
+      if (Math.abs(diff) <= 180) { // they're on the same side of the circle
+        avgHue += (diff / (index+1)); // shift the average by less each time
+      } else {
+        let subtraction = diff >= 0 ? 360 : -360;
+        diff -= subtraction;
+        avgHue += (diff / (index+1)); // shift the average by less each time
+      }
+    }
   })
-  let avgHue = Math.round(totalHue/hues.length);
+  if (avgHue < 1) {
+    avgHue += 360;
+  }
 
-  let newHex = ColourHelper.getColourForMode(avgHue, false, true);
+  return Math.round(avgHue);
+}
+
+function getAverageColour(hues) {
+  let avgHue = getAverageHue(hues);
+
+  let newHex = ColourHelper.getColourForMode(avgHue, false, true, true);
   return newHex;
 }
 
@@ -204,7 +170,8 @@ export default class ChartsComponent extends React.Component {
         || JSON.stringify(this.props.selectedData) !== JSON.stringify(nextProps.selectedData)
         || this.props.start !== nextProps.start
         || this.props.end !== nextProps.end
-        || this.state.isLoading !== nextState.isLoading;
+        || this.state.isLoading !== nextState.isLoading
+        || this.props.theme.dark !== nextProps.theme.dark;
   }
 
   getAverageForBar = (selectedData, dates, start, end, length, format, scaleMultiple, itemPercentage) => {
@@ -231,8 +198,8 @@ export default class ChartsComponent extends React.Component {
       let typeName = selected.split(' ')[0];
       let id = parseInt(selected.split(' ')[1]);
       let type = this.props[typeName+"s"].find((t) => t.id === id);
-      let typeColour = ColourHelper.getColourForMode(type.hue, false, true);
-      colourList.push(shadeColour(typeColour, 40));
+      let typeColour = ColourHelper.getColourForMode(type.hue, this.props.theme.dark, true, true);
+      colourList.push(typeColour);
       let instances = this.props[typeName+"Instances"].filter((instance) => { return instance.typeId === id; });
 
       if (instances.length !== 0) {
@@ -281,8 +248,8 @@ export default class ChartsComponent extends React.Component {
       let typeName = selected.split(' ')[0];
       let id = parseInt(selected.split(' ')[1]);
       let type = this.props[typeName+"s"].find((t) => t.id === id);
-      let typeColour = ColourHelper.getColourForMode(type.hue, false, true);
-      colourList.push(shadeColour(typeColour, 40));
+      let typeColour = ColourHelper.getColourForMode(type.hue, this.props.theme.dark, true, true);
+      colourList.push(typeColour);
 
       let instances = this.props[typeName+"Instances"].filter((instance) => {
         return instance.typeId === id;
@@ -414,7 +381,7 @@ export default class ChartsComponent extends React.Component {
       for (let i=0; i<length; i++) {
         emptyDataEntry.push(0);
       }
-      let typeColour = ColourHelper.getColourForMode(type.hue, false, true);
+      let typeColour = ColourHelper.getColourForMode(type.hue, this.props.theme.dark, true, true);
       let typeLine = {
         data: [],
         color: (opacity = 1) => typeColour
@@ -513,7 +480,7 @@ export default class ChartsComponent extends React.Component {
       let typeData = dateData.map((dateDatum) => {
         return dateDatum[1][index];
       });
-      let typeColour = ColourHelper.getColourForMode(type.hue, false, true);
+      let typeColour = ColourHelper.getColourForMode(type.hue, this.props.theme.dark, true, true);
       let typeLine = {
         data: typeData,
         color: (opacity = 1) => typeColour
@@ -597,7 +564,7 @@ export default class ChartsComponent extends React.Component {
 
       allInstances = allInstances.concat(instances);
     });
-    colourIntervals = getColourIntervals(getAverageColour(hues), 4);
+    let colourIntervals = getColourIntervals(getAverageColour(hues), 4);
 
     allInstances.forEach((instance) => {
       dataArr[moment(instance.date).format(format)-1]++;
@@ -608,18 +575,32 @@ export default class ChartsComponent extends React.Component {
 
   buildHeatChart = (data) => {
     if (data.period === "month-average") {
+      let monthWeekDay = {
+        color: this.props.theme.dark ? "#ffffff" : "#000000",
+        textAlign:"center",
+        width: 45,
+        marginTop: -20
+      };
+      let monthDay = {
+        color: this.props.theme.dark ? "#ffffff" : "#000000",
+        height: 73,
+        width: 45,
+        paddingLeft: 15,
+        textAlign: "center"
+      };
+
       return (
         <View style={{ paddingTop: 30, paddingLeft: 10, display: "flex" }}>
           <View style={styles.monthList}>
-            <Text style={styles.monthWeekDay}>1</Text>
-            <Text style={styles.monthWeekDay}>2</Text>
-            <Text style={styles.monthWeekDay}>3</Text>
-            <Text style={styles.monthWeekDay}>4</Text>
-            <Text style={styles.monthWeekDay}>5</Text>
-            <Text style={styles.monthWeekDay}>6</Text>
-            <Text style={styles.monthWeekDay}>7</Text>
+            <Text style={monthWeekDay}>1</Text>
+            <Text style={monthWeekDay}>2</Text>
+            <Text style={monthWeekDay}>3</Text>
+            <Text style={monthWeekDay}>4</Text>
+            <Text style={monthWeekDay}>5</Text>
+            <Text style={monthWeekDay}>6</Text>
+            <Text style={monthWeekDay}>7</Text>
           </View>
-            <Text style={[styles.monthWeekDay, {marginTop: 0}]}></Text>
+            <Text style={[monthWeekDay, {marginTop: 0}]}></Text>
 
           <View>
             <View style={{
@@ -628,9 +609,9 @@ export default class ChartsComponent extends React.Component {
               justifyContent: "space-between",
               flex: 1
             }}>
-              <Text style={[styles.monthDay, {marginTop: -32}]}> 1</Text>
-              <Text style={styles.monthDay}> 7</Text>
-              <Text style={styles.monthDay}>29</Text>
+              <Text style={[monthDay, {marginTop: -32}]}> 1</Text>
+              <Text style={monthDay}> 7</Text>
+              <Text style={monthDay}>29</Text>
             </View>
 
             <View style={styles.heatTransform}>
@@ -648,16 +629,22 @@ export default class ChartsComponent extends React.Component {
       )
 
     } else if (data.period === "week-average") {
+      let weekDay = {
+        color: this.props.theme.dark ? "#ffffff" : "#000000",
+        textAlign:"center",
+        width: 45
+      };
+      
       return (
         <View style={{ paddingTop: 70 }}>
           <View style={styles.weekList}>
-            <Text style={styles.weekDay}>Mon</Text>
-            <Text style={styles.weekDay}>Tue</Text>
-            <Text style={styles.weekDay}>Wed</Text>
-            <Text style={styles.weekDay}>Thu</Text>
-            <Text style={styles.weekDay}>Fri</Text>
-            <Text style={styles.weekDay}>Sat</Text>
-            <Text style={styles.weekDay}>Sun</Text>
+            <Text style={weekDay}>Mon</Text>
+            <Text style={weekDay}>Tue</Text>
+            <Text style={weekDay}>Wed</Text>
+            <Text style={weekDay}>Thu</Text>
+            <Text style={weekDay}>Fri</Text>
+            <Text style={weekDay}>Sat</Text>
+            <Text style={weekDay}>Sun</Text>
           </View>
           <View style={styles.heatTransform}>
             <View style={{ width: 50, height: 312 }}>
@@ -672,21 +659,27 @@ export default class ChartsComponent extends React.Component {
         </View>
       )
     } else if (data.period === "year-average") {
+      let weekDay = {
+        color: this.props.theme.dark ? "#ffffff" : "#000000",
+        textAlign:"center",
+        width: 45
+      };
+      
       return (
         <View style={{ paddingTop: 80 }}>
           <View style={styles.yearList}>
-            <Text style={styles.weekDay}>Jan</Text>
-            <Text style={styles.weekDay}>Feb</Text>
-            <Text style={styles.weekDay}>Mar</Text>
-            <Text style={styles.weekDay}>Apr</Text>
-            <Text style={styles.weekDay}>May</Text>
-            <Text style={styles.weekDay}>Jun</Text>
-            <Text style={styles.weekDay}>Jul</Text>
-            <Text style={styles.weekDay}>Aug</Text>
-            <Text style={styles.weekDay}>Sep</Text>
-            <Text style={styles.weekDay}>Oct</Text>
-            <Text style={styles.weekDay}>Nov</Text>
-            <Text style={styles.weekDay}>Dec</Text>
+            <Text style={weekDay}>Jan</Text>
+            <Text style={weekDay}>Feb</Text>
+            <Text style={weekDay}>Mar</Text>
+            <Text style={weekDay}>Apr</Text>
+            <Text style={weekDay}>May</Text>
+            <Text style={weekDay}>Jun</Text>
+            <Text style={weekDay}>Jul</Text>
+            <Text style={weekDay}>Aug</Text>
+            <Text style={weekDay}>Sep</Text>
+            <Text style={weekDay}>Oct</Text>
+            <Text style={weekDay}>Nov</Text>
+            <Text style={weekDay}>Dec</Text>
           </View>
           <View style={styles.heatTransform}>
             <View style={{ width: 40, height: 340 }}>
@@ -744,6 +737,11 @@ export default class ChartsComponent extends React.Component {
   }
 
   renderGraph = (type) => {
+    let bgColour = this.props.theme.dark ? "#000000" : "#ffffff";
+    let textColour = this.props.theme.dark
+      ? (opacity = 1) => `rgba(256, 256, 256, ${opacity})`
+      : (opacity = 1) => `rgba(20, 20, 20, ${opacity})`;
+    
     if (type === "bar") {
       let selectedData = this.state.GraphData;
       let widths = selectedData.widths;
@@ -764,11 +762,11 @@ export default class ChartsComponent extends React.Component {
             decimalPlaces={0}
             hideLegend={true}
             chartConfig={{
-              backgroundGradientFrom: "white",
-              backgroundGradientTo: "white",
+              backgroundGradientFrom: bgColour,
+              backgroundGradientTo: bgColour,
               withVerticalLines: true,
-              color: (opacity = 1) => `rgba(20, 20, 20, ${opacity})`,
-              labelColor: (opacity = 1) => `rgba(20, 20, 20, ${opacity})`,
+              color: textColour,
+              labelColor: textColour,
               barPercentage: widths.itemPercentage,
               style: {
                 borderRadius: 16
@@ -808,11 +806,11 @@ export default class ChartsComponent extends React.Component {
             width={(this.state.graphWidth+30) * lengthMultiple}
             height={220}
             chartConfig={{
-              backgroundGradientFrom: "white",
-              backgroundGradientTo: "white",
+              backgroundGradientFrom: bgColour,
+              backgroundGradientTo: bgColour,
               decimalPlaces: 0,
-              color: (opacity = 1) => `rgba(20, 20, 20, ${opacity})`,
-              labelColor: (opacity = 1) => `rgba(20, 20, 20, ${opacity})`,
+              color: textColour,
+              labelColor: textColour,
               propsForDots: {
                 r: "6",
                 strokeWidth: "2",
@@ -833,8 +831,9 @@ export default class ChartsComponent extends React.Component {
   }
 
   render() {
+    let bgColour = this.props.theme.dark ? "#000000" : "#ffffff";
     return (
-      <View style={{ width: "100%" }} onLayout={(event) => {this.setState({graphWidth: event.nativeEvent.layout.width});}}>
+      <View style={{ width: "100%", height: "100%", backgroundColor: bgColour }} onLayout={(event) => {this.setState({graphWidth: event.nativeEvent.layout.width});}}>
         {this.renderGraph(this.props.type)}
       </View>
     )

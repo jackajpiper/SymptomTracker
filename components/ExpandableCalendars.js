@@ -11,43 +11,33 @@ import SymptomModal from './SymptomModal';
 import TreatmentModal from './TreatmentModal';
 import TriggerModal from './TriggerModal';
 import { Ionicons } from '@expo/vector-icons';
+import { useTheme } from '@react-navigation/native';
 
+export default function(props) {
+  let theme = useTheme();
+
+  theme.calendarBackground = theme.dark ? '#000000' : '#ffffff';
+  theme.backgroundColor = theme.dark ? '#000000' : '#ffffff';
+  theme.dayTextColor = theme.dark ? '#ffffff' : '#2d4150';
+  theme.monthTextColor = theme.dark ? '#ffffff' : '#2d4150';
+  theme.selectedDayBackgroundColor = theme.dark ? '#0a465c' : "#00a0db";
+
+  return <ExpandableCalendarScreen {...props} theme={theme}/>
+}
 
 const today = moment().format("YYYY-MM-DD");
-
-const actionColour = "#00a0db";
-const actions = [
-  {
-    text: "Add Symptom",
-    name: "bt_add_symptom",
-    color: actionColour,
-    position: 1
-  },
-  {
-    text: "Add Treatment",
-    name: "bt_add_treatment",
-    color: actionColour,
-    position: 2
-  },
-  {
-    text: "Add Trigger",
-    name: "bt_add_trigger",
-    color: actionColour,
-    position: 3
-  }
-];
 
 // takes the symptoms, symptom instances, treatments and treatment instances straight from the datastore and converts them for use
 function processInstances(symptomInstances, symptoms, treatmentInstances, treatments, triggerInstances, triggers, props) {
   let dateDict = {};
   let dateArr = [];
-  console.log("there are " + symptomInstances.length + "symptom instances");
-  console.log("there are " + triggerInstances.length + "trigger instances");
-  console.log("there are " + treatmentInstances.length + "treatment instances");
+  symptoms.map((symptom) => {
+    symptom.colour = ColourHelper.getColourForMode(symptom.hue, props.theme.dark);
+  })
   symptomInstances.forEach(function (instance, index) {
     let symptom = symptoms.find(symptom => symptom.id === instance.typeId);
     instance.name = symptom.name;
-    instance.colour = ColourHelper.getColourForMode(symptom.hue, props.theme.dark);
+    instance.colour = symptom.colour;
     instance.type = "symptom";
     let day = instance.date;
     if (!dateDict[day]) {
@@ -55,10 +45,13 @@ function processInstances(symptomInstances, symptoms, treatmentInstances, treatm
     }
     dateDict[day].push(instance);
   });
+  treatments.map((treatment) => {
+    treatment.colour = ColourHelper.getColourForMode(treatment.hue, props.theme.dark);
+  })
   treatmentInstances.forEach(function (instance, index) {
     let treatment = treatments.find(treatment => treatment.id === instance.typeId);
     instance.name = treatment.name;
-    instance.colour = ColourHelper.getColourForMode(treatment.hue, props.theme.dark);
+    instance.colour = treatment.colour;
     instance.type = "treatment";
     let day = instance.date;
     if (!dateDict[day]) {
@@ -66,10 +59,13 @@ function processInstances(symptomInstances, symptoms, treatmentInstances, treatm
     }
     dateDict[day].push(instance);
   });
+  triggers.map((trigger) => {
+    trigger.colour = ColourHelper.getColourForMode(trigger.hue, props.theme.dark);
+  })
   triggerInstances.forEach(function (instance, index) {
     let trigger = triggers.find(trigger => trigger.id === instance.typeId);
     instance.name = trigger.name;
-    instance.colour = ColourHelper.getColourForMode(trigger.hue, props.theme.dark);
+    instance.colour = trigger.colour;
     instance.type = "trigger";
     let day = instance.date;
     if (!dateDict[day]) {
@@ -104,19 +100,11 @@ function processInstances(symptomInstances, symptoms, treatmentInstances, treatm
   return dateArr;
 }
 
-function getContrastYIQ(hexcolor){
-  hexcolor = hexcolor.replace("#", "");
-  var r = parseInt(hexcolor.substr(0,2),16);
-  var g = parseInt(hexcolor.substr(2,2),16);
-  var b = parseInt(hexcolor.substr(4,2),16);
-  var yiq = ((r*299)+(g*587)+(b*114))/1000;
-  return (yiq >= 128) ? 'black' : 'white';
-}
-
-export default class ExpandableCalendarScreen extends Component {
+class ExpandableCalendarScreen extends Component {
 
   constructor(props) {
     super(props);
+    this.props = props;
 
     this.state = {
       Symptoms: [],
@@ -214,6 +202,21 @@ export default class ExpandableCalendarScreen extends Component {
     });
   }
 
+  componentDidUpdate(prevProps) {
+    if (prevProps.theme.dark !== this.props.theme.dark) {
+      this.setState({ITEMS: processInstances(
+        this.state.SymptomInstances,
+        this.state.Symptoms,
+        this.state.TreatmentInstances,
+        this.state.Treatments,
+        this.state.TriggerInstances,
+        this.state.Triggers,
+        this.props
+      )});
+    }
+    
+  }
+
   componentWillUnmount = () => {
     if(this.willFocusListener && typeof this.willFocusListener.remove === "function") {
       this.willFocusListener.remove();
@@ -226,7 +229,7 @@ export default class ExpandableCalendarScreen extends Component {
 
   renderToday() {
     return (
-      <View style={styles.emptyItem}>
+      <View style={[styles.emptyItem, { backgroundColor: this.props.theme.dark ? "#333333" : "#f5f5f5" }]}>
         <Text style={styles.emptyItemText}>How are you feeling today?</Text>
       </View>
     );
@@ -238,22 +241,22 @@ export default class ExpandableCalendarScreen extends Component {
     }
 
     let colour = item.colour;
-    let textColour = getContrastYIQ(colour);
-    let lighterTextColour = textColour === 'black' ? 'grey' : 'silver';
+    let textColour = this.props.theme.colors.text;
+    let lighterTextColour = this.props.theme.colors.text;
 
     if (item.type === "symptom") {
       return (
         <LinearGradient 
-          colors={['white', colour]}
+          colors={[this.props.theme.colors.card, colour]}
           style = { styles.container }
           start={{ x: 0.5, y: 0.5 }}
           end={{ x: 1, y: 0.5 }}>
   
           <TouchableOpacity onPress={() => this.itemPressed(item)} style={styles.item}>
             <Ionicons style={{textAlign: "center", paddingTop: 4}} name="thermometer-outline" size={28} color="#b6b6b6" />
-            <Text style={styles.itemTitleText}>{item.name}</Text>
+            <Text style={[styles.itemTitleText, {color: textColour}]}>{item.name}</Text>
             <View style={styles.itemButtonContainer}>
-              <Text style={[styles.itemTimeText, {color: textColour}]}>
+              <Text style={{color: textColour, marginTop: 10}}>
                 {item.startTime + ' - ' + item.endTime}
               </Text>
               <Text style={[styles.itemSeverityText, {color: lighterTextColour}]}>
@@ -266,16 +269,16 @@ export default class ExpandableCalendarScreen extends Component {
     } else if (item.type === "treatment") {
       return (
         <LinearGradient 
-          colors={['white', colour]}
+          colors={[this.props.theme.colors.card, colour]}
           style = { styles.container }
           start={{ x: 0.5, y: 0.5 }}
           end={{ x: 1, y: 0.5 }}>
   
           <TouchableOpacity onPress={() => this.itemPressed(item)} style={styles.item}>
             <Ionicons style={{textAlign: "center", paddingTop: 4}} name="bandage-outline" size={28} color="#b6b6b6" />
-            <Text style={styles.itemTitleText}>{item.name}</Text>
+            <Text style={[styles.itemTitleText, {color: textColour}]}>{item.name}</Text>
             <View style={styles.itemButtonContainer}>
-              <Text style={[styles.itemTimeText, {color: textColour, marginTop: 10}]}>
+              <Text style={{color: textColour, marginTop: 10}}>
                 {item.startTime + ' - ' + item.endTime}
               </Text>
             </View>
@@ -285,16 +288,16 @@ export default class ExpandableCalendarScreen extends Component {
     } else if (item.type === "trigger") {
       return (
         <LinearGradient 
-          colors={['white', colour]}
+          colors={[this.props.theme.colors.card, colour]}
           style = { styles.container }
           start={{ x: 0.5, y: 0.5 }}
           end={{ x: 1, y: 0.5 }}>
 
           <TouchableOpacity onPress={() => this.itemPressed(item)} style={styles.item}>
             <Ionicons style={{textAlign: "center", paddingTop: 4}} name="alert" size={28} color="#b6b6b6" />
-            <Text style={styles.itemTitleText}>{item.name}</Text>
+            <Text style={[styles.itemTitleText, {color: textColour}]}>{item.name}</Text>
             <View style={styles.itemButtonContainer}>
-              <Text style={[styles.itemTimeText, {color: textColour, marginTop: 10}]}>
+              <Text style={{color: textColour, marginTop: 10}}>
                 {item.startTime + ' - ' + item.endTime}
               </Text>
             </View>
@@ -346,6 +349,36 @@ export default class ExpandableCalendarScreen extends Component {
   }
 
   render() {
+    const actionColour = this.props.theme.dark ? "#000000" : "#00a0db";
+    const textColour = this.props.theme.dark ? "#ffffff" : "#000000";
+    const textBackground = this.props.theme.dark ? "#000000" : "#ffffff";
+    const actions = [
+      {
+        text: "Add Symptom",
+        name: "bt_add_symptom",
+        color: actionColour,
+        textBackground: textBackground,
+        textColor: textColour,
+        position: 1
+      },
+      {
+        text: "Add Treatment",
+        name: "bt_add_treatment",
+        color: actionColour,
+        textBackground: textBackground,
+        textColor: textColour,
+        position: 2
+      },
+      {
+        text: "Add Trigger",
+        name: "bt_add_trigger",
+        color: actionColour,
+        textBackground: textBackground,
+        textColor: textColour,
+        position: 3
+      }
+    ];
+
     if(this.state.isLoading) {
       return (
         <View style={[styles.spinner]}>
@@ -355,17 +388,22 @@ export default class ExpandableCalendarScreen extends Component {
     } else {
       return (
         <CalendarProvider
+          key={this.props.theme.dark}
+          theme={this.props.theme}
           date={today}
           showTodayButton
           disabledOpacity={0.6}
         >
           <ExpandableCalendar
+            theme={this.props.theme}
             disableAllTouchEventsForDisabledDays
             firstDay={1}
             markedDates={this.getMarkedDates()}
             style = {styles.expandableCalendar}
           />
           <AgendaList
+            key={this.props.theme.dark}
+            theme={this.props.theme}
             sections={this.state.ITEMS}
             extraData={this.state}
             renderItem={this.renderItem}
@@ -373,7 +411,7 @@ export default class ExpandableCalendarScreen extends Component {
           />
           <FloatingAction
             actions={actions}
-            color={"#00ABEB"}
+            color={actionColour}
             onPressItem={name => { this.floatingActions(name)}}
           />
           <Modal animationType = {"slide"}
@@ -411,9 +449,6 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     height: "100%"
   },
-  itemTimeText: {
-    color: 'black'
-  },
   itemSeverityText: {
     color: 'grey',
     fontSize: 12,
@@ -422,7 +457,6 @@ const styles = StyleSheet.create({
     textAlign: 'right'
   },
   itemTitleText: {
-    color: 'black',
     marginLeft: 16,
     fontWeight: 'bold',
     fontSize: 16,
@@ -437,8 +471,7 @@ const styles = StyleSheet.create({
     height: 85,
     justifyContent: 'center',
     borderBottomWidth: 1,
-    borderBottomColor: 'lightgrey',
-    backgroundColor: '#f5f5f5'
+    borderBottomColor: 'lightgrey'
   },
   emptyItemText: {
     color: 'darkgrey',

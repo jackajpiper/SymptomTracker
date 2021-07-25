@@ -6,11 +6,18 @@ import Toast from 'react-native-simple-toast';
 import AsyncManager from './AsyncManager';
 import ColourHelper from './ColourHelper';
 import { FontAwesome, AntDesign } from '@expo/vector-icons';
+import { useTheme } from '@react-navigation/native';
 
-export default class TriggersListScreen extends Component {
+export default function(props) {
+  let theme = useTheme();
+  return <EditTriggerScreen {...props} theme={theme}/>
+}
+
+class EditTriggerScreen extends Component {
   constructor(props) {
     super(props);
 
+    this.theme = props.theme;
     this.isNew = !props.route.params.trigger.id;
     this.state = {
       isLoading: true,
@@ -131,13 +138,19 @@ export default class TriggersListScreen extends Component {
   }
 
   render() {
+    const textColour = this.theme.dark ? "#ffffff" : "#000000";
+    const fieldLabel = {
+      color: this.theme.dark ? "#ffffff" : "grey",
+      fontSize: 18
+    }
+
     return (
       <View style={styles.container}>
         <View style={styles.form}>
           <View style={styles.field}>
-            <Text style={styles.fieldLabel}>Name:</Text>
+            <Text style={fieldLabel}>Name:</Text>
             <TextInput
-              style={styles.nameInput}
+              style={[styles.nameInput, {color: textColour}]}
               onChangeText={text => this.updateField('name', text)}
               placeholder="Trigger name"
               placeholderTextColor="#B4B4B9"
@@ -147,7 +160,7 @@ export default class TriggersListScreen extends Component {
           </View>
           
           <View style={styles.field}>
-            <Text style={[styles.fieldLabel, {marginBottom: 25}]}>Colour:</Text>
+            <Text style={[fieldLabel, {marginBottom: 25}]}>Colour:</Text>
             <SliderHuePicker
                 ref={view => {this.sliderHuePicker = view;}}
                 oldColor={ColourHelper.getColourForMode(this.state.hue, false, true)}
@@ -159,8 +172,8 @@ export default class TriggersListScreen extends Component {
           </View>
           
           <View style={styles.field}>
-            <Text style={[styles.fieldLabel, {marginTop: 15}]}>Track amount?</Text>
-            <Text style={[styles.fieldLabel, {marginBottom: 15}]}>(Show slider when creating a record)</Text>
+            <Text style={[fieldLabel, {marginTop: 15}]}>Track amount?</Text>
+            <Text style={[fieldLabel, {marginBottom: 15}]}>(Show slider when creating a record)</Text>
             <Switch
               style={{alignSelf: "flex-start"}}
               trackColor={{ false: "#c6c6c6", true: "cornflowerblue" }}

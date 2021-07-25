@@ -9,8 +9,14 @@ import DateTimePicker from '@react-native-community/datetimepicker';
 import Toast from 'react-native-simple-toast';
 import Slider from '@react-native-community/slider';
 import ColourHelper from './ColourHelper';
+import { useTheme } from '@react-navigation/native';
 
-export default class SymptomModal extends React.Component {
+export default function(props) {
+  let theme = useTheme();
+  return <SymptomModal {...props} theme={theme}/>
+}
+
+class SymptomModal extends React.Component {
 
   constructor(props) {
     super(props);
@@ -25,6 +31,7 @@ export default class SymptomModal extends React.Component {
       notes: data.notes || ""
     };
 
+    this.theme = props.theme;
     this.id = data.id;
     this.isNew = !data.id;
     this.symptoms = this.props.symptoms;
@@ -164,6 +171,7 @@ export default class SymptomModal extends React.Component {
 
   render() {
     let underlineColour = this.state.colour;
+    let textColour = this.theme.dark ? "white": "black";
     let pickerStyles = StyleSheet.create({
       inputIOS: {
         fontSize: 16,
@@ -172,7 +180,7 @@ export default class SymptomModal extends React.Component {
         borderWidth: 1,
         borderColor: 'gray',
         borderRadius: 4,
-        color: 'black',
+        color: textColour,
         paddingRight: 30, // to ensure the text is never behind the icon
       },
       inputAndroid: {
@@ -181,7 +189,7 @@ export default class SymptomModal extends React.Component {
         paddingVertical: 8,
         borderBottomWidth: 1,
         borderColor: underlineColour,
-        color: 'black',
+        color: textColour,
         paddingRight: 30, // to ensure the text is never behind the icon
       },
       placeholder: {
@@ -194,7 +202,7 @@ export default class SymptomModal extends React.Component {
         paddingVertical: 8,
         borderBottomWidth: 1,
         borderColor: underlineColour,
-        color: 'black',
+        color: textColour,
         paddingRight: 30
       }
     }
@@ -220,15 +228,26 @@ export default class SymptomModal extends React.Component {
         </View>
     }
 
+    let formStyle = {
+      backgroundColor: this.theme.dark ? "#000000" : "#f6f6f6",
+      borderColor: this.theme.dark ? "#333333" : "black",
+      borderWidth: this.theme.dark+1
+    }
+
+    let fieldLabel = {
+      color: this.theme.dark ? "white": "grey",
+      fontSize: 18
+    }
+
     return (
       <View style={formStyles.container}>
-        <View style={formStyles.form}>
+        <View style={[formStyles.form, formStyle]}>
           <TouchableOpacity style={formStyles.closeBtn} onPress={() => { this.props.toggleModal("symptom", false) }} >
-            <Ionicons name="close" size={24} color="black" />
+            <Ionicons name="close" size={24} color={textColour} />
           </TouchableOpacity>
           <ScrollView style={formStyles.fields}>
             <View style={formStyles.field}>
-              <Text style={formStyles.fieldLabel}>Symptom:</Text>
+              <Text style={fieldLabel}>Symptom:</Text>
               <RNPickerSelect
                 onValueChange={value => {this.updateField("symptomId", value)}}
                 value={this.state.symptomId}
@@ -242,7 +261,7 @@ export default class SymptomModal extends React.Component {
               />
             </View>
             <View style={formStyles.field}>
-              <Text style={formStyles.fieldLabel}>Date:</Text>
+              <Text style={fieldLabel}>Date:</Text>
               <TouchableOpacity style={formStyles.basicInput} onPress={()=> {this.setState({showDate: true})}}>
                 <Text style={dynamicStyles.dateTime}>
                   {this.formatDateTime(this.state.date, "date")}
@@ -260,7 +279,7 @@ export default class SymptomModal extends React.Component {
             </View>
             <View style={formStyles.rowField}>
               <View style={formStyles.columnView}>
-                <Text style={formStyles.fieldLabel}>Start Time:</Text>
+                <Text style={fieldLabel}>Start Time:</Text>
                 <TouchableOpacity style={formStyles.basicInput} onPress={()=> {this.setState({showStartTime: true})}}>
                   <Text style={dynamicStyles.dateTime}>
                     {this.formatDateTime(this.state.startTime, "time")}
@@ -277,7 +296,7 @@ export default class SymptomModal extends React.Component {
                 )}
               </View>
               <View style={formStyles.columnView}>
-                <Text style={formStyles.fieldLabel}>End Time:</Text>
+                <Text style={fieldLabel}>End Time:</Text>
                 <TouchableOpacity style={formStyles.basicInput} onPress={()=> {this.setState({showEndTime: true})}}>
                   <Text style={dynamicStyles.dateTime}>
                     {this.formatDateTime(this.state.endTime, "time")}
@@ -295,7 +314,7 @@ export default class SymptomModal extends React.Component {
               </View>
             </View>
             {this.state.showSlider && <View style={[formStyles.field, formStyles.sliderField]}>
-              <Text style={formStyles.fieldLabel}>{"Severity  ("+this.state.severity+")"}</Text>
+              <Text style={fieldLabel}>{"Severity  ("+this.state.severity+")"}</Text>
               <View style={{ marginLeft: -20, marginRight: -20, paddingTop: 10 }}>
                 <Slider
                   value={this.state.severity}
@@ -309,9 +328,9 @@ export default class SymptomModal extends React.Component {
               </View>
             </View>}
             <View style={[formStyles.field, {paddingBottom: 10}]}>
-              <Text style={formStyles.fieldLabel}>Notes:</Text>
+              <Text style={fieldLabel}>Notes:</Text>
               <TextInput
-                style={formStyles.basicInput}
+                style={[formStyles.basicInput, {color: textColour}]}
                 onChangeText={text => this.updateField('notes', text)}
                 placeholder="Notes"
                 placeholderTextColor="#B4B4B9"
@@ -342,8 +361,6 @@ const formStyles = StyleSheet.create({
     paddingBottom: 22,
     height: "100%",
     margin: 38,
-    backgroundColor: '#f6f6f6',
-    borderWidth: 1,
     borderRadius: 20
   },
   fields: {
@@ -351,10 +368,6 @@ const formStyles = StyleSheet.create({
   },
   field: {
     paddingBottom: 18
-  },
-  fieldLabel: {
-    color: 'grey',
-    fontSize: 18
   },
   basicInput: {
     height: 50,

@@ -556,6 +556,18 @@ const AsyncManager = {
       }
     }
     return id+1;
+  },
+
+  isDarkMode: async function () {
+    return AsyncStorage.getItem('IsDarkMode').then(
+      (value) => {
+        return !!value;
+      }
+    );
+  },
+
+  setDarkMode: async function (bool) {
+    return AsyncStorage.setItem('IsDarkMode', bool ? "1" : "");
   }
 }
 
