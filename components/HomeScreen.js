@@ -1,7 +1,6 @@
 import _ from 'lodash';
-import React, {Component} from 'react';
+import React, {useEffect} from 'react';
 import {StyleSheet, View, Text, TouchableOpacity} from 'react-native';
-import moment from "moment";
 import { createStackNavigator } from '@react-navigation/stack';
 import SymptomsListScreen from './SymptomsListScreen.js';
 import TreatmentsListScreen from './TreatmentsListScreen.js';
@@ -14,13 +13,28 @@ import EditDiaryScreen from './EditDiaryScreen.js';
 import SettingsScreen from './SettingsScreen.js';
 import {LinearGradient} from 'expo-linear-gradient';
 import { useTheme } from '@react-navigation/native';
+import AsyncManager from './AsyncManager';
 
-const today = moment().format("YYYY-MM-DD");
 const Stack = createStackNavigator();
 
 function MainScreen (props) {
   const theme = props.theme;
   const dark = theme.dark;
+  const appName = props.appName;
+  const updateName = props.updateName;
+  
+  useEffect(() => {
+    updateName();
+    
+    const willFocusListener = props.navigation.addListener('focus', async () => {
+      updateName();
+    });
+    return () => {
+      if(willFocusListener && typeof willFocusListener.remove === "function") {
+        willFocusListener.remove();
+      };
+    }
+  }, []);
 
   const renderMenuButton = (title, target, colour) => {
     return (
@@ -39,7 +53,7 @@ function MainScreen (props) {
 
   return (
     <View style={ [styles.main, {backgroundColor: theme.backgroundColor}] }>
-      <Text style={ [styles.titleText, {color: theme.colors.text}] }>Amy's Symptom Tracker</Text>
+      <Text style={ [styles.titleText, {color: theme.colors.text}] }>{appName + " Symptom Tracker"}</Text>
       <View style={ styles.buttonList }>
         {renderMenuButton("Manage Symptoms", "Symptoms", dark ? "#5C0A20" : "#E7D5E1")}
         {renderMenuButton("Manage Triggers", "Triggers", dark ? "#5C4A0A" : "#FAEEC4")}
@@ -53,8 +67,15 @@ function MainScreen (props) {
 
 export default function HomeScreen (props) {
   let theme = useTheme();
+  const [appName, setAppName] = React.useState("Amy's");
 
-  editTitle = (route, obj) => {
+  const updateName = () => {
+    AsyncManager.getAppName().then((name) => {
+      setAppName(name);
+    });
+  }
+
+  const editTitle = (route, obj) => {
     if (route.params[obj].id) {
       return "Edit " + (route.params[obj].name || "Diary");
     } else {
@@ -67,19 +88,19 @@ export default function HomeScreen (props) {
   return (
     <Stack.Navigator>
       <Stack.Screen name="Home" options={{headerShown: false}}>
-        {(props) => <MainScreen  {...props} theme={theme} />}
+        {(props) => <MainScreen  {...props} appName={appName} updateName={updateName} theme={theme} />}
       </Stack.Screen>
       <Stack.Screen name="Symptoms" component={SymptomsListScreen} />
       <Stack.Screen name="Treatments" component={TreatmentsListScreen} />
       <Stack.Screen name="Triggers" component={TriggersListScreen} />
       <Stack.Screen name="Diary" component={DiaryScreen} />
-      <Stack.Screen name="EditDiary" component={EditDiaryScreen} options={({ route }) => ({ title: this.editTitle(route, "diary") })} />
+      <Stack.Screen name="EditDiary" component={EditDiaryScreen} options={({ route }) => ({ title: editTitle(route, "diary") })} />
       <Stack.Screen name="Settings">
-        {(props) => <SettingsScreen  {...props} setIsDarkMode={setIsDarkMode} />}
+        {(props) => <SettingsScreen  {...props} setIsDarkMode={setIsDarkMode} appName={appName} />}
       </Stack.Screen>
-      <Stack.Screen name="EditSymptom" component={EditSymptomScreen} options={({ route }) => ({ title: this.editTitle(route, "symptom") })} />
-      <Stack.Screen name="EditTreatment" component={EditTreatmentScreen} options={({ route }) => ({ title: this.editTitle(route, "treatment") })} />
-      <Stack.Screen name="EditTrigger" component={EditTriggerScreen} options={({ route }) => ({ title: this.editTitle(route, "trigger") })} />
+      <Stack.Screen name="EditSymptom" component={EditSymptomScreen} options={({ route }) => ({ title: editTitle(route, "symptom") })} />
+      <Stack.Screen name="EditTreatment" component={EditTreatmentScreen} options={({ route }) => ({ title: editTitle(route, "treatment") })} />
+      <Stack.Screen name="EditTrigger" component={EditTriggerScreen} options={({ route }) => ({ title: editTitle(route, "trigger") })} />
     </Stack.Navigator>
   )
 }

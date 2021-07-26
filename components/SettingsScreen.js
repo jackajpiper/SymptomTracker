@@ -2,6 +2,7 @@ import _ from 'lodash';
 import React, {Component} from 'react';
 import {StyleSheet, View, Text, TextInput, Switch} from 'react-native';
 import { useTheme } from '@react-navigation/native';
+import AsyncManager from './AsyncManager';
 
 export default function(props) {
   let theme = useTheme();
@@ -15,7 +16,7 @@ class SettingsScreen extends React.Component {
 
     this.setIsDarkMode = props.setIsDarkMode;
     this.state = {
-      name: "Amy's",
+      name: props.appName || "Amy's",
       darkMode: props.theme.dark
     };
   }
@@ -23,6 +24,9 @@ class SettingsScreen extends React.Component {
   updateField = (field, value) => {
     if (field === "darkMode") {
       this.setIsDarkMode(value);
+    }
+    if (field === "name") {
+      AsyncManager.setAppName(value);
     }
     this.setState({[field]: value});
   }

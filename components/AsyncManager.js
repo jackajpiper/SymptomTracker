@@ -568,6 +568,18 @@ const AsyncManager = {
 
   setDarkMode: async function (bool) {
     return AsyncStorage.setItem('IsDarkMode', bool ? "1" : "");
+  },
+
+  getAppName: async function () {
+    return AsyncStorage.getItem('AppName').then(
+      (value) => {
+        return value;
+      }
+    );
+  },
+
+  setAppName: async function (name) {
+    return AsyncStorage.setItem('AppName', name);
   }
 }
 

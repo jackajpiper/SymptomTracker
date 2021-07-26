@@ -95,14 +95,13 @@ const DiaryData = [
 // TODO
 //  -- make the title on the homepage more stylish
 //  -- implement settings
+//  -- fix issue where a long custom name makes the title skewiff
 //  -- make a onboarding thing for new users
 
 // EDGE CASES
 //  -- symptom/trigger/treatment name being super long
 
 // Settings
-//  -- light mode/dark mode
-//  -- rename the symptom trackers e.g Jane's Symptom Tracker
 //  -- import/export
 
 
