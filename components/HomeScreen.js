@@ -11,6 +11,7 @@ import EditSymptomScreen from './EditSymptomScreen.js';
 import DiaryScreen from './DiaryScreen.js';
 import EditDiaryScreen from './EditDiaryScreen.js';
 import SettingsScreen from './SettingsScreen.js';
+import ImportExportScreen from './ImportExportScreen.js';
 import {LinearGradient} from 'expo-linear-gradient';
 import { useTheme } from '@react-navigation/native';
 import AsyncManager from './AsyncManager';
@@ -101,6 +102,7 @@ export default function HomeScreen (props) {
       <Stack.Screen name="EditSymptom" component={EditSymptomScreen} options={({ route }) => ({ title: editTitle(route, "symptom") })} />
       <Stack.Screen name="EditTreatment" component={EditTreatmentScreen} options={({ route }) => ({ title: editTitle(route, "treatment") })} />
       <Stack.Screen name="EditTrigger" component={EditTriggerScreen} options={({ route }) => ({ title: editTitle(route, "trigger") })} />
+      <Stack.Screen name="ImportExport" component={ImportExportScreen} />
     </Stack.Navigator>
   )
 }

@@ -1,8 +1,9 @@
 import _ from 'lodash';
 import React, {Component} from 'react';
-import {StyleSheet, View, Text, TextInput, Switch} from 'react-native';
+import {StyleSheet, View, Text, TextInput, Switch, TouchableOpacity} from 'react-native';
 import { useTheme } from '@react-navigation/native';
 import AsyncManager from './AsyncManager';
+import {LinearGradient} from 'expo-linear-gradient';
 
 export default function(props) {
   let theme = useTheme();
@@ -14,6 +15,7 @@ class SettingsScreen extends React.Component {
   constructor(props) {
     super(props);
 
+    this.props = props;
     this.setIsDarkMode = props.setIsDarkMode;
     this.state = {
       name: props.appName || "Amy's",
@@ -37,6 +39,8 @@ class SettingsScreen extends React.Component {
       color: this.state.darkMode ? "#ffffff" : "grey",
       fontSize: 18
     }
+    const btnBackground = this.state.darkMode ? "#000000" : "#f2f2f2";
+    const btnColour = this.state.darkMode ? "#0A5C41" : "#C3D8D1";
 
     return (
       <View style={styles.container}>
@@ -68,6 +72,17 @@ class SettingsScreen extends React.Component {
             value={this.state.darkMode}
           />
         </View>
+
+        <LinearGradient 
+          colors={[btnBackground, btnColour]}
+          style = { styles.buttonContainer }
+          start={{ x: 0.25, y: 0.5 }}
+          end={{ x: 1, y: 0.5 }}>
+
+          <TouchableOpacity style={styles.mainButton} onPress={() => this.props.navigation.navigate("ImportExport")}>
+            <Text style={[styles.mainButtonText, {color: this.props.theme.colors.text}]}>Import/export data</Text>
+          </TouchableOpacity>
+        </LinearGradient>
       </View>
     );
   }
@@ -94,5 +109,22 @@ const styles = StyleSheet.create({
   restOfName: {
     fontSize: 20,
     alignSelf: "flex-start"
+  },
+  buttonContainer: {
+    width: '100%',
+    height: 65,
+    backgroundColor: 'cornflowerblue',
+    justifyContent: 'center',
+    borderRadius:10
+  },
+  mainButtonText: {
+    marginLeft: 16,
+    fontSize: 16,
+    textAlign: 'left'
+  },
+  mainButton: {
+    height: "100%",
+    flexDirection: 'row',
+    alignItems: 'center',
   }
 });
