@@ -3,7 +3,12 @@ import React, {useEffect} from 'react';
 import {StyleSheet, View, Text, TouchableOpacity} from 'react-native';
 import {LinearGradient} from 'expo-linear-gradient';
 import { useTheme } from '@react-navigation/native';
+import * as DocumentPicker from 'expo-document-picker';
+import * as FileSystem from 'expo-file-system';
+import * as MediaLibrary from 'expo-media-library';
+import * as Permissions from 'expo-permissions';
 import AsyncManager from './AsyncManager';
+import Toast from 'react-native-simple-toast';
 
 export default function ImportExportScreen (props) {
   let theme = useTheme();
@@ -12,6 +17,31 @@ export default function ImportExportScreen (props) {
   const btnBackground = theme.dark ? "#000000" : "#ffffff";
   const btnColour1 = theme.dark ? "#5C210A" : "#F9D5C7";
   const btnColour2 = theme.dark ? "#5C0A20" : "#E7D5E1";
+
+  const pickFile = async () => {
+    let result = await DocumentPicker.getDocumentAsync({});
+    if (result.type === 'cancel') {
+      return;
+    }
+
+    let data = await FileSystem.readAsStringAsync(result.uri);
+
+    await AsyncManager.processImportData(data);
+    Toast.show("Data imported");
+  }
+
+  const exportData = async () => {
+    const { status } = await Permissions.askAsync(Permissions.CAMERA_ROLL);
+    if (status === "granted") {
+      var data = await AsyncManager.getExportData();
+
+      let fileUri = FileSystem.documentDirectory + "Symptom-Tracker-Data.txt";
+      await FileSystem.writeAsStringAsync(fileUri, data, { encoding: FileSystem.EncodingType.UTF8 });
+      const asset = await MediaLibrary.createAssetAsync(fileUri)
+      await MediaLibrary.createAlbumAsync("Download", asset, false);
+      Toast.show("Data downloaded");
+    }
+}
 
   return (
     <View style={ [styles.main, {backgroundColor: theme.backgroundColor}] }>
@@ -22,7 +52,7 @@ export default function ImportExportScreen (props) {
         start={{ x: 0.25, y: 0.5 }}
         end={{ x: 1, y: 0.5 }}>
 
-        <TouchableOpacity style={styles.mainButton}>
+        <TouchableOpacity style={styles.mainButton} onPress={pickFile}>
           <Text style={[styles.mainButtonText, {color: textColour}]}>Import data</Text>
         </TouchableOpacity>
       </LinearGradient>
@@ -33,7 +63,7 @@ export default function ImportExportScreen (props) {
         start={{ x: 0.25, y: 0.5 }}
         end={{ x: 1, y: 0.5 }}>
 
-        <TouchableOpacity style={styles.mainButton}>
+        <TouchableOpacity style={styles.mainButton} onPress={exportData}>
           <Text style={[styles.mainButtonText, {color: textColour}]}>Export data</Text>
         </TouchableOpacity>
       </LinearGradient>

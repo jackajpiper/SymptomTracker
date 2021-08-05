@@ -580,7 +580,42 @@ const AsyncManager = {
 
   setAppName: async function (name) {
     return AsyncStorage.setItem('AppName', name);
+  },
+
+  getExportData: async function () {
+    let symptoms = await AsyncManager.getSymptoms();
+    let symptomInstances = await AsyncManager.getSymptomInstances();
+    let triggers = await AsyncManager.getTriggers();
+    let triggerSymptoms = await AsyncManager.getTriggerInstances();
+    let treatments = await AsyncManager.getTreatments();
+    let treatmentIntances = await AsyncManager.getTreatmentInstances();
+    let diaries = await AsyncManager.getDiaries();
+
+    let arr = [
+      symptoms,
+      symptomInstances,
+      triggers,
+      triggerSymptoms,
+      treatments,
+      treatmentIntances,
+      diaries
+    ];
+
+    return JSON.stringify(arr);
+  },
+
+  processImportData: async function (data) {
+    let arr = JSON.parse(data);
+
+    await AsyncManager.setSymptoms(arr[0]);
+    await AsyncManager.setSymptomInstances(arr[1]);
+    await AsyncManager.setTriggers(arr[2]);
+    await AsyncManager.setTriggerInstances(arr[3]);
+    await AsyncManager.setTreatments(arr[4]);
+    await AsyncManager.setTreatmentInstances(arr[5]);
+    await AsyncManager.setDiaries(arr[6]);
   }
+
 }
 
 export default AsyncManager;
