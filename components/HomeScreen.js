@@ -118,7 +118,8 @@ const styles = StyleSheet.create({
     fontSize: 24,
     fontWeight: 'bold',
     marginTop: 60,
-    marginBottom: 20
+    marginBottom: 20,
+    textAlign: 'center'
   },
   buttonList: {
     flex: 1,

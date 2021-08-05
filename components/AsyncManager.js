@@ -573,7 +573,7 @@ const AsyncManager = {
   getAppName: async function () {
     return AsyncStorage.getItem('AppName').then(
       (value) => {
-        return value;
+        return value || "Amy's";
       }
     );
   },
