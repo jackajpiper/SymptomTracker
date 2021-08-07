@@ -14,6 +14,7 @@ import SettingsScreen from './SettingsScreen.js';
 import ImportExportScreen from './ImportExportScreen.js';
 import {LinearGradient} from 'expo-linear-gradient';
 import { useTheme } from '@react-navigation/native';
+import { useFonts } from 'expo-font';
 import AsyncManager from './AsyncManager';
 
 const Stack = createStackNavigator();
@@ -23,7 +24,10 @@ function MainScreen (props) {
   const dark = theme.dark;
   const appName = props.appName;
   const updateName = props.updateName;
-  
+  const [loaded] = useFonts({
+    'Comfortaa': require('../assets/Comfortaa-Bold.ttf'),
+  });
+
   useEffect(() => {
     updateName();
     
@@ -54,7 +58,7 @@ function MainScreen (props) {
 
   return (
     <View style={ [styles.main, {backgroundColor: theme.backgroundColor}] }>
-      <Text style={ [styles.titleText, {color: theme.colors.text}] }>{appName + " Symptom Tracker"}</Text>
+      <Text style={ [styles.titleText, {color: theme.colors.text, fontFamily: loaded ? 'Comfortaa' : 'normal'}] }>{appName + " Symptom Tracker"}</Text>
       <View style={ styles.buttonList }>
         {renderMenuButton("Manage Symptoms", "Symptoms", dark ? "#5C0A20" : "#E7D5E1")}
         {renderMenuButton("Manage Triggers", "Triggers", dark ? "#5C4A0A" : "#FAEEC4")}
@@ -116,8 +120,7 @@ const styles = StyleSheet.create({
   },
   titleText: {
     fontSize: 24,
-    fontWeight: 'bold',
-    marginTop: 60,
+    marginTop: 50,
     marginBottom: 20,
     textAlign: 'center'
   },
