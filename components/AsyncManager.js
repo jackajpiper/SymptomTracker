@@ -614,7 +614,19 @@ const AsyncManager = {
     await AsyncManager.setTreatments(arr[4]);
     await AsyncManager.setTreatmentInstances(arr[5]);
     await AsyncManager.setDiaries(arr[6]);
-  }
+  },
+
+  hasOnboarded: async function () {
+    return AsyncStorage.getItem('HasOnboarded').then(
+      (value) => {
+        return JSON.parse(value);
+      }
+    );
+  },
+
+  setOnboarded: async function (hasOnboarded) {
+    return AsyncStorage.setItem('HasOnboarded', JSON.stringify(hasOnboarded));
+  },
 
 }
 
