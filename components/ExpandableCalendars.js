@@ -264,7 +264,7 @@ class ExpandableCalendarScreen extends Component {
               </Text>
               {item.trackSlider &&
               <Text style={[styles.itemSeverityText, {color: lighterTextColour}]}>
-                {item.severity + '%'}
+                {(item.severity || 50) + '%'}
               </Text>}
             </View>
           </TouchableOpacity>
@@ -287,7 +287,7 @@ class ExpandableCalendarScreen extends Component {
               </Text>
               {item.trackSlider &&
               <Text style={[styles.itemSeverityText, {color: lighterTextColour}]}>
-                {item.severity + '%'}
+                {(item.severity || 50) + '%'}
               </Text>}
             </View>
           </TouchableOpacity>
@@ -310,7 +310,7 @@ class ExpandableCalendarScreen extends Component {
               </Text>
               {item.trackSlider &&
               <Text style={[styles.itemSeverityText, {color: lighterTextColour}]}>
-                {item.severity + '%'}
+                {(item.severity || 50) + '%'}
               </Text>}
             </View>
           </TouchableOpacity>

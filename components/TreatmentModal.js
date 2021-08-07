@@ -27,6 +27,7 @@ class TreatmentModal extends React.Component {
       date: data.date ? new Date(data.date) : new Date(),
       startTime: data.startTime ? moment(data.startTime, "HH:mm").toDate() : new Date(),
       endTime: data.endTime ? moment(data.endTime, "HH:mm").toDate() : new Date(),
+      severity: data.severity || 50,
       notes: data.notes || ""
     };
 
@@ -54,6 +55,7 @@ class TreatmentModal extends React.Component {
       date: origin.date,
       startTime: origin.startTime,
       endTime: origin.endTime,
+      severity: origin.severity,
       notes: origin.notes,
       origin: JSON.parse(JSON.stringify(origin)),
       showDate: false,
