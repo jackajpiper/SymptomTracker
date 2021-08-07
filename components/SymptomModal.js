@@ -375,10 +375,12 @@ const formStyles = StyleSheet.create({
   },
   closeBtn: {
     position: 'absolute',
-    top: 20,
-    right: 10,
-    width: 40,
-    height: 40,
+    display: "flex",
+    justifyContent: "center",
+    top: 0,
+    right: 0,
+    width: 60,
+    height: 60,
     alignItems: "center"
   },
   dropdown: {
