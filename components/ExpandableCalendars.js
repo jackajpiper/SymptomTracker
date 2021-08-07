@@ -39,6 +39,7 @@ function processInstances(symptomInstances, symptoms, treatmentInstances, treatm
     instance.name = symptom.name;
     instance.colour = symptom.colour;
     instance.type = "symptom";
+    instance.trackSlider = symptom.trackSlider;
     let day = instance.date;
     if (!dateDict[day]) {
       dateDict[day] = [];
@@ -53,6 +54,7 @@ function processInstances(symptomInstances, symptoms, treatmentInstances, treatm
     instance.name = treatment.name;
     instance.colour = treatment.colour;
     instance.type = "treatment";
+    instance.trackSlider = treatment.trackSlider;
     let day = instance.date;
     if (!dateDict[day]) {
       dateDict[day] = [];
@@ -67,6 +69,7 @@ function processInstances(symptomInstances, symptoms, treatmentInstances, treatm
     instance.name = trigger.name;
     instance.colour = trigger.colour;
     instance.type = "trigger";
+    instance.trackSlider = trigger.trackSlider;
     let day = instance.date;
     if (!dateDict[day]) {
       dateDict[day] = [];
@@ -259,9 +262,10 @@ class ExpandableCalendarScreen extends Component {
               <Text style={{color: textColour, marginTop: 10}}>
                 {item.startTime + ' - ' + item.endTime}
               </Text>
+              {item.trackSlider &&
               <Text style={[styles.itemSeverityText, {color: lighterTextColour}]}>
                 {item.severity + '%'}
-              </Text>
+              </Text>}
             </View>
           </TouchableOpacity>
         </LinearGradient>
@@ -281,6 +285,10 @@ class ExpandableCalendarScreen extends Component {
               <Text style={{color: textColour, marginTop: 10}}>
                 {item.startTime + ' - ' + item.endTime}
               </Text>
+              {item.trackSlider &&
+              <Text style={[styles.itemSeverityText, {color: lighterTextColour}]}>
+                {item.severity + '%'}
+              </Text>}
             </View>
           </TouchableOpacity>
         </LinearGradient>
@@ -300,6 +308,10 @@ class ExpandableCalendarScreen extends Component {
               <Text style={{color: textColour, marginTop: 10}}>
                 {item.startTime + ' - ' + item.endTime}
               </Text>
+              {item.trackSlider &&
+              <Text style={[styles.itemSeverityText, {color: lighterTextColour}]}>
+                {item.severity + '%'}
+              </Text>}
             </View>
           </TouchableOpacity>
         </LinearGradient>
