@@ -1,8 +1,9 @@
 import React, {Component} from 'react';
-import { StyleSheet, View, ActivityIndicator } from "react-native";
+import { StyleSheet, View, ActivityIndicator, StatusBar } from "react-native";
 import AsyncManager from './AsyncManager';
 import ChartsComponent from './ChartsComponent';
 import AnalysisTabs from './AnalysisTabs';
+import { SafeAreaView } from 'react-native-safe-area-context';
 
 export default class AnalysisScreen extends React.Component {
   constructor(props) {
@@ -149,8 +150,12 @@ export default class AnalysisScreen extends React.Component {
   }
 
   render() {
+    let bgColour = this.props.theme.dark ? "#000000" : "#ffffff";
     return (
-      <View style={styles.container}>
+      <SafeAreaView style={[styles.container, { backgroundColor: bgColour }]}>
+        <StatusBar
+          barStyle={this.props.theme.dark ? "light-content" : "dark-content"}
+          backgroundColor={bgColour} />
         <View style={styles.top}>
           {this.renderGraph(this.state.GraphType, this.state.GraphPeriodType, this.state.SelectedData, this.state.PeriodStart, this.state.PeriodEnd)}
         </View>
@@ -163,7 +168,7 @@ export default class AnalysisScreen extends React.Component {
             triggers={this.state.Triggers}
             treatments={this.state.Treatments}/>
         </View>
-      </View>
+      </SafeAreaView>
     );
   }
 }
@@ -173,13 +178,11 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: "flex-start",
     alignItems: "center",
-    backgroundColor: "white"
   },
   top: {
     flex: 12,
     width: "100%",
     flexDirection: "row",
-    marginTop: 25,
     borderBottomWidth: 1
   },
   graph: {

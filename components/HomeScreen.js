@@ -1,6 +1,6 @@
 import _ from 'lodash';
 import React, {useEffect} from 'react';
-import {StyleSheet, View, Text, TouchableOpacity} from 'react-native';
+import {StyleSheet, View, Text, TouchableOpacity, StatusBar} from 'react-native';
 import { createStackNavigator } from '@react-navigation/stack';
 import SymptomsListScreen from './SymptomsListScreen.js';
 import TreatmentsListScreen from './TreatmentsListScreen.js';
@@ -16,6 +16,7 @@ import {LinearGradient} from 'expo-linear-gradient';
 import { useTheme } from '@react-navigation/native';
 import { useFonts } from 'expo-font';
 import AsyncManager from './AsyncManager';
+import { SafeAreaView } from 'react-native-safe-area-context';
 
 const Stack = createStackNavigator();
 
@@ -57,7 +58,10 @@ function MainScreen (props) {
   }
 
   return (
-    <View style={ [styles.main, {backgroundColor: theme.backgroundColor}] }>
+    <SafeAreaView style={ [styles.main, {backgroundColor: theme.backgroundColor}] }>
+      <StatusBar
+        barStyle={theme.dark ? "light-content" : "dark-content"}
+        backgroundColor={theme.backgroundColor} />
       <Text style={ [styles.titleText, {color: theme.colors.text, fontFamily: loaded ? 'Comfortaa' : 'normal'}] }>{appName + " Symptom Tracker"}</Text>
       <View style={ styles.buttonList }>
         {renderMenuButton("Manage Symptoms", "Symptoms", dark ? "#5C0A20" : "#E7D5E1")}
@@ -66,7 +70,7 @@ function MainScreen (props) {
         {renderMenuButton("Diary", "Diary", dark ? "#5C210A" : "#F9D5C7")}
         {renderMenuButton("Settings", "Settings", dark ? "#5C0A41" : "#F9E2E8")}
       </View>
-    </View>
+    </SafeAreaView>
   );
 }
 
@@ -120,7 +124,7 @@ const styles = StyleSheet.create({
   },
   titleText: {
     fontSize: 24,
-    marginTop: 50,
+    marginTop: 20,
     marginBottom: 20,
     textAlign: 'center'
   },

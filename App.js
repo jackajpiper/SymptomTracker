@@ -11,6 +11,7 @@ import ExpandableCalendar from './components/ExpandableCalendars.js';
 import AnalysisScreen from './components/AnalysisScreen.js';
 import AsyncManager from './components/AsyncManager';
 import Onboarding from 'react-native-onboarding-swiper';
+import { SafeAreaProvider } from 'react-native-safe-area-context';
 
 console.log("Reloaded.", moment());
 
@@ -74,40 +75,54 @@ export default function App() {
     return <Simple />
   } else {
     return (
-      <NavigationContainer theme={theme}>
-        <Tab.Navigator
-          screenOptions={({ route }) => ({
-            tabBarIcon: ({ focused, color, size }) => {
-              let iconName;
-  
-              if (route.name === 'Home') {
-                iconName = focused ? 'home' : 'home-outline';
-              } else if (route.name === 'Calendar') {
-                iconName = focused ? 'calendar' : 'calendar-outline';
-              } else if (route.name === 'Analyse') {
-                iconName = focused ? 'analytics' : 'analytics-outline';
+      <SafeAreaProvider>
+        <NavigationContainer theme={theme}>
+          <Tab.Navigator
+            screenOptions={({ route }) => ({
+              tabBarIcon: ({ focused, color, size }) => {
+                let iconName;
+    
+                if (route.name === 'Home') {
+                  iconName = focused ? 'home' : 'home-outline';
+                } else if (route.name === 'Calendar') {
+                  iconName = focused ? 'calendar' : 'calendar-outline';
+                } else if (route.name === 'Analyse') {
+                  iconName = focused ? 'analytics' : 'analytics-outline';
+                }
+                
+                return <Ionicons name={iconName} size={size} color={color} />;
+              },
+              options: {
+                statusBar: {
+                  backgroundColor: 'blue',
+                  style: 'dark'
+                }
               }
-              
-              return <Ionicons name={iconName} size={size} color={color} />;
-            },
-          })}
-          tabBarOptions={{
-            activeTintColor: isDarkMode ? '#3d798f' : "#00ABEB",
-            inactiveTintColor: 'gray',
-            style: {
-              paddingBottom: 3,
-              paddingTop: 3
-            }
-          }}>
-          <Tab.Screen name="Calendar" component={ExpandableCalendar}/>
-          <Tab.Screen name="Home">
-            {(props) => <HomeScreen  {...props} setIsDarkMode={setMode} />}
-          </Tab.Screen>
-          <Tab.Screen name="Analyse">
-            {(props) => <AnalysisScreen  {...props} theme={theme} />}
-          </Tab.Screen>
-        </Tab.Navigator>
-      </NavigationContainer>
+            })}
+            tabBarOptions={{
+              activeTintColor: isDarkMode ? '#3d798f' : "#00ABEB",
+              inactiveTintColor: 'gray',
+              style: {
+                paddingBottom: 3,
+                paddingTop: 3
+              },
+              options: {
+                statusBar: {
+                  backgroundColor: 'white',
+                  style: 'dark'
+                }
+              }
+            }}>
+            <Tab.Screen name="Calendar" component={ExpandableCalendar}/>
+            <Tab.Screen name="Home">
+              {(props) => <HomeScreen  {...props} setIsDarkMode={setMode} />}
+            </Tab.Screen>
+            <Tab.Screen name="Analyse">
+              {(props) => <AnalysisScreen  {...props} theme={theme} />}
+            </Tab.Screen>
+          </Tab.Navigator>
+        </NavigationContainer>
+      </SafeAreaProvider>
     );
   }
 }

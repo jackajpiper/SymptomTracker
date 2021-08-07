@@ -1,6 +1,6 @@
 import _ from 'lodash';
 import React, {Component} from 'react';
-import {Modal, ActivityIndicator, Alert, StyleSheet, View, Text, TouchableOpacity, Button} from 'react-native';
+import {Modal, ActivityIndicator, StatusBar, StyleSheet, View, Text, TouchableOpacity, Button} from 'react-native';
 import {ExpandableCalendar, AgendaList, CalendarProvider, WeekCalendar} from 'react-native-calendars';
 import moment from "moment";
 import {LinearGradient} from 'expo-linear-gradient';
@@ -12,6 +12,7 @@ import TreatmentModal from './TreatmentModal';
 import TriggerModal from './TriggerModal';
 import { Ionicons } from '@expo/vector-icons';
 import { useTheme } from '@react-navigation/native';
+import { SafeAreaProvider, SafeAreaView } from 'react-native-safe-area-context';
 
 export default function(props) {
   let theme = useTheme();
@@ -406,13 +407,17 @@ class ExpandableCalendarScreen extends Component {
           showTodayButton
           disabledOpacity={0.6}
         >
-          <ExpandableCalendar
-            theme={this.props.theme}
-            disableAllTouchEventsForDisabledDays
-            firstDay={1}
-            markedDates={this.getMarkedDates()}
-            style = {styles.expandableCalendar}
-          />
+          <SafeAreaView>
+            <StatusBar
+              barStyle={this.props.theme.dark ? "light-content" : "dark-content"}
+              backgroundColor={this.props.theme.dark ? "#000000" : "#ffffff"} />
+            <ExpandableCalendar
+              theme={this.props.theme}
+              disableAllTouchEventsForDisabledDays
+              firstDay={1}
+              markedDates={this.getMarkedDates()}
+            />
+          </SafeAreaView>
           <AgendaList
             key={this.props.theme.dark}
             theme={this.props.theme}
@@ -451,9 +456,6 @@ class ExpandableCalendarScreen extends Component {
 }
 
 const styles = StyleSheet.create({
-  expandableCalendar: {
-    paddingTop: 15
-  },
   item: {
     padding: 20,
     borderBottomWidth: 0.5,
