@@ -8,9 +8,6 @@ import Toast from 'react-native-simple-toast';
 import DateTimePicker from '@react-native-community/datetimepicker';
 import ColourHelper from './ColourHelper';
 
-
-const today = moment().format("YYYY-MM-DD");
-
 const Tab = createMaterialTopTabNavigator();
 
 export default class AnalysisTabs extends React.Component {
@@ -157,7 +154,7 @@ export default class AnalysisTabs extends React.Component {
           unfillColor={this.props.theme.dark ? "#444444" : "lightgrey"}
           text={symptom.name}
           iconStyle={{ borderColor: "#444444" }}
-          textStyle={{ marginLeft: -10, color: this.props.theme.colors.text }}
+          textStyle={{ marginLeft: -10, color: this.props.theme.colors.text, paddingRight: 20 }}
           onPress={(checked) => {this.checkboxClicked(checked, symptom.id, type, symptom.name)}}
         />
       </View>
