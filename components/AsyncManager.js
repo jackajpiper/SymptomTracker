@@ -586,7 +586,7 @@ const AsyncManager = {
     let symptoms = await AsyncManager.getSymptoms();
     let symptomInstances = await AsyncManager.getSymptomInstances();
     let triggers = await AsyncManager.getTriggers();
-    let triggerSymptoms = await AsyncManager.getTriggerInstances();
+    let triggerInstances = await AsyncManager.getTriggerInstances();
     let treatments = await AsyncManager.getTreatments();
     let treatmentIntances = await AsyncManager.getTreatmentInstances();
     let diaries = await AsyncManager.getDiaries();
@@ -595,7 +595,7 @@ const AsyncManager = {
       symptoms,
       symptomInstances,
       triggers,
-      triggerSymptoms,
+      triggerInstances,
       treatments,
       treatmentIntances,
       diaries
@@ -614,6 +614,27 @@ const AsyncManager = {
     await AsyncManager.setTreatments(arr[4]);
     await AsyncManager.setTreatmentInstances(arr[5]);
     await AsyncManager.setDiaries(arr[6]);
+  },
+
+  checkHasData: async function () {
+    let symptoms = await AsyncManager.getSymptoms();
+    if (symptoms.length) {
+      return true;
+    }
+    let triggers = await AsyncManager.getTriggers();
+    if (triggers.length) {
+      return true;
+    }
+    let treatments = await AsyncManager.getTreatments();
+    if (treatments.length) {
+      return true;
+    }
+    let diaries = await AsyncManager.getDiaries();
+    if (diaries.length) {
+      return true;
+    }
+
+    return false;
   },
 
   hasOnboarded: async function () {

@@ -1,6 +1,6 @@
 import _ from 'lodash';
 import React, {useEffect} from 'react';
-import {StyleSheet, View, Text, TouchableOpacity} from 'react-native';
+import {StyleSheet, View, Text, TouchableOpacity, Alert} from 'react-native';
 import {LinearGradient} from 'expo-linear-gradient';
 import { useTheme } from '@react-navigation/native';
 import * as DocumentPicker from 'expo-document-picker';
@@ -24,6 +24,28 @@ export default function ImportExportScreen (props) {
       return;
     }
 
+    let hasData = await AsyncManager.checkHasData();
+    if (hasData) {
+      Alert.alert(
+        'Overwrite data?',
+        'You have data that will be overwritten.',
+        [
+          { text: "Cancel", style: 'cancel', onPress: () => {} },
+          {
+            text: 'Okay',
+            style: 'destructive',
+            onPress: () => {
+              importData(result);
+            },
+          },
+        ]
+      );
+    } else {
+      importData(result);
+    }
+  }
+
+  const importData = async (result) => {
     let data = await FileSystem.readAsStringAsync(result.uri);
 
     await AsyncManager.processImportData(data);
