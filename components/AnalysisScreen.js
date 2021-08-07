@@ -176,7 +176,7 @@ const styles = StyleSheet.create({
     backgroundColor: "white"
   },
   top: {
-    flex: 3,
+    flex: 12,
     width: "100%",
     flexDirection: "row",
     marginTop: 25,
@@ -196,7 +196,7 @@ const styles = StyleSheet.create({
     marginTop: 12
   },
   bottom: {
-    flex: 4,
+    flex: 17,
     width: "100%"
   },
   spinner: {
