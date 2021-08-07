@@ -95,6 +95,7 @@ class TriggerModal extends React.Component {
       || !moment(state.date).isSame(moment(origin.date))
       || !moment(state.startTime).isSame(moment(origin.startTime))
       || !moment(state.endTime).isSame(moment(origin.endTime))
+      || state.severity !== origin.severity
       || state.notes !== origin.notes) {
         return true;
     }
@@ -115,6 +116,7 @@ class TriggerModal extends React.Component {
       date: moment(this.state.date).format("YYYY-MM-DD"),
       startTime: moment(this.state.startTime).format("HH:mm"),
       endTime: moment(this.state.endTime).format("HH:mm"),
+      severity: this.state.severity,
       notes: this.state.notes
     }
   }
