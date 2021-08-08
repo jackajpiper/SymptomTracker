@@ -82,7 +82,7 @@ function processInstances(symptomInstances, symptoms, treatmentInstances, treatm
     return b.startTime.localeCompare(a.startTime);
   }
   
-  var todayObj = {startTime: "00:00"};
+  var todayObj = {startTime: "23:59"};
   if (!dateDict[today]) {
     dateDict[today] = [todayObj];
   } else {
