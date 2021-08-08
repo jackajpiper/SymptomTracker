@@ -59,13 +59,15 @@ export default function ImportExportScreen (props) {
   }
 
   const exportData = async () => {
-    var data = await AsyncManager.getExportData();
-
-    let fileUri = FileSystem.documentDirectory + "Symptom-Tracker-Data.txt";
-    await FileSystem.writeAsStringAsync(fileUri, data, { encoding: FileSystem.EncodingType.UTF8 });
-    const asset = await MediaLibrary.createAssetAsync(fileUri)
-    await MediaLibrary.createAlbumAsync("Download", asset, false);
-    Toast.show("Data downloaded");
+    const { status } = await Permissions.askAsync(Permissions.CAMERA_ROLL);
+    if (status === "granted") {
+      var data = await AsyncManager.getExportData();
+      let fileUri = FileSystem.documentDirectory + "Symptom-Tracker-Data.txt";
+      await FileSystem.writeAsStringAsync(fileUri, data, { encoding: FileSystem.EncodingType.UTF8 });
+      const asset = await MediaLibrary.createAssetAsync(fileUri)
+      await MediaLibrary.createAlbumAsync("Download", asset, false);
+      Toast.show("Data downloaded");
+    }
 }
 
   return (
