@@ -1,5 +1,6 @@
 // You can import Ionicons from @expo/vector-icons if you use Expo or
 // react-native-vector-icons/Ionicons otherwise.
+import 'react-native-gesture-handler';
 import React, { useEffect } from 'react';
 import { StyleSheet, View, Image } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
