@@ -19,7 +19,7 @@ export default function ImportExportScreen (props) {
   const btnColour2 = theme.dark ? "#5C0A20" : "#E7D5E1";
 
   const pickFile = async () => {
-    let result = await DocumentPicker.getDocumentAsync({});
+    let result = await DocumentPicker.getDocumentAsync({copyToCacheDirectory: false});
     if (result.type === 'cancel') {
       return;
     }
@@ -46,23 +46,26 @@ export default function ImportExportScreen (props) {
   }
 
   const importData = async (result) => {
-    let data = await FileSystem.readAsStringAsync(result.uri);
+    const uri = FileSystem.documentDirectory+result.name;
+    await FileSystem.copyAsync({
+      from: result.uri,
+      to: uri
+    });
+
+    let data = await FileSystem.readAsStringAsync(uri);
 
     await AsyncManager.processImportData(data);
     Toast.show("Data imported");
   }
 
   const exportData = async () => {
-    const { status } = await Permissions.askAsync(Permissions.CAMERA_ROLL);
-    if (status === "granted") {
-      var data = await AsyncManager.getExportData();
+    var data = await AsyncManager.getExportData();
 
-      let fileUri = FileSystem.documentDirectory + "Symptom-Tracker-Data.txt";
-      await FileSystem.writeAsStringAsync(fileUri, data, { encoding: FileSystem.EncodingType.UTF8 });
-      const asset = await MediaLibrary.createAssetAsync(fileUri)
-      await MediaLibrary.createAlbumAsync("Download", asset, false);
-      Toast.show("Data downloaded");
-    }
+    let fileUri = FileSystem.documentDirectory + "Symptom-Tracker-Data.txt";
+    await FileSystem.writeAsStringAsync(fileUri, data, { encoding: FileSystem.EncodingType.UTF8 });
+    const asset = await MediaLibrary.createAssetAsync(fileUri)
+    await MediaLibrary.createAlbumAsync("Download", asset, false);
+    Toast.show("Data downloaded");
 }
 
   return (
