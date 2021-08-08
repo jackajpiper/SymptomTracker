@@ -4,7 +4,7 @@
     "slug": "amys-symptom-tracker",
     "version": "1.0.0",
     "orientation": "portrait",
-    "icon": "./assets/icon1024.png",
+    "icon": "./assets/icon-rounded.png",
     "splash": {
       "image": "./assets/icon1024.png",
       "resizeMode": "contain",
@@ -24,7 +24,7 @@
       "versionCode": 1
     },
     "web": {
-      "favicon": "./assets/icon1024.png"
+      "favicon": "./assets/icon-rounded.png"
     }
   }
 }
