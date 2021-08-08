@@ -233,9 +233,11 @@ class ExpandableCalendarScreen extends Component {
 
   renderToday() {
     return (
-      <View style={[styles.emptyItem, { backgroundColor: this.props.theme.dark ? "#333333" : "#f5f5f5" }]}>
+      <TouchableOpacity
+        style={[styles.emptyItem, { backgroundColor: this.props.theme.dark ? "#333333" : "#f5f5f5" }]}
+        onPress={() => {this.floatingAction.animateButton()}}>
         <Text style={styles.emptyItemText}>How are you feeling today?</Text>
-      </View>
+      </TouchableOpacity>
     );
   }
 
@@ -427,6 +429,7 @@ class ExpandableCalendarScreen extends Component {
             ref={this.agendaList}
           />
           <FloatingAction
+            ref={(ref) => { this.floatingAction = ref; }}
             actions={actions}
             color={actionColour}
             onPressItem={name => { this.floatingActions(name)}}
