@@ -121,7 +121,7 @@ export default class AnalysisScreen extends React.Component {
     if (!this.state.Symptoms.length) {
       return (
         <View style={[styles.spinner, {backgroundColor: bgColour}]}>
-          <ActivityIndicator size="large" color="cornflowerblue" />
+          <ActivityIndicator animating={this.state.isLoading} size="large" color="cornflowerblue" />
         </View>
       );
     } else {

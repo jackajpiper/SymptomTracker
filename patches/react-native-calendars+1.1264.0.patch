@@ -1,0 +1,27 @@
+diff --git a/node_modules/react-native-calendars/src/expandableCalendar/agendaList.js b/node_modules/react-native-calendars/src/expandableCalendar/agendaList.js
+index e80de76..05475a1 100644
+--- a/node_modules/react-native-calendars/src/expandableCalendar/agendaList.js
++++ b/node_modules/react-native-calendars/src/expandableCalendar/agendaList.js
+@@ -201,7 +201,8 @@ class AgendaList extends Component {
+         showsVerticalScrollIndicator={false}
+         onViewableItemsChanged={this.onViewableItemsChanged}
+         viewabilityConfig={this.viewabilityConfig}
+-        renderSectionHeader={this.renderSectionHeader}
++        renderSectionFooter={this.renderSectionHeader}
++        inverted
+         onScroll={this.onScroll}
+         onMomentumScrollBegin={this.onMomentumScrollBegin}
+         onMomentumScrollEnd={this.onMomentumScrollEnd}
+diff --git a/node_modules/react-native-calendars/src/expandableCalendar/style.js b/node_modules/react-native-calendars/src/expandableCalendar/style.js
+index 2e13abf..5944e6d 100644
+--- a/node_modules/react-native-calendars/src/expandableCalendar/style.js
++++ b/node_modules/react-native-calendars/src/expandableCalendar/style.js
+@@ -146,7 +146,7 @@ export default function styleConstructor(theme = {}) {
+       flexDirection: appStyle.todayButtonPosition === 'right' ? 'row-reverse' : 'row',
+       justifyContent: 'center',
+       alignItems: 'center',
+-      backgroundColor: 'white',
++      backgroundColor: theme.dark ? 'black' : 'white',
+       ...Platform.select({
+         ios: {
+           shadowColor: '#79838A',

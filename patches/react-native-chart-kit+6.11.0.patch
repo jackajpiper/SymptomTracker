@@ -1,0 +1,37 @@
+diff --git a/node_modules/react-native-chart-kit/dist/StackedBarChart.js b/node_modules/react-native-chart-kit/dist/StackedBarChart.js
+index 80bbfb0..31ee32f 100644
+--- a/node_modules/react-native-chart-kit/dist/StackedBarChart.js
++++ b/node_modules/react-native-chart-kit/dist/StackedBarChart.js
+@@ -85,7 +85,7 @@ var StackedBarChart = /** @class */ (function (_super) {
+     }
+     StackedBarChart.prototype.render = function () {
+         var paddingTop = 15;
+-        var paddingRight = 50;
++        var paddingRight = 35;
+         var barWidth = 32 * this.getBarPercentage();
+         var _a = this.props, width = _a.width, height = _a.height, _b = _a.style, style = _b === void 0 ? {} : _b, data = _a.data, _c = _a.withHorizontalLabels, withHorizontalLabels = _c === void 0 ? true : _c, _d = _a.withVerticalLabels, withVerticalLabels = _d === void 0 ? true : _d, _e = _a.segments, segments = _e === void 0 ? 4 : _e, decimalPlaces = _a.decimalPlaces, _f = _a.percentile, percentile = _f === void 0 ? false : _f, _g = _a.verticalLabelsHeightPercentage, verticalLabelsHeightPercentage = _g === void 0 ? DEFAULT_X_LABELS_HEIGHT_PERCENTAGE : _g, _h = _a.formatYLabel, formatYLabel = _h === void 0 ? function (yLabel) {
+             return yLabel;
+@@ -121,7 +121,7 @@ var StackedBarChart = /** @class */ (function (_super) {
+           </G>
+           <G>
+             {withHorizontalLabels
+-            ? this.renderHorizontalLabels(__assign(__assign({}, config), { count: segments, data: [0, border], paddingTop: paddingTop,
++            ? this.renderHorizontalLabels(__assign(__assign({}, config), { count: segments, data: [0, border], paddingTop: paddingTop+4,
+                 paddingRight: paddingRight,
+                 decimalPlaces: decimalPlaces,
+                 verticalLabelsHeightPercentage: verticalLabelsHeightPercentage,
+@@ -130,12 +130,12 @@ var StackedBarChart = /** @class */ (function (_super) {
+           </G>
+           <G>
+             {withVerticalLabels
+-            ? this.renderVerticalLabels(__assign(__assign({}, config), { labels: data.labels, paddingRight: paddingRight + 28, stackedBar: stackedBar,
++            ? this.renderVerticalLabels(__assign(__assign({}, config), { labels: data.labels, paddingRight: paddingRight, stackedBar: stackedBar,
+                 paddingTop: paddingTop, horizontalOffset: barWidth, verticalLabelsHeightPercentage: verticalLabelsHeightPercentage }))
+             : null}
+           </G>
+           <G>
+-            {this.renderBars(__assign(__assign({}, config), { data: data.data, border: border, colors: this.props.data.barColors, paddingTop: paddingTop, paddingRight: paddingRight + 20, stackedBar: stackedBar,
++            {this.renderBars(__assign(__assign({}, config), { data: data.data, border: border, colors: this.props.data.barColors, paddingTop: paddingTop, paddingRight: paddingRight, stackedBar: stackedBar,
+             verticalLabelsHeightPercentage: verticalLabelsHeightPercentage }))}
+           </G>
+           {showLegend &&
