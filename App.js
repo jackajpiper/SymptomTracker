@@ -34,26 +34,48 @@ export default function App() {
 
   const Simple = () => (
     <Onboarding
+      containerStyles={{}}
+      imageContainerStyles={{position: "absolute", alignSelf: "center", top: 10}}
+      bottomBarHeight={50}
       onDone={() => completeOnboarding()}
+      onSkip={() => completeOnboarding()}
       pages={[
         {
-          backgroundColor: '#fff',
-          image: <Image source={require('./assets/favicon.png')} />,
-          title: 'Onboarding',
-          subtitle: 'Done with React Native Onboarding Swiper',
+          backgroundColor: '#ffffff',
+          image: <Image source={require('./assets/1-homepage-n.png')} />,
+          title: '',
+          subtitle: '',
         },
         {
-          backgroundColor: '#fe6e58',
-          image: <Image source={require('./assets/icon.png')} />,
-          title: 'The Title',
-          subtitle: 'This is the subtitle that sumplements the title.',
+          backgroundColor: '#ffffff',
+          image: <Image source={require('./assets/2-symptoms-n.png')} />,
+          title: '',
+          subtitle: '',
         },
         {
-          backgroundColor: '#999',
-          image: <Image source={require('./assets/splash.png')} />,
-          title: 'Triangle',
-          subtitle: "Beautiful, isn't it?",
+          backgroundColor: '#ffffff',
+          image: <Image source={require('./assets/3-calendar-n.png')} />,
+          title: '',
+          subtitle: "",
         },
+        {
+          backgroundColor: '#ffffff',
+          image: <Image source={require('./assets/4-graph-n.png')} />,
+          title: '',
+          subtitle: "",
+        },
+        {
+          backgroundColor: '#ffffff',
+          image: <Image source={require('./assets/5-diary-n.png')} />,
+          title: '',
+          subtitle: "",
+        },
+        {
+          backgroundColor: '#ffffff',
+          image: <Image source={require('./assets/6-ready-n.png')} />,
+          title: '',
+          subtitle: "",
+        }
       ]}
     />
   );
@@ -69,9 +91,7 @@ export default function App() {
     });
   }, []);
   
-  if (hasOnboarded === "initial") {
-    return <View></View>
-  } else if (!hasOnboarded) {
+  if (!hasOnboarded) {
     return <Simple />
   } else {
     return (
