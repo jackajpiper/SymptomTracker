@@ -24,7 +24,6 @@ export default function App() {
   const setMode = (val) => {
     setIsDarkMode(val);
     AsyncManager.setDarkMode(val);
-    AsyncManager.setOnboarded(false);
   }
 
   const completeOnboarding = () => {
@@ -40,6 +39,12 @@ export default function App() {
       onDone={() => completeOnboarding()}
       onSkip={() => completeOnboarding()}
       pages={[
+        {
+          backgroundColor: '#ffffff',
+          image: <Image></Image>,
+          title: "Welcome to Amy's Symptom Tracker!",
+          subtitle: "Let's show you around to get you started.",
+        },
         {
           backgroundColor: '#ffffff',
           image: <Image source={require('./assets/1-homepage-n.png')} />,
