@@ -19,7 +19,7 @@ export default function ImportExportScreen (props) {
   const btnColour2 = theme.dark ? "#5C0A20" : "#E7D5E1";
 
   const pickFile = async () => {
-    let result = await DocumentPicker.getDocumentAsync({copyToCacheDirectory: false});
+    let result = await DocumentPicker.getDocumentAsync({copyToCacheDirectory: false, type: "text/plain"});
     if (result.type === 'cancel') {
       return;
     }
@@ -46,13 +46,18 @@ export default function ImportExportScreen (props) {
   }
 
   const importData = async (result) => {
-    const uri = FileSystem.documentDirectory+result.name;
-    await FileSystem.copyAsync({
-      from: result.uri,
-      to: uri
-    });
-
-    let data = await FileSystem.readAsStringAsync(uri);
+    let data = null;
+    try {
+      data = await FileSystem.readAsStringAsync(result.uri);
+    } catch (err) {
+      const uri = FileSystem.documentDirectory+result.name;
+      await FileSystem.copyAsync({
+        from: result.uri,
+        to: uri
+      });
+      data = await FileSystem.readAsStringAsync(uri);
+    }
+    
 
     await AsyncManager.processImportData(data);
     Toast.show("Data imported");
