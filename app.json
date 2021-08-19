@@ -17,7 +17,8 @@
       "./assets/*"
     ],
     "ios": {
-      "supportsTablet": false
+      "supportsTablet": false,
+      "bundleIdentifier": "com.helpfultechnologies.amys"
     },
     "android": {
       "package": "com.helpfultechnologies.amys",
